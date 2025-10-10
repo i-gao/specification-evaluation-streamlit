@@ -11,3 +11,4 @@ tenacity
 inflect
 pandas
 scikit-learn
+json-repair>=0.40
