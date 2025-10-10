@@ -1,0 +1,55 @@
+from utils.misc import import_from_string
+from data.apps.data import APPSDataset
+from data.travel_planner.data import TravelPlannerDataset
+from data.grading.data import GradingDataset
+from data.cuad.data import CUADDataset
+from data.meal_planning.data import MealPlanningDataset
+from data.workout_planning.data import WorkoutPlanningDataset
+from data.design2code.data import Design2CodeDataset
+from data.shopping.data import ShoppingDataset
+from data.text_classification.data import TextClassificationDataset
+from data.dataset import Specification, FixedSpecification, CustomSpecification
+
+
+__all__ = ["DATASETS", "get_dataset", "get_spec"]
+
+DATASETS = [
+    "apps",
+    "travel_planner",
+    "grading",
+    "cuad",
+    "meal_planning",
+    "workout_planning",
+    "design2code",
+    "shopping",
+    "text_classification",
+]
+
+
+def get_dataset(dataset_name: str, **kwargs):
+    # Dynamically import the requested dataset class
+    if dataset_name == "apps":
+        return APPSDataset(**kwargs)
+    elif dataset_name == "travel_planner":
+        return TravelPlannerDataset(**kwargs)
+    elif dataset_name == "grading":
+        return GradingDataset(**kwargs)
+    elif dataset_name == "cuad":
+        return CUADDataset(**kwargs)
+    elif dataset_name == "meal_planning":
+        return MealPlanningDataset(**kwargs)
+    elif dataset_name == "workout_planning":
+        return WorkoutPlanningDataset(**kwargs)
+    elif dataset_name == "design2code":
+        return Design2CodeDataset(**kwargs)
+    elif dataset_name == "shopping":
+        return ShoppingDataset(**kwargs)
+    elif dataset_name == "text_classification":
+        return TextClassificationDataset(**kwargs)
+    else:
+        raise ValueError(f"Unknown dataset: {dataset_name}")
+
+
+def get_spec(dataset_name: str, index: int, **kwargs):
+    dataset = get_dataset(dataset_name, **kwargs)
+    return dataset[index]

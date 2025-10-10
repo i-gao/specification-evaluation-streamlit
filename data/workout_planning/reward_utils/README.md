@@ -1,0 +1,1 @@
+docker build -t workout_planning -f reward_utils/Dockerfile .

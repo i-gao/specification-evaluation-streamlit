@@ -1,0 +1,1 @@
+docker build -t meal_planning -f reward_utils/Dockerfile .
