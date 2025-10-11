@@ -13,7 +13,6 @@ import os
 import lotus
 from lotus.models import LM
 import pandas as pd
-from rank_bm25 import BM25Okapi
 from utils.model import init_langchain_model
 
 
@@ -356,6 +355,7 @@ def get_query_theta_action(theta: str, retrieval_method="bm25") -> Action:
     Args:
         theta (str): The theta of the task.
     """
+    from rank_bm25 import BM25Okapi
 
     # Split the theta into chunks
     chunks = [c.strip() for c in theta.split("<chunk>") if c.strip() != ""]
