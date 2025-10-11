@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-import clip
 import matplotlib.pyplot as plt
 from scipy.optimize import linear_sum_assignment
 import random
@@ -16,6 +15,7 @@ from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
 
+from clip import load as clip_load
 
 # This is a patch for color map, which is not updated for newer version of numpy
 def patch_asscalar(a):

@@ -1,10 +1,10 @@
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 import PIL
-import clip
 import torch
+from clip import load as clip_load
 device = "cuda" if torch.cuda.is_available() else "cpu"
-model, preprocess = clip.load("ViT-B/32", device=device)
+model, preprocess = clip_load("ViT-B/32", device=device)
 
 
 def compute_similarity_matrix(A, B, sim_fn: callable) -> np.ndarray:
