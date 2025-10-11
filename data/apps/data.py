@@ -8,7 +8,6 @@ import numpy as np
 import copy
 import streamlit as st
 
-from llm_sandbox import SandboxSession
 from data.dataset import SpecificationCollection, Specification, FixedSpecification
 from utils.streamlit_types import FormElement
 from utils.misc import parse_code, parse_json, subset_data, add_section
@@ -230,6 +229,7 @@ class APPSDataset(SpecificationCollection):
 
             # persist one docker container
             if self._persist_docker_container and self._docker_image is not None:
+                from llm_sandbox import SandboxSession
                 session = SandboxSession(image=self._docker_image)
                 session.open()
                 container_id = session.container.id

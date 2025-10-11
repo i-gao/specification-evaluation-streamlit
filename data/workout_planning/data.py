@@ -12,7 +12,6 @@ import streamlit as st
 from langchain_core.tools import tool
 import re
 
-from llm_sandbox import SandboxSession
 
 from data.dataset import (
     SpecificationCollection,
@@ -351,6 +350,7 @@ class WorkoutPlanningDataset(SpecificationCollection):
             theta += "\n<chunk>\nNote that barring rest day constraints, more workouts per week will be more effective."
 
             if self._persist_docker_container and self._docker_image is not None:
+                from llm_sandbox import SandboxSession
                 session = SandboxSession(image=self._docker_image)
                 session.open()
                 container_id = session.container.id

@@ -8,7 +8,6 @@ import streamlit as st
 
 # import sys
 import json
-from llm_sandbox import SandboxSession
 
 from data.reward import Constraint, linear_reward
 from data.dataset import (
@@ -289,6 +288,7 @@ class MealPlanningDataset(SpecificationCollection):
 
             # actions
             if self._persist_docker_container and self._docker_image is not None:
+                from llm_sandbox import SandboxSession
                 session = SandboxSession(image=self._docker_image)
                 session.open()
                 container_id = session.container.id

@@ -15,7 +15,6 @@ from langchain_core.tools import tool
 import uuid
 import streamlit as st
 import functools
-from llm_sandbox import SandboxSession
 
 from data.dataset import (
     SpecificationCollection,
@@ -234,6 +233,7 @@ class Design2CodeDataset(SpecificationCollection):
 
             # persist one docker container
             if self._persist_docker_container and self._docker_image is not None:
+                from llm_sandbox import SandboxSession
                 session = SandboxSession(image=self._docker_image)
                 session.open()
                 container_id = session.container.id
@@ -306,6 +306,7 @@ class Design2CodeDataset(SpecificationCollection):
             fake_test_id = f"custom_{uuid.uuid4().hex[:8]}"
 
             if self._persist_docker_container and self._docker_image is not None:
+                from llm_sandbox import SandboxSession
                 session = SandboxSession(image=self._docker_image)
                 session.open()
                 container_id = session.container.id

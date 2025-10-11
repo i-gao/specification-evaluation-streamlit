@@ -5,7 +5,6 @@ from langchain_core.tools import tool
 import pandas as pd
 import json
 from PIL import Image
-from llm_sandbox import SandboxSession
 from data.dataset import (
     SpecificationCollection,
     FixedSpecification,
@@ -327,6 +326,7 @@ class ShoppingDataset(SpecificationCollection):
             ]
 
             if self._persist_docker_container and self._docker_image is not None:
+                from llm_sandbox import SandboxSession
                 session = SandboxSession(image=self._docker_image)
                 session.open()
                 container_id = session.container.id
