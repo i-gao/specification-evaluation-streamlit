@@ -1,21 +1,6 @@
-gdown
-numpy<2.0
-datasets
-lotus-ai>=1.1
-langchain-anthropic>=0.3
-langchain-openai>=0.3
-langchain
-openai
-anthropic
-tenacity
-inflect
-pandas
-scikit-learn
-json-repair>=0.40
-llm-sandbox
-
 # Essential dependencies for visual score evaluation
 opencv-python
+numpy<2.0
 matplotlib>=3.8.1
 scipy
 scikit-learn
@@ -32,3 +17,4 @@ lxml
 # Progress bars and utilities
 tqdm
 playwright
+datasets
