@@ -53,6 +53,7 @@ class SingleLLM(InteractionPolicy):
             raw = self.agent_executor.generate(
                 dialogs=[msgs],
                 persist_state=persist_state,
+                remove_thinking_tokens=True,
             )[0]
 
         # Look at the new messages and extract the tool calls for saving
@@ -198,7 +199,7 @@ class ClarifyLLM(SingleLLM):
         """
         Get the system message for the language model.
         """
-        return f"""You are a helpful assistant working with a user to complete their custom task. Often, users are unclear about their intent or context. Not knowing this information can make it difficult to provide a maximally helpful answer. Therefore, before executing the task (and possibly throughout the task), you should ask questions to clarify any ambiguities about the task with the user.
+        return f"""You are a helpful assistant working with a user to complete their custom task. Often, users are unclear about their intent or context. Not knowing this information can make it difficult to provide a maximally helpful answer. Therefore, before executing the task (and possibly throughout the task), you should ask questions to clarify any ambiguities about the task with the user, but avoid asking questions that are repetitive or time-wasting.
 
 You know the following basic information about the task: 
 {self.initial_specification}
@@ -206,7 +207,7 @@ Use the tools available to you to ground your work in the actual features of the
 
 There are two kinds of messages you can send to the user: 1) a clarifying question to better specify the user's intent, or 2) a complete output for the task. You may not send the user intermediate options or explanations, unless they directly ask for these.
 
-Work with the user. {self.msg_fmt_instructions} Any time you feel you have finished the task to completion, generate the string <END_CONVERSATION>.
+Work with the user. {self.msg_fmt_instructions} Any time you feel you have finished the task to completion, generate the string <END_CONVERSATION>. Remember to ask questions!
 """
 
 

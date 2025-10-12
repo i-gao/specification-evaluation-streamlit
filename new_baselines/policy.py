@@ -413,7 +413,9 @@ class InteractionPolicy:
             turn_idx = checkpoint_data["turn_idx"]
 
         if self.verbosity >= 1:
-            print(f"Checkpoint loaded from {self.checkpoint_file}, currently at the start of turn {turn_idx} (awaiting user response)")
+            print(
+                f"Checkpoint loaded from {self.checkpoint_file}, currently at the start of turn {turn_idx} (awaiting user response)"
+            )
 
     def _restore_full_state(
         self,
@@ -497,7 +499,9 @@ class InteractionPolicy:
                 "tool_calls", []
             ):
                 id = tool_call["id"]
-                kwargs = tool_call["function"]["arguments"]
+                kwargs = tool_call["function"].get("arguments") | tool_call[
+                    "function"
+                ].get("args")
                 name = tool_call["function"]["name"]
 
                 # look ahead for response

@@ -266,6 +266,15 @@ def init_langchain_model(model_name: str, **kwargs):
             **kwargs,
         )
 
+def view_messages_hook(state: dict) -> dict:
+    """
+    View the messages in the state.
+    """
+    print("==================")
+    print(state["messages"])
+    print("==================")
+    return state
+
 
 class LangChainModel(Model):
     from langchain_core.tools import StructuredTool
@@ -316,6 +325,10 @@ class LangChainModel(Model):
                 print("Warning: list_tools_in_prompt is False for huggingface model")
             bind_tools_kwargs = {}
 
+            # multiturn memory must be true if prompt_cache is true
+            if prompt_cache:
+                assert multiturn_memory, "For HF models, multiturn_memory must be true if prompt_cache is true"
+
         # setup ReAct style prompt
         if list_tools_in_prompt:
             from utils.tools import post_model_parse_tools_hook
@@ -340,6 +353,7 @@ class LangChainModel(Model):
             tools=tools if tools is not None else [],
             debug=(verbosity == 2),
             checkpointer=MemorySaver(),  # need to keep this for state fetching
+            # pre_model_hook=view_messages_hook,
             **extra_kwargs,
         )
         self._raw_state = []
@@ -409,10 +423,14 @@ class LangChainModel(Model):
             )
 
         if remove_thinking_tokens:
+            pattern = (
+                re.escape(self._thinking_tokens[0])
+                + r".*?"
+                + re.escape(self._thinking_tokens[1])
+            )
             for out in outs:
-                out.content = out.content.replace(self._thinking_tokens[0], "").replace(
-                    self._thinking_tokens[1], ""
-                )
+                for msg in out:
+                    msg.content = re.sub(pattern, "", msg.content, flags=re.DOTALL)
 
         return outs
 
@@ -776,70 +794,6 @@ class LangChainModel(Model):
         """Get the ids of the messages with the given content"""
         return [m.id for m in self.state if m.content == content]
 
-    def _get_post_model_hook(self):
-        from langchain_core.messages import AIMessage, ToolMessage, SystemMessage
-        from langgraph.types import Command
-
-        def reject_duplicate_tool_call(state: dict) -> dict:
-            """
-            Rejects the last message if it is a tool call that is identical to the
-            second-to-last message.
-            """
-
-            if len(state["messages"]) == 1:
-                return state
-
-            # the last message is the one that just got generated
-            last_msg = state["messages"][-1]
-            if not isinstance(last_msg, AIMessage):
-                return state
-            tool_calls = last_msg.additional_kwargs.get("tool_calls", [])
-            if len(tool_calls) == 0:
-                return state
-
-            # find the second-to-last AIMessage before this
-            for msg in state["messages"][-2::-1]:
-                if isinstance(msg, AIMessage):
-                    break
-            if msg is None:
-                return state
-            former_tool_calls = msg.additional_kwargs.get("tool_calls", [])
-            if len(former_tool_calls) == 0:
-                return state
-
-            # compare the two
-            def _is_in_former(tool_call: dict) -> bool:
-                for former_tool_call in former_tool_calls:
-                    if (
-                        former_tool_call["function"]["name"]
-                        == tool_call["function"]["name"]
-                        and former_tool_call["function"]["arguments"]
-                        == tool_call["function"]["arguments"]
-                    ):
-                        return True
-                return False
-
-            if not all(_is_in_former(tool_call) for tool_call in tool_calls):
-                return state
-
-            for tool_call in tool_calls:
-                state["messages"].append(
-                    ToolMessage(
-                        content="Tool call canceled",
-                        tool_call_id=tool_call["id"],
-                        name=tool_call["function"]["name"],
-                    )
-                )
-            state["messages"].append(
-                SystemMessage(
-                    content="You've just called this tool. You don't need to call it again."
-                )
-            )
-            print(state["messages"])
-            return Command(update=state, goto="agent")
-
-        return reject_duplicate_tool_call
-
 
 def get_token_usage(
     response_metadata: dict,
@@ -906,6 +860,8 @@ class OpenAIModel(Model):
             dialogs = self.fmt_as_dialog(prompts=prompts)
         else:
             dialogs = self.fmt_as_dialog(dialogs=dialogs)
+        if self._multiturn_memory:
+            assert len(dialogs) == 1, "Only one conversation at a time is supported"
 
         return [
             self.client.chat.completions.create(
@@ -1371,3 +1327,14 @@ def read_anthropic_batch_job(
             }
         )
     return jsons
+
+@lru_cache(maxsize=1)
+def load_clip(model_name: str = "ViT-B/32"):
+    """
+    Load a CLIP model.
+    """
+    import torch
+    import clip
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model, preprocess = clip.load(model_name, device=device)
+    return model, preprocess, device

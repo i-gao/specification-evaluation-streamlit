@@ -15,7 +15,7 @@ from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
 
-from clip import load as clip_load
+from utils.model import load_clip
 
 # This is a patch for color map, which is not updated for newer version of numpy
 def patch_asscalar(a):
@@ -24,8 +24,6 @@ def patch_asscalar(a):
 
 setattr(np, "asscalar", patch_asscalar)
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-model, preprocess = clip.load("ViT-B/32", device=device)
 
 # ============================================================================
 # MAIN EVALUATION FUNCTION
@@ -923,8 +921,7 @@ def calculate_clip_similarity_without_blocks(
     Returns:
         float: CLIP similarity score between 0 and 1
     """
-
-    import numpy as np
+    model, preprocess, device = load_clip()
     
     # Load and preprocess images with text blocks removed
     image1 = (

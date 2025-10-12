@@ -7,6 +7,7 @@ POLICIES = [
     "raw_llm",
     "clarify_llm",
     "execution_llm",
+    "collab_llm",
 ]
 
 
@@ -16,6 +17,7 @@ def get_policy(policy_name: str, **kwargs):
         "clarify_llm": "new_baselines.prompted_llm.ClarifyLLM",
         "execution_llm": "new_baselines.prompted_llm.ExecutionLLM",
         "prompted_llm": "new_baselines.prompted_llm.PromptedLLM",
+        "collab_llm": "new_baselines.prompted_llm.CollabLLM",
     }
 
     if policy_name not in policy_modules:

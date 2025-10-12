@@ -2,9 +2,7 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment
 import PIL
 import torch
-from clip import load as clip_load
-device = "cuda" if torch.cuda.is_available() else "cpu"
-model, preprocess = clip_load("ViT-B/32", device=device)
+from utils.model import load_clip
 
 
 def compute_similarity_matrix(A, B, sim_fn: callable) -> np.ndarray:
@@ -75,6 +73,8 @@ def clip_score(img1: PIL.Image, img2: PIL.Image) -> float:
     """
     Compute the CLIP score between two images.
     """
+    model, preprocess, device = load_clip()
+
     image1 = preprocess(img1).unsqueeze(0).to(device)
     image2 = preprocess(img2).unsqueeze(0).to(device)
 

@@ -433,6 +433,11 @@ def render_eval_second_page(*, final_prediction: str, y0: List[str], db):
             label=f'How much do you agree with this statement: "I would rather purchase this cart as is (at \${total_cost:.2f}) instead of continuing my search with the assistant for 10 more minutes."',
             options=["-"] + INSTRUMENT_LIKERT,
         ),
+        FormElement(
+            input_type="text_area",
+            label="If you were to continue your search with the assistant for 10 more minutes, what would you want it to change?",
+            height=120,
+        )
     ]
 
     with st.form(key="shopping_custom_eval_form"):
