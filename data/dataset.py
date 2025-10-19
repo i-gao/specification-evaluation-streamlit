@@ -505,7 +505,7 @@ class SpecificationCollection:
     def __init__(
         self,
         dev: bool = False,
-        skip_docker_check: bool = False,
+        skip_docker_check: bool = True,
         **kwargs: Any,
     ) -> None:
         # Check and download assets before loading dataset
