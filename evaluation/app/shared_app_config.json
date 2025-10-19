@@ -1,0 +1,10 @@
+{
+    "max_react_steps": 25,
+    "evaluation_minimum": 120,
+    "reasoning_effort": "minimal",
+    "include_fmt_instructions": true,
+    "cost_type": "user",
+    "exit_code": "ld32480jcskdf093",
+    "output_dir": "streamlit_logs/interactions",
+    "seed": null
+}
