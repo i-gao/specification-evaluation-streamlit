@@ -557,12 +557,14 @@ class SpecificationCollection:
         return f"SpecificationCollection(name={self.dataset_name}, dev={self.dev}, fixed_specs={len(self.fixed_specs)}, custom_specs={len(self.custom_specs)})"
 
     def __del__(self) -> None:
-        for spec in self.fixed_specs.values():
-            if hasattr(spec, "__del__"):
-                spec.__del__()
-        for spec in self.custom_specs.values():
-            if hasattr(spec, "__del__"):
-                spec.__del__()
+        if hasattr(self, "fixed_specs"):
+            for spec in self.fixed_specs.values():
+                if hasattr(spec, "__del__"):
+                    spec.__del__()
+        if hasattr(self, "custom_specs"):
+            for spec in self.custom_specs.values():
+                if hasattr(spec, "__del__"):
+                    spec.__del__()
 
     def _finish_init(self) -> None:
         """Check if the required attributes are set"""
