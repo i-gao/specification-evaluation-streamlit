@@ -529,7 +529,7 @@ def evaluation_screen():
     components.render_specification_banner()
 
     evaluation_flow(
-        # chat_evaluation_form=forms.interaction_evaluation,
+        chat_evaluation_form=forms.interaction_evaluation,
         custom_final_specification_form=forms.custom_final_specification,
     )
 

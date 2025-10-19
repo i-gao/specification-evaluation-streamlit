@@ -1,0 +1,17 @@
+{
+    "article_id": "The unique numeric identifier for the product",
+    "detail_desc": "Detailed description of the product (free text)",
+    "prod_name": "The name of the product",
+    "product_group_name": "High-level category of the product (e.g. sweater)",
+    "product_type_name": "Subcategory of the product (e.g. garment upper body)",
+    "graphical_appearance_name": "Product pattern (e.g. solid, stripes, etc.)",
+    "colour_group_name": "Exact color name",
+    "perceived_colour_value_name": "Tone of the color (e.g. light, medium, dark)",
+    "perceived_colour_master_name": "Basic hue family (e.g. red, blue, green, etc.)",
+    "department_name": "Department of the product",
+    "index_group_name": "High-level H&M brand of the product (e.g. Divided, H&M+, etc.)",
+    "index_name": "If available, detailed H&M brand of the product",
+    "section_name": "High-level style of the product",
+    "garment_group_name": "Detailed style of garment",
+    "price": "Price of the product (in USD)"
+}

@@ -1,0 +1,2741 @@
+{
+    "0": {
+        "sunday": {
+            "breakfast": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Apple And Honey Sorbet"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Apple And Honey Sorbet"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Apple And Honey Sorbet"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Middle Eastern Rice With Black Beans And Chickpeas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Middle Eastern Rice With Black Beans And Chickpeas"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Cheese Bourekas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cheese Bourekas"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Israeli Tomato And Cucumber Salad"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Israeli Tomato And Cucumber Salad"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Apple and Honey Sorbet"
+                }
+            ]
+        },
+        "monday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Apple And Honey Sorbet"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Apple and Honey Sorbet"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Middle Eastern Rice With Black Beans And Chickpeas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cheese Bourekas"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Israeli Tomato And Cucumber Salad"
+                }
+            ],
+            "snack": []
+        },
+        "tuesday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Apple And Honey Sorbet"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Middle Eastern Rice With Black Beans And Chickpeas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cheese Bourekas"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Israeli Tomato And Cucumber Salad"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Apple and Honey Sorbet"
+                }
+            ]
+        },
+        "wednesday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Apple And Honey Sorbet"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Middle Eastern Rice With Black Beans And Chickpeas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cheese Bourekas"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Israeli Tomato And Cucumber Salad"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Apple and Honey Sorbet"
+                }
+            ]
+        },
+        "thursday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Apple And Honey Sorbet"
+                }
+            ],
+            "lunch": [],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Israeli Tomato And Cucumber Salad"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Middle Eastern Rice With Black Beans And Chickpeas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cheese Bourekas"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Apple and Honey Sorbet"
+                }
+            ]
+        },
+        "friday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Apple And Honey Sorbet"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Middle Eastern Rice With Black Beans And Chickpeas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cheese Bourekas"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Israeli Tomato And Cucumber Salad"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Apple and Honey Sorbet"
+                }
+            ]
+        },
+        "saturday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Middle Eastern Rice With Black Beans And Chickpeas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cheese Bourekas"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Moroccan Shabbat Fish"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Israeli Tomato And Cucumber Salad"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Israeli Tomato And Cucumber Salad"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Apple and Honey Sorbet"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Apple And Honey Sorbet"
+                }
+            ]
+        }
+    },
+    "1": {
+        "sunday": {
+            "breakfast": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Cuban Goulash"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Cuban Pork"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cuban Goulash"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cuban Pork"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Mamita'S Mojito Scallop Kabobs With Stuffed Tomatoes"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Mamita'S Mojito Scallop Kabobs With Stuffed Tomatoes"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Boliche (Cuban Pot Roast)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Boliche (Cuban Pot Roast)"
+                }
+            ],
+            "snack": []
+        },
+        "monday": {
+            "breakfast": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Cuban Goulash"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Cuban Pork"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cuban Goulash"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cuban Pork"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Mamita'S Mojito Scallop Kabobs With Stuffed Tomatoes"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Mamita'S Mojito Scallop Kabobs With Stuffed Tomatoes"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Mamita'S Mojito Scallop Kabobs With Stuffed Tomatoes"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Boliche (Cuban Pot Roast)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Boliche (Cuban Pot Roast)"
+                }
+            ],
+            "snack": []
+        },
+        "tuesday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Cuban Goulash"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cuban Pork"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Mamita'S Mojito Scallop Kabobs With Stuffed Tomatoes"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Boliche (Cuban Pot Roast)"
+                }
+            ],
+            "snack": []
+        },
+        "wednesday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Cuban Goulash"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cuban Pork"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Mamita'S Mojito Scallop Kabobs With Stuffed Tomatoes"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Boliche (Cuban Pot Roast)"
+                }
+            ],
+            "snack": []
+        },
+        "thursday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Cuban Goulash"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cuban Pork"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Mamita'S Mojito Scallop Kabobs With Stuffed Tomatoes"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Boliche (Cuban Pot Roast)"
+                }
+            ],
+            "snack": []
+        },
+        "friday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Mamita'S Mojito Scallop Kabobs With Stuffed Tomatoes"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cuban Goulash"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cuban Pork"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Boliche (Cuban Pot Roast)"
+                }
+            ],
+            "snack": []
+        },
+        "saturday": {
+            "breakfast": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Cuban Goulash"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Cuban Pork"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cuban Goulash"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Cuban Pork"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Mamita'S Mojito Scallop Kabobs With Stuffed Tomatoes"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Mamita'S Mojito Scallop Kabobs With Stuffed Tomatoes"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Mamita'S Mojito Scallop Kabobs With Stuffed Tomatoes"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Boliche (Cuban Pot Roast)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Boliche (Cuban Pot Roast)"
+                }
+            ],
+            "snack": []
+        }
+    },
+    "2": {
+        "sunday": {
+            "breakfast": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Creole Okra"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Creole Okra"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Russian Chicken Stew With Potatoes And Vegetables"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Russian Chicken Stew With Potatoes And Vegetables"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "cook",
+                    "recipe_title": "New Year Black Eyed Peas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "New Year Black Eyed Peas"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Beef Pirozhki"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Beef Pirozhki"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Chilean Pebre Sauce"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Chilean Pebre Sauce"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Nana'S Beef Stroganoff"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Nana'S Beef Stroganoff"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Stewed Okra With Tomatoes"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Stewed Okra With Tomatoes"
+                }
+            ]
+        },
+        "monday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Creole Okra"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Russian Chicken Stew With Potatoes And Vegetables"
+                }
+            ],
+            "lunch": [],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "New Year Black Eyed Peas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Beef Pirozhki"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Chilean Pebre Sauce"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Nana'S Beef Stroganoff"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Stewed Okra With Tomatoes"
+                }
+            ]
+        },
+        "tuesday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Creole Okra"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Russian Chicken Stew With Potatoes And Vegetables"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "New Year Black Eyed Peas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Beef Pirozhki"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Chilean Pebre Sauce"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Nana'S Beef Stroganoff"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Stewed Okra With Tomatoes"
+                }
+            ]
+        },
+        "wednesday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Creole Okra"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Russian Chicken Stew With Potatoes And Vegetables"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "New Year Black Eyed Peas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Beef Pirozhki"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Chilean Pebre Sauce"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Nana'S Beef Stroganoff"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Stewed Okra With Tomatoes"
+                }
+            ]
+        },
+        "thursday": {
+            "breakfast": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Mitzie'S Beef Stroganoff"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Mitzie'S Beef Stroganoff"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Solianka (Russian Beef Soup)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Solianka (Russian Beef Soup)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Chilean Pebre"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Chilean Pebre"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Chilean Pebre"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                }
+            ]
+        },
+        "friday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Mitzie'S Beef Stroganoff"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Solianka (Russian Beef Soup)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Chilean Pebre"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Chilean Pebre"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                }
+            ]
+        },
+        "saturday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Mitzie'S Beef Stroganoff"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Solianka (Russian Beef Soup)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Chilean Pebre"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Chilean Pebre"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Spicy Bean Salsa"
+                }
+            ]
+        }
+    },
+    "3": {
+        "sunday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Grilled Pollo A La Brasa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Grilled Pollo A La Brasa"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Arroz Tapado (Rice On Top)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Arroz Tapado (Rice On Top)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Arroz Tapado (Rice On Top)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Grilled Pollo A La Brasa"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Porotos Granados (Chilean Bean Stew)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Porotos Granados (Chilean Bean Stew)"
+                }
+            ]
+        },
+        "monday": {
+            "breakfast": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Peruvian Pickled Onions (Salsa Criolla)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Peruvian Pickled Onions (Salsa Criolla)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Peruvian Pickled Onions (Salsa Criolla)"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Argentinean Potato Salad"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Argentinean Potato Salad"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Argentinean Potato Salad"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Red Salad"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Red Salad"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Red Salad"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Hot Banana Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Hot Banana Salsa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Hot Banana Salsa"
+                }
+            ],
+            "lunch": [],
+            "dinner": [],
+            "snack": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Chilean Pebre"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Chilean Pebre"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Chilean Pebre"
+                }
+            ]
+        },
+        "tuesday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Grilled Pollo A La Brasa"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Arroz Tapado (Rice On Top)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Arroz Tapado (Rice On Top)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Grilled Pollo A La Brasa"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Porotos Granados (Chilean Bean Stew)"
+                }
+            ]
+        },
+        "wednesday": {
+            "breakfast": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Grilled Pollo A La Brasa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Grilled Pollo A La Brasa"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Arroz Tapado (Rice On Top)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Arroz Tapado (Rice On Top)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Grilled Pollo A La Brasa"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Porotos Granados (Chilean Bean Stew)"
+                }
+            ]
+        },
+        "thursday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Grilled Pollo A La Brasa"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Arroz Tapado (Rice On Top)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Arroz Tapado (Rice On Top)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Arroz Tapado (Rice On Top)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Grilled Pollo A La Brasa"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Porotos Granados (Chilean Bean Stew)"
+                }
+            ]
+        },
+        "friday": {
+            "breakfast": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Grilled Pollo A La Brasa"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Grilled Pollo A La Brasa"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Arroz Tapado (Rice On Top)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Arroz Tapado (Rice On Top)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Grilled Pollo A La Brasa"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Porotos Granados (Chilean Bean Stew)"
+                }
+            ]
+        },
+        "saturday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Grilled Pollo A La Brasa"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Arroz Tapado (Rice On Top)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Arroz Tapado (Rice On Top)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Grilled Pollo A La Brasa"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Porotos Granados (Chilean Bean Stew)"
+                }
+            ]
+        }
+    },
+    "4": {
+        "sunday": {
+            "breakfast": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Piña Colada Sorbet"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Piña Colada Sorbet"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Sheet Pan Cajun Butter Shrimp"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sheet Pan Cajun Butter Shrimp"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Pique (Puerto Rican Hot Sauce)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Pique (Puerto Rican Hot Sauce)"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Creole Seasoning Blend"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Creole Seasoning Blend"
+                }
+            ]
+        },
+        "monday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Piña Colada Sorbet"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Sheet Pan Cajun Butter Shrimp"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Pique (Puerto Rican Hot Sauce)"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Creole Seasoning Blend"
+                }
+            ]
+        },
+        "tuesday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Sheet Pan Cajun Butter Shrimp"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Piña Colada Sorbet"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Pique (Puerto Rican Hot Sauce)"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Creole Seasoning Blend"
+                }
+            ]
+        },
+        "wednesday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Piña Colada Sorbet"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Sheet Pan Cajun Butter Shrimp"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Pique (Puerto Rican Hot Sauce)"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Creole Seasoning Blend"
+                }
+            ]
+        },
+        "thursday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Piña Colada Sorbet"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Sheet Pan Cajun Butter Shrimp"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Pique (Puerto Rican Hot Sauce)"
+                }
+            ],
+            "dinner": [],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Creole Seasoning Blend"
+                }
+            ]
+        },
+        "friday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Piña Colada Sorbet"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Sheet Pan Cajun Butter Shrimp"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Pique (Puerto Rican Hot Sauce)"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Creole Seasoning Blend"
+                }
+            ]
+        },
+        "saturday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Piña Colada Sorbet"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Sheet Pan Cajun Butter Shrimp"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sheet Pan Cajun Butter Shrimp"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Pique (Puerto Rican Hot Sauce)"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Creole Seasoning Blend"
+                }
+            ]
+        }
+    },
+    "5": {
+        "sunday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Best Hawaiian Banana Nut Bread"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Best Hawaiian Banana Nut Bread"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Vegan Sweet Potato Chickpea Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Vegan Sweet Potato Chickpea Curry"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Russian Poppy Seed Roll"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Russian Poppy Seed Roll"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Australian Federation Biscuits"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Australian Federation Biscuits"
+                }
+            ],
+            "snack": []
+        },
+        "monday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Best Hawaiian Banana Nut Bread"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Vegan Sweet Potato Chickpea Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Russian Poppy Seed Roll"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Australian Federation Biscuits"
+                }
+            ],
+            "snack": []
+        },
+        "tuesday": {
+            "breakfast": [],
+            "lunch": [],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Best Hawaiian Banana Nut Bread"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Vegan Sweet Potato Chickpea Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Russian Poppy Seed Roll"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Australian Federation Biscuits"
+                }
+            ],
+            "snack": []
+        },
+        "wednesday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Best Hawaiian Banana Nut Bread"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Vegan Sweet Potato Chickpea Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Russian Poppy Seed Roll"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Australian Federation Biscuits"
+                }
+            ],
+            "snack": []
+        },
+        "thursday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Best Hawaiian Banana Nut Bread"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Vegan Sweet Potato Chickpea Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Russian Poppy Seed Roll"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Australian Federation Biscuits"
+                }
+            ],
+            "snack": []
+        },
+        "friday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Best Hawaiian Banana Nut Bread"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Vegan Sweet Potato Chickpea Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Russian Poppy Seed Roll"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Australian Federation Biscuits"
+                }
+            ],
+            "snack": []
+        },
+        "saturday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Best Hawaiian Banana Nut Bread"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Vegan Sweet Potato Chickpea Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Vegan Sweet Potato Chickpea Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Russian Poppy Seed Roll"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Indian Chicken Curry"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Australian Federation Biscuits"
+                }
+            ],
+            "snack": []
+        }
+    },
+    "6": {
+        "sunday": {
+            "breakfast": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Chili Garlic (Homemade) Paneer"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Air Fryer Samosas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Chili Garlic (Homemade) Paneer"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Chef John'S Brazilian Fish Stew"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Chef John'S Brazilian Fish Stew"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Good New Orleans Creole Gumbo"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Good New Orleans Creole Gumbo"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Good New Orleans Creole Gumbo"
+                }
+            ],
+            "snack": []
+        },
+        "monday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Chili Garlic (Homemade) Paneer"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Good New Orleans Creole Gumbo"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Chef John'S Brazilian Fish Stew"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Good New Orleans Creole Gumbo"
+                }
+            ],
+            "snack": []
+        },
+        "tuesday": {
+            "breakfast": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Sopa De Mariscos (Seafood Soup)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sopa De Mariscos (Seafood Soup)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Good New Orleans Creole Gumbo"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Chef John'S Brazilian Fish Stew"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Good New Orleans Creole Gumbo"
+                }
+            ],
+            "snack": []
+        },
+        "wednesday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Chili Garlic (Homemade) Paneer"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Good New Orleans Creole Gumbo"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Chef John'S Brazilian Fish Stew"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Good New Orleans Creole Gumbo"
+                }
+            ],
+            "snack": []
+        },
+        "thursday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Chili Garlic (Homemade) Paneer"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Air Fryer Samosas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Good New Orleans Creole Gumbo"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Chef John'S Brazilian Fish Stew"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Good New Orleans Creole Gumbo"
+                }
+            ],
+            "snack": []
+        },
+        "friday": {
+            "breakfast": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Hawaiian Pizza"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Hawaiian Pizza"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Good New Orleans Creole Gumbo"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Chef John'S Brazilian Fish Stew"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Good New Orleans Creole Gumbo"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Chili Garlic (Homemade) Paneer"
+                }
+            ],
+            "snack": []
+        },
+        "saturday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Chili Garlic (Homemade) Paneer"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Samosas"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Good New Orleans Creole Gumbo"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Chef John'S Brazilian Fish Stew"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Chef John'S Brazilian Fish Stew"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Good New Orleans Creole Gumbo"
+                }
+            ],
+            "snack": []
+        }
+    },
+    "7": {
+        "sunday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Air Fryer Spanish Tortilla"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Spanish Tortilla"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Easy Gazpacho"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Easy Gazpacho"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Mongo Guisado (Mung Bean Soup)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Mongo Guisado (Mung Bean Soup)"
+                }
+            ]
+        },
+        "monday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Spanish Tortilla"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Easy Gazpacho"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Mongo Guisado (Mung Bean Soup)"
+                }
+            ]
+        },
+        "tuesday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Spanish Tortilla"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Easy Gazpacho"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Mongo Guisado (Mung Bean Soup)"
+                }
+            ]
+        },
+        "wednesday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Spanish Tortilla"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Easy Gazpacho"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Mongo Guisado (Mung Bean Soup)"
+                }
+            ]
+        },
+        "thursday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Air Fryer Spanish Tortilla"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Spanish Tortilla"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Easy Gazpacho"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Mongo Guisado (Mung Bean Soup)"
+                }
+            ]
+        },
+        "friday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Mongo Guisado (Mung Bean Soup)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Spanish Tortilla"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Easy Gazpacho"
+                }
+            ],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Mongo Guisado (Mung Bean Soup)"
+                }
+            ]
+        },
+        "saturday": {
+            "breakfast": [],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sinigang Na Bangus (Filipino Milkfish In Tamarind Broth)"
+                }
+            ],
+            "dinner": [],
+            "snack": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Mongo Guisado (Mung Bean Soup)"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Air Fryer Spanish Tortilla"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Tortilla Española"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Easy Gazpacho"
+                }
+            ]
+        }
+    },
+    "8": {
+        "sunday": {
+            "breakfast": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Aargau Carrot Cake"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Aargau Carrot Cake"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Carrots And Lentils"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Carrots And Lentils"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Chicken Curry V"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Chicken Curry V"
+                }
+            ],
+            "snack": []
+        },
+        "monday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Aargau Carrot Cake"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Carrots And Lentils"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Chicken Curry V"
+                }
+            ],
+            "snack": []
+        },
+        "tuesday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Aargau Carrot Cake"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Carrots And Lentils"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Chicken Curry V"
+                }
+            ],
+            "snack": []
+        },
+        "wednesday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Aargau Carrot Cake"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Carrots And Lentils"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Chicken Curry V"
+                }
+            ],
+            "snack": []
+        },
+        "thursday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Aargau Carrot Cake"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Carrots And Lentils"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Carrots And Lentils"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Chicken Curry V"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Chicken Curry V"
+                }
+            ],
+            "snack": []
+        },
+        "friday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Aargau Carrot Cake"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Carrots And Lentils"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Chicken Curry V"
+                }
+            ],
+            "snack": []
+        },
+        "saturday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Aargau Carrot Cake"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Carrots And Lentils"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Chicken Curry V"
+                }
+            ],
+            "snack": []
+        }
+    },
+    "9": {
+        "sunday": {
+            "breakfast": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Amish Peanut Butter"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Peanut Butter"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Amish Friendship Bread"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Friendship Bread"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "cook",
+                    "recipe_title": "Best Vinegar Coleslaw"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Best Vinegar Coleslaw"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Amish Friendship Cake"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Friendship Cake"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Sushi Party"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sushi Party"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Rosemary Steak"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Rosemary Steak"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Argentinean Potato Salad"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Argentinean Potato Salad"
+                }
+            ],
+            "snack": []
+        },
+        "monday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Peanut Butter"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Friendship Bread"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Best Vinegar Coleslaw"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Friendship Cake"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sushi Party"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Rosemary Steak"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Argentinean Potato Salad"
+                }
+            ],
+            "snack": []
+        },
+        "tuesday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Peanut Butter"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Friendship Bread"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Best Vinegar Coleslaw"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Friendship Cake"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sushi Party"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Rosemary Steak"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Argentinean Potato Salad"
+                }
+            ],
+            "snack": []
+        },
+        "wednesday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Peanut Butter"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Friendship Bread"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Best Vinegar Coleslaw"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Friendship Cake"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sushi Party"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Rosemary Steak"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Argentinean Potato Salad"
+                }
+            ],
+            "snack": []
+        },
+        "thursday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Peanut Butter"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Friendship Bread"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Best Vinegar Coleslaw"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Friendship Cake"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sushi Party"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Rosemary Steak"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Rosemary Steak"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Argentinean Potato Salad"
+                }
+            ],
+            "snack": []
+        },
+        "friday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Peanut Butter"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Friendship Bread"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Best Vinegar Coleslaw"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Friendship Cake"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sushi Party"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Rosemary Steak"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Argentinean Potato Salad"
+                }
+            ],
+            "snack": []
+        },
+        "saturday": {
+            "breakfast": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Peanut Butter"
+                }
+            ],
+            "lunch": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Friendship Bread"
+                }
+            ],
+            "dinner": [
+                {
+                    "action": "eat",
+                    "recipe_title": "Best Vinegar Coleslaw"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Amish Friendship Cake"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Sushi Party"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Rosemary Steak"
+                },
+                {
+                    "action": "cook",
+                    "recipe_title": "Argentinean Potato Salad"
+                },
+                {
+                    "action": "eat",
+                    "recipe_title": "Argentinean Potato Salad"
+                }
+            ],
+            "snack": []
+        }
+    }
+}

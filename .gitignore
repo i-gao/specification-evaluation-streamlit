@@ -5,12 +5,8 @@ tmp/
 data/atoms/
 data/logs/
 *.zip
-*.csv
-*.json
-*.jsonl
 *.pkl
 *.arrow
-data/*/assets/*/
 evaluation/results/
 experiments/task_ablations/
 *batch_job_id.txt
