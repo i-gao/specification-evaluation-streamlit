@@ -451,7 +451,7 @@ class LangChainModel(Model):
         """
         return self._raw_state
 
-    def get_state(self):
+    def get_state(self) -> str:
         """Dump the state of the chain"""
         from langchain_core.load import dumps
 
@@ -721,16 +721,29 @@ class LangChainModel(Model):
             _final_msg(cfg)
 
         stub = self.state[og_len:]
+        
+        # Ensure content is a string
+        try:
+            for m in stub:
+                if isinstance(m.content, list):
+                    texts = [c["text"] for c in m.content if c["type"] == "text"]
+                    stub = self._update_messages(ids=[m.id], content=["\n".join(texts)])
+        except Exception as e:
+            print(f"Error cleaning message content: {e}")
 
-        # Modify the state (but not the returned stub)
-        if not self._multiturn_memory:
-            self.clear_state()
-            self._raw_state = []
+        if self._out_of_steps_msg is not None:
+            _ids = [
+                m.id
+                for m in stub[:-1]
+                if isinstance(m, AIMessage)
+                and m.content == "Sorry, need more steps to process this request."
+            ]
+            stub = self._update_messages(
+                ids=_ids,
+                content=[self._out_of_steps_msg for _ in _ids],
+            )
 
-        elif not persist_state:
-            self._delete_messages(ids=[m.id for m in stub])
-
-        elif self._add_thinking_tag:
+        if self._add_thinking_tag:
             # This only affects the state, not the returned stub
             self._update_messages(
                 ids=[
@@ -745,18 +758,15 @@ class LangChainModel(Model):
                 ],
             )
 
-        elif self._out_of_steps_msg is not None:
-            _ids = [
-                m.id
-                for m in stub[:-1]
-                if isinstance(m, AIMessage)
-                and m.content == "Sorry, need more steps to process this request."
-            ]
-            self._update_messages(
-                ids=_ids,
-                content=[self._out_of_steps_msg for _ in _ids],
-            )
 
+        # Modify the state (but not the returned stub)
+        if not self._multiturn_memory:
+            self.clear_state()
+            self._raw_state = []
+
+        elif not persist_state:
+            self._delete_messages(ids=[m.id for m in stub])
+        
         # Cut out prompt messages before returning
         return stub[len(messages) :]
 
@@ -775,6 +785,7 @@ class LangChainModel(Model):
             {"configurable": {"thread_id": self.thread_id}},
             {"messages": new_state},
         )
+        return new_state
 
     def _delete_messages(self, ids: List[str]):
         """Remove messages from the state"""

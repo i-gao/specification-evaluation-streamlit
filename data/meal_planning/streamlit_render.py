@@ -1,71 +1,272 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Callable
 import streamlit as st
 import uuid
 from data.meal_planning.db import RecipeDB, DAYS_OF_THE_WEEK, MEALS, Recipe
+from data.meal_planning.parser import parse_meal_plan
+import random
+from evaluation.qualitative_eval import COMPARISON_LIKERT
+from data.reward import likert_to_win_rate, pairwise_win_rate
 
 
-def render_eval_meal(
-    *, final_prediction: str, y0: Optional[str], db, auto_patch_eat_before_cook: bool
+def render_eval(*, final_prediction: str, y0: str, db: RecipeDB):
+    ranking_done = rank_recipes(final_prediction=final_prediction, y0=y0, db=db)
+    if not ranking_done:
+        return False, None
+
+    comparison_done = render_comparison(final_prediction=final_prediction, y0=y0, db=db)
+    if not comparison_done:
+        return False, None
+
+    # Compute the final score
+    prediction_rankings = [
+        list(
+            st.session_state.form_results["final_evaluation"]["recipe"][
+                "predicted_ranks"
+            ].values()
+        )
+    ]
+    y0_rankings = [
+        list(
+            st.session_state.form_results["final_evaluation"]["recipe"][
+                "y0_ranks"
+            ].values()
+        )
+    ]
+    p_recipe_wins = pairwise_win_rate(prediction_rankings, y0_rankings)
+    other_wins, total = likert_to_win_rate(
+        [
+            st.session_state.form_results["final_evaluation"][
+                "cooking_schedule_preference"
+            ],
+            st.session_state.form_results["final_evaluation"]["freshness_preference"],
+            st.session_state.form_results["final_evaluation"]["variety_preference"],
+            st.session_state.form_results["final_evaluation"][
+                "schedule_fit_preference"
+            ],
+            st.session_state.form_results["final_evaluation"]["nutritional_preference"],
+        ],
+        return_total=True,
+    )
+    p_wins = (p_recipe_wins + other_wins) / (total + 1)
+    st.session_state.form_results["final_evaluation"]["score"] = p_wins
+
+    return True, None
+
+
+def rank_recipes(*, final_prediction: str, y0: str, db: RecipeDB):
+    predicted = parse_meal_plan(final_prediction, db)
+    y0 = parse_meal_plan(y0, db)
+
+    done = "recipe" in st.session_state.form_results["final_evaluation"]
+    if not done:
+        predicted_recipes = [
+            recipe
+            for day in DAYS_OF_THE_WEEK
+            for meal in MEALS
+            for recipe in (
+                predicted[day][meal] if predicted[day][meal] is not None else []
+            )
+        ]
+        y0_recipes = [
+            recipe
+            for day in DAYS_OF_THE_WEEK
+            for meal in MEALS
+            for recipe in (y0[day][meal] if y0[day][meal] is not None else [])
+        ]
+        _render_carousel(
+            predicted_recipes,
+            y0_recipes,
+            show_k=None,
+        )
+        return
+
+    return True
+
+
+@st.fragment
+def _render_carousel(
+    predicted: List[Dict[str, Any]],
+    y0: List[Dict[str, Any]],
+    name: str = "recipe",
+    md_fn: callable = lambda d: _recipe_details(d["recipe"]),
+    filter_fn: Callable[[Dict[str, Any]], bool] = None,
+    show_k: int = None,
 ):
     """
-    Render evaluation UI for Meal Planning custom specs and return (completed, feedback).
+    Args:
+        predicted: list of predicted options
+        y0: list of y0 options
+        name: name of the thing being ranked. Used for saving to session state.
+        md_fn: function to render the option
+        filter_fn: function to filter the options
+        show_k: number of options to show
+
+    Adds to session state:
+        - ranking: a dict mapping a rank (0-indexed) to a name
+        - y0_ranks: a dict mapping name to a rank
+        - predicted_ranks: a list of ranks for the predicted options
     """
-    from utils.streamlit_types import FormElement, form_element_to_streamlit
-    from data.meal_planning.data import (
-        output_to_streamlit,
-        output_to_streamlit_comparison,
-    )
-
-    st.markdown("## Evaluate the assistant's meal plan")
-    with st.container(key="meal_eval_display", width="stretch"):
-        try:
-            if y0 is not None:
-                output_to_streamlit_comparison(
-                    y0,
-                    final_prediction,
-                    db,
-                    auto_patch_eat_before_cook=auto_patch_eat_before_cook,
-                )
-            else:
-                output_to_streamlit(
-                    final_prediction,
-                    db,
-                    auto_patch_eat_before_cook=auto_patch_eat_before_cook,
-                )
-        except Exception as e:
-            st.write("Error rendering plans:", str(e))
-
-    form_elements: List[FormElement] = [
-        FormElement(
-            input_type="text_area",
-            label="Describe the pros and cons of the plan in a few sentences.",
-            height=120,
-        ),
-        FormElement(
-            input_type="radio",
-            label="Do you think more exploration could have led to a better plan?",
-            options=["Yes", "Maybe", "No"],
-        ),
+    predicted = [
+        p
+        for p in predicted
+        if p is not None and (filter_fn is None or filter_fn(p))
     ]
+    predicted = list({d["recipe"].title: d for d in predicted}.values())
 
-    with st.form(key="meal_custom_eval_form"):
-        feedback: Dict[str, Any] = {}
-        for element in form_elements:
-            st_fn, st_kwargs, required = form_element_to_streamlit(element)
-            value = st_fn(**st_kwargs)
-            label = element.get("label", "question")
-            feedback[label] = value
+    y0 = [
+        p for p in y0 if p is not None and (filter_fn is None or filter_fn(p))
+    ]
+    y0 = list({d["recipe"].title: d for d in y0}.values())
+
+    if len(predicted) == 0:
+        # set difference is the entire y0, and y0 auto-wins
+        dummy_rank = {i: y["recipe"].title for i, y in enumerate(y0)}
+        st.session_state.form_results["final_evaluation"][name] = {
+            "ranking": dummy_rank,
+            "y0_ranks": {v: k for k, v in dummy_rank.items()},
+            "predicted_ranks": {},
+        }
+        st.rerun()
+
+    # find the set difference
+    predicted_names = set([p["recipe"].title for p in predicted])
+    y0_names = set([p["recipe"].title for p in y0])
+    diff_names = (predicted_names - y0_names).union(y0_names - predicted_names)
+    if not diff_names:
+        # don't render anything
+        return
+
+    predicted_options = [p for p in predicted if p["recipe"].title in diff_names]
+    y0_options = [p for p in y0 if p["recipe"].title in diff_names]
+    if show_k is not None and len(diff_names) > show_k:
+        # try to get a roughly balanced set of options
+        if len(predicted_options) < show_k / 2:
+            options = predicted_options + y0_options[: show_k - len(predicted_options)]
+        elif len(y0_options) < show_k / 2:
+            options = predicted_options[: show_k - len(y0_options)] + y0_options
+        else:
+            options = (
+                predicted_options[: show_k // 2 + show_k % 2]
+                + y0_options[: show_k // 2]
+            )
+    else:
+        options = predicted_options + y0_options
+
+    # Stabilize the options order across reruns within this fragment
+    state_key = f"options_order_{name}"
+    if state_key not in st.session_state:
+        # Store stable order as indices into the current options list
+        order = list(range(len(options)))
+        random.shuffle(order)
+        st.session_state[state_key] = order
+    order = st.session_state[state_key]
+    # Reorder options according to stored order, truncating/expanding safely
+    if len(order) != len(options):
+        order = list(range(len(options)))
+        st.session_state[state_key] = order
+    options = [options[i] for i in order]
+
+    # display the carousel
+    from evaluation.app.components import carousel
+
+    def display_fn(i):
+        st.markdown(f"### {options[i]['recipe'].title}")
+        st.markdown(
+            md_fn(
+                options[i],
+            ),
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("### Review the assistant's recommendations")
+    st.markdown(f"The assistant has recommended {len(options)} {name}s for you.")
+    carousel([lambda i=i: display_fn(i) for i in range(len(options))], height=300)
+
+    with st.form(key=f"ranking_form_{name}"):
+        rank = st.multiselect(
+            f"Rank the {name} above from MOST to LEAST preferred.",
+            [i for i in range(len(options))],
+            default=[],
+            format_func=lambda x: f"Option {x + 1}: {options[x]['recipe'].title}",
+            key=f"ranking_multiselect_{name}",
+        )
         submit = st.form_submit_button("Submit", type="primary")
         if submit:
-            for element in form_elements:
-                if element.get("required", False):
-                    label = element.get("label")
-                    if not feedback.get(label):
-                        st.error("Please fill in all required fields.")
-                        return False, None
-            return True, feedback
+            print(rank)
+            print(len(rank), len(options))
+            if len(rank) != len(options):
+                st.error("Please rank all options")
+                return
+            ranking = {i: options[i]["recipe"].title for i in rank}
+            st.session_state.form_results["final_evaluation"][name] = {
+                "ranking": ranking,
+                "y0_ranks": {v: k for k, v in ranking.items() if v in y0_names},
+                "predicted_ranks": {
+                    v: k for k, v in ranking.items() if v in predicted_names
+                },
+            }
+            st.rerun()
 
-    return False, None
+
+def render_comparison(*, final_prediction: str, y0: str, db: RecipeDB):
+    predicted = parse_meal_plan(final_prediction, db)
+    y0 = parse_meal_plan(y0, db)
+
+    with st.container(border=True):
+        st.markdown("## Compare these meal plans")
+
+        output_to_streamlit_comparison(
+            predicted, y0, db, valid1=None, valid2=None, metadata1=None, metadata2=None
+        )
+
+    st.divider()
+
+    # Render form
+    with st.form(key="meal_planning_comparison_form"):
+        cooking_schedule_preference = st.radio(
+            "Compare the **cooking schedule** of the recipes in meal plans A and B. Do you have a preference?",
+            options=["-"] + COMPARISON_LIKERT,
+        )
+        freshness_preference = st.radio(
+            "Compare the **balance of eating new meals vs. eating leftovers** in meal plans A and B. Do you have a preference?",
+            options=["-"] + COMPARISON_LIKERT,
+        )
+        variety_preference = st.radio(
+            "Compare the **variety of meals** in meal plans A and B. Do you have a preference?",
+            options=["-"] + COMPARISON_LIKERT,
+        )
+        schedule_fit_preference = st.radio(
+            "Compare how well meal plans A and B **fit into your upcoming schedule,** accounting for your existing plans / time constraints. Which one do you prefer?",
+            options=["-"] + COMPARISON_LIKERT,
+        )
+        nutritional_preference = st.radio(
+            "Compare the **nutritional profiles** of meal plans A and B. Do you have a preference?",
+            options=["-"] + COMPARISON_LIKERT,
+        )
+        submit = st.form_submit_button("Submit", type="primary")
+        if submit:
+            if any(
+                v is None or v == "-"
+                for v in [
+                    cooking_schedule_preference,
+                    freshness_preference,
+                    variety_preference,
+                    schedule_fit_preference,
+                    nutritional_preference,
+                ]
+            ):
+                st.error("Please fill out all fields")
+                return
+            st.session_state.form_results["final_evaluation"].update(
+                {
+                    "cooking_schedule_preference": cooking_schedule_preference,
+                    "freshness_preference": freshness_preference,
+                    "variety_preference": variety_preference,
+                    "schedule_fit_preference": schedule_fit_preference,
+                    "nutritional_preference": nutritional_preference,
+                }
+            )
+    return True
 
 
 def render_meal_plan_streamlit(meal_plan: Dict[str, Dict[str, Any]]) -> None:

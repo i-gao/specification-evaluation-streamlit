@@ -13,6 +13,8 @@ pandas
 scikit-learn
 json-repair>=0.40
 llm-sandbox
+gcsfs
+st-files-connection
 
 # Essential dependencies for visual score evaluation
 opencv-python

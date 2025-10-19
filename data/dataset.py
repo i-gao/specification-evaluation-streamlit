@@ -30,6 +30,7 @@ class Specification:
         render_task_explanation: Optional[Callable[[], None]] = None,
         initial_specification: str = None,
         initial_specification_multimodal: List[DisplayElement] = None,
+        commonsense_description: Optional[str] = None,
         actions: Optional[List[Action]] = None,
         msg_fmt_instructions: Optional[str] = None,
         prediction_fmt_instructions: Optional[str] = None,
@@ -73,6 +74,7 @@ class Specification:
             )
 
         # save attributes
+        self.commonsense_description = commonsense_description
         self.render_task_explanation = render_task_explanation
         self.initial_specification = initial_specification
         self.current_specification = initial_specification
@@ -98,7 +100,6 @@ class Specification:
         self._validity_fn_tool_description = getattr(
             self, "_validity_fn_tool_description", None
         )
-
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -274,6 +275,7 @@ class CustomSpecification(Specification):
         render_comparison_fn: Optional[Callable[[str, str], None]] = None,
         render_evaluation_fn: Optional[Callable[..., Tuple[bool, dict]]] = None,
         render_evaluation_kwargs: Optional[Dict[str, Any]] = None,
+        final_eval_likert_label: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -312,6 +314,7 @@ class CustomSpecification(Specification):
         self._render_comparison_fn = render_comparison_fn
         self._render_evaluation_fn = render_evaluation_fn
         self._render_evaluation_kwargs = render_evaluation_kwargs
+        self.final_eval_likert_label = final_eval_likert_label
 
     ################ functions ################
 

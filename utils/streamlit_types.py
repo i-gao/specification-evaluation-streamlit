@@ -58,13 +58,13 @@ def form_element_to_streamlit(element: FormElement) -> Tuple[callable, dict]:
         if "-" != element["options"][0]:
             element["options"] = ["-"] + element["options"]
     elif input_type == "selectbox":
-        keys = ["label", "options", "index", "help", "accept_new_options"]
+        keys = ["label", "options", "index", "help", "accept_new_options", "format_func"]
         component = st.selectbox
     elif input_type == "select_slider":
-        keys = ["label", "options", "value", "help"]
+        keys = ["label", "options", "value", "help", "format_func"]
         component = st.select_slider
     elif input_type == "multiselect":
-        keys = ["label", "options", "value", "help"]
+        keys = ["label", "options", "value", "help", "format_func"]
         component = st.multiselect
     elif input_type == "toggle":
         keys = ["label", "value", "help"]

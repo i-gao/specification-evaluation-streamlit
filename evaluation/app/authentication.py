@@ -1,8 +1,5 @@
 import streamlit as st
-import pandas as pd
 import json
-import os
-from pathlib import Path
 from typing import Optional, Dict, Any, List
 
 
@@ -20,25 +17,13 @@ def token_to_configs_json(token: str) -> Optional[List[Dict[str, Any]]]:
     """
     try:
         # Check if the token is a valid json file
-        config_path = Path(__file__).parent / f"test_configs/{token}.json"
-        with open(config_path, 'r') as f:
-            configs = json.load(f)
+        config_path = f"streamlit_logs/test_configs/{token}.json"
+        configs = st.session_state.connection.read(config_path)
         return configs
         
     except Exception as e:
+        print(f"Error loading configs: {e}")
         return None
-    
-
-def token_to_configs_csv(token: str) -> Optional[List[Dict[str, Any]]]:
-    """
-    Checks the CSV file for the token and returns corresponding configs.
-    
-    Returns:
-        List of dictionaries containing the user's configurations, or None if not found
-        The list represents the different rounds of the experiment.
-    """
-    raise NotImplementedError("Not implemented")
-
 
 def check_token() -> Optional[str]:
     """

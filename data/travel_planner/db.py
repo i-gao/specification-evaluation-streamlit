@@ -15,6 +15,7 @@ from tp_utils.func import (
     get_valid_name_city,
 )
 
+
 class TravelDB:
     """
     A database of travel-related information including restaurants, attractions,
@@ -139,18 +140,67 @@ class TravelDB:
             restaurant_info = self.get_restaurant_info(name, city)
             if restaurant_info:
                 return {"type": "restaurant", "info": restaurant_info}
-            
+
             # Try to find as attraction
             attraction_info = self.get_attraction_info(name, city)
             if attraction_info:
                 return {"type": "attraction", "info": attraction_info}
-            
+
             # Try to find as accommodation
             accommodation_info = self.get_accommodation_info(name, city)
             if accommodation_info:
                 return {"type": "accommodation", "info": accommodation_info}
-            
+
             return None
         except Exception as e:
             print(f"Error looking up travel item {name_and_city}: {e}")
             return None
+
+    def get_valid_transportations(
+        self, origin: str, destination: str, date: str, top_k: int = 4
+    ) -> List[str]:
+        """Get all valid transportation options between two cities on a given date."""
+        try:
+            mask = (
+                (self.flights_df["departure_city"].str.lower() == origin.lower())
+                & (self.flights_df["arrival_city"].str.lower() == destination.lower())
+                & (self.flights_df["flight_date"] == date)
+            )
+            if mask.any():
+                return self.flights_df[mask].to_dict("records")[:top_k]
+        except Exception as e:
+            print(
+                f"Error looking up valid transportation options from {origin} to {destination} on {date}: {e}"
+            )
+        return []
+
+    def get_valid_restaurants(self, city: str, top_k: int = 4) -> List[str]:
+        """Get all valid restaurants in a given city."""
+        try:
+            mask = self.restaurants_df["city"].str.lower() == city.lower()
+            if mask.any():
+                return self.restaurants_df[mask].to_dict("records")[:top_k]
+        except Exception as e:
+            print(f"Error looking up valid restaurants in {city}: {e}")
+        return []
+
+    def get_valid_attractions(self, city: str, top_k: int = 4) -> List[str]:
+        """Get all valid attractions in a given city."""
+        try:
+            mask = self.attractions_df["city"].str.lower() == city.lower()
+            if mask.any():
+                return self.attractions_df[mask].to_dict("records")[:top_k]
+        except Exception as e:
+            print(f"Error looking up valid attractions in {city}: {e}")
+        return []
+
+    def get_valid_accommodations(self, city: str, nights: int, top_k: int = 4) -> List[str]:
+        """Get all valid accommodations in a given city."""
+        try:
+            mask = self.accommodations_df["city"].str.lower() == city.lower()
+            mask = mask & (self.accommodations_df["minimum_nights"] <= nights)
+            if mask.any():
+                return self.accommodations_df[mask].to_dict("records")[:top_k]
+        except Exception as e:
+            print(f"Error looking up valid accommodations in {city}: {e}")
+        return []

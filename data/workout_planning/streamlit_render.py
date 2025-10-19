@@ -3,60 +3,85 @@ import streamlit as st
 import uuid
 import re
 from data.workout_planning.db import DAYS_OF_THE_WEEK, TIMES_OF_DAY
+from data.workout_planning.parser import parse_workout_plan
+from evaluation.qualitative_eval import COMPARISON_LIKERT
+from data.reward import likert_to_win_rate
 
 
-def render_eval_workout(*, final_prediction: str, y0: Optional[str], db):
+def render_eval(*, final_prediction: str, y0: Optional[str], db):
     """
-    Render evaluation UI for Workout Planning custom specs and return (completed, feedback).
+    Render evaluation UI: show A vs B comparison and collect Likert-scale preferences.
+    Returns (completed, feedback_dict_or_none).
     """
-    from utils.streamlit_types import FormElement, form_element_to_streamlit
-    from data.workout_planning.data import (
-        output_to_streamlit,
-        output_to_streamlit_comparison,
+    # Comparison view
+    parsed_pred = parse_workout_plan(final_prediction, db, leave_invalid=True)
+    parsed_y0 = (
+        parse_workout_plan(y0, db, leave_invalid=True) if y0 is not None else None
     )
 
-    st.markdown("## Evaluate the assistant's workout plan")
-    with st.container(key="workout_eval_display", width="stretch"):
-        try:
-            if y0 is not None:
-                output_to_streamlit_comparison(y0, final_prediction, db)
-            else:
-                output_to_streamlit(final_prediction, db)
-        except Exception as e:
-            st.write("Error rendering plans:", str(e))
+    with st.container(border=True):
+        st.markdown("## Compare these workout plans")
+        output_to_streamlit_comparison(
+            parsed_pred,
+            parsed_y0,
+            db,
+            valid1=None,
+            valid2=None,
+            metadata1=None,
+            metadata2=None,
+        )
 
-    form_elements: List[FormElement] = [
-        FormElement(
-            input_type="text_area",
-            label="Describe the pros and cons of the plan in a few sentences.",
-            height=120,
-        ),
-        FormElement(
-            input_type="radio",
-            label="Do you think more exploration could have led to a better plan?",
-            options=["Yes", "Maybe", "No"],
-        ),
-    ]
+    st.divider()
 
-    with st.form(key="workout_custom_eval_form"):
-        feedback: Dict[str, Any] = {}
-        for element in form_elements:
-            st_fn, st_kwargs, required = form_element_to_streamlit(element)
-            value = st_fn(**st_kwargs)
-            label = element.get("label", "question")
-            feedback[label] = value
+    # Likert questionnaire
+    with st.form(key="workout_planning_comparison_form"):
+        goals_preference = st.radio(
+            "Compare how well plans A and B align with your fitness goals.",
+            options=["-"] + COMPARISON_LIKERT,
+        )
+        schedule_preference = st.radio(
+            "Compare how well plans A and B fit your schedule.",
+            options=["-"] + COMPARISON_LIKERT,
+        )
+        equipment_preference = st.radio(
+            "Compare how well plans A and B match your equipment availability.",
+            options=["-"] + COMPARISON_LIKERT,
+        )
+        injury_preference = st.radio(
+            "Compare how well plans A and B accommodate your injury/mobility constraints.",
+            options=["-"] + COMPARISON_LIKERT,
+        )
+        difficulty_preference = st.radio(
+            "Compare the difficulty levels of exercises in plans A and B. Which do you prefer?",
+            options=["-"] + COMPARISON_LIKERT,
+        )
+
         submit = st.form_submit_button("Submit", type="primary")
         if submit:
-            for element in form_elements:
-                if element.get("required", False):
-                    label = element.get("label")
-                    if not feedback.get(label):
-                        st.error("Please fill in all required fields.")
-                        return False, None
-            return True, feedback
+            responses = [
+                difficulty_preference,
+                goals_preference,
+                schedule_preference,
+                equipment_preference,
+                injury_preference,
+            ]
+            if any(v is None or v == "-" for v in responses):
+                st.error("Please fill out all fields")
+                return False, None
+
+            st.session_state.form_results["final_evaluation"].update(
+                {
+                    "difficulty_preference": difficulty_preference,
+                    "goals_preference": goals_preference,
+                    "schedule_preference": schedule_preference,
+                    "equipment_preference": equipment_preference,
+                    "injury_preference": injury_preference,
+                    "score": likert_to_win_rate(responses),
+                }
+            )
+            return True, None
 
     return False, None
-
 
 def render_workout_plan_streamlit(plan: Any) -> None:
     """

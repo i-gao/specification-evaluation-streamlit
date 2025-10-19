@@ -14,9 +14,8 @@ from dataclasses import dataclass, asdict
 from data.actions import Action
 from data.dataset import Specification
 import os
-import pickle
 from langchain_core.messages import BaseMessage
-
+import json
 
 @dataclass
 class PolicyConversationTurn:
@@ -260,6 +259,7 @@ class InteractionPolicy:
                 self.conversation_history[-1].user_msg = user_response
                 self.conversation_history[-1].user_cost = user_cost
 
+        print("Calling generate_message")
         assistant_msg, wants_to_end_conversation = self.generate_message(user_response)
         assistant_cost = sum(
             [
@@ -314,7 +314,7 @@ class InteractionPolicy:
 
     ######## CHECKPOINTING ##########
 
-    def save_checkpoint(self) -> None:
+    def save_checkpoint(self, connection=None) -> None:
         """
         Save the current state of the policy to a checkpoint file.
         Critically, this does not save configs for the policy, so the policy later must be initialized with the same configs as the checkpoint.
@@ -342,15 +342,18 @@ class InteractionPolicy:
             checkpoint_data["specification_state"] = self.spec.get_state()
 
         # Save checkpoint
-        if os.path.exists(self.checkpoint_file):
-            os.remove(self.checkpoint_file)
-        with open(self.checkpoint_file, "wb") as f:
-            pickle.dump(checkpoint_data, f)
+        if connection is not None:
+            connection.write(self.checkpoint_file, json.dumps(checkpoint_data, indent=2))
+        else:
+            if os.path.exists(self.checkpoint_file):
+                os.remove(self.checkpoint_file)
+            with open(self.checkpoint_file, "w") as f:
+                json.dump(checkpoint_data, f, indent=2)
 
         if self.verbosity >= 1:
             print(f"Checkpoint saved to {self.checkpoint_file}")
 
-    def load_checkpoint(self, turn_idx: int = None) -> None:
+    def load_checkpoint(self, turn_idx: int = None, connection=None) -> None:
         """
         Load the policy state from a checkpoint file.
         Critically, this does not save configs for the policy, so the policy must be initialized with the same configs as the checkpoint.
@@ -369,8 +372,13 @@ class InteractionPolicy:
             raise FileNotFoundError(
                 f"Checkpoint file not found: {self.checkpoint_file}"
             )
-        with open(self.checkpoint_file, "rb") as f:
-            checkpoint_data = pickle.load(f)
+        
+        if connection is not None:
+            # Use binary read method if available, otherwise fall back to base64 decoding
+            checkpoint_data = json.loads(connection.read(self.checkpoint_file))
+        else:
+            with open(self.checkpoint_file, "r") as f:
+                checkpoint_data = json.load(f)
 
         if turn_idx is not None:
             # Restore a single turn based on the hook history
@@ -499,9 +507,9 @@ class InteractionPolicy:
                 "tool_calls", []
             ):
                 id = tool_call["id"]
-                kwargs = tool_call["function"].get("arguments") | tool_call[
-                    "function"
-                ].get("args")
+                kwargs = tool_call["function"].get("arguments")
+                if kwargs is None:
+                    kwargs = tool_call["function"].get("args")
                 name = tool_call["function"]["name"]
 
                 # look ahead for response

@@ -8,23 +8,24 @@ from data.dataset import FixedSpecification, CustomSpecification
 from evaluation.app.control_flow import (
     start_interaction,
     initialize_session_state,
-    reset_session_state_for_round,
     chat_flow,
-    start_presurvey,
+    start_brainstorming,
     evaluation_flow,
     exit_survey_flow,
     end_interaction,
     finish_onboarding,
-    get_cached_spec,
+    complete_brainstorming,
 )
 import evaluation.app.authentication as authentication
 import evaluation.app.forms as forms
 import evaluation.app.components as components
+import evaluation.app.files as files
 
-APP_CONFIG_JSON = ["evaluation/app/shared_app_config.json"]
+APP_CONFIG_JSON = ["shared_app_config.json"]
 SCREENS = [
     "welcome_screen",
     "dataset_screen",
+    "brainstorming_screen",
     "presurvey_screen",
     "chat_screen",
     "evaluation_screen",
@@ -266,7 +267,11 @@ def header():
     with st.container(key="floating_header", horizontal=True):
         components.experiment_progress_bar()
 
-        if st.session_state.current_screen == "chat_screen":
+        if st.session_state.current_screen in [
+            "chat_screen",
+            "brainstorming_screen",
+            "presurvey_screen",
+        ]:
             if st.session_state.spec.render_task_explanation is not None:
                 st.button(
                     "Task Instructions",
@@ -370,16 +375,18 @@ def dataset_screen():
             else:
                 # Custom spec: show Begin button directly
                 if st.button("Begin the task", type="primary"):
-                    st.session_state.current_screen = "presurvey_screen"
-                    start_presurvey()
+                    # Always route through brainstorming controller; it will skip itself if unconfigured
+                    st.session_state.current_screen = "brainstorming_screen"
+                    start_brainstorming()
 
         elif page_index == 1 and isinstance(st.session_state.spec, FixedSpecification):
             # Page 2: Initial specification (only for fixed specs)
             components.render_specification()
 
             if st.button("Begin the task", type="primary"):
-                st.session_state.current_screen = "presurvey_screen"
-                start_presurvey()
+                # Always route through brainstorming controller; it will skip itself if unconfigured
+                st.session_state.current_screen = "brainstorming_screen"
+                start_brainstorming()
 
 
 def presurvey_screen():
@@ -392,6 +399,7 @@ def presurvey_screen():
     header()
 
     with st.container(key="narrow_body"):
+        components.render_specification_banner()
         st.write("Before we begin, please answer a few questions about yourself.")
 
         def validate(form_values):
@@ -442,12 +450,13 @@ def _custom_chat_screen():
     st.markdown(
         ":small[You should not need to access any external websites. The AI only needs to show you a final recommendation; it does not have the ability to do anything else (e.g. place orders in the real world).]"
     )
-    st.info("*Your task:* " + st.session_state.spec.current_specification)
+    components.render_specification_banner()
 
     chat_flow(
         show_raw_message=DEBUG_MODE,
         autovalidate=False,
         show_response_time=True,
+        show_end_conversation_button=True,
     )
 
 
@@ -517,13 +526,67 @@ def evaluation_screen():
 
     header()
 
-    if isinstance(st.session_state.spec, CustomSpecification):
-        st.info("*Your task:* " + st.session_state.spec.current_specification)
+    components.render_specification_banner()
 
     evaluation_flow(
-        chat_evaluation_form=forms.interaction_evaluation,
+        # chat_evaluation_form=forms.interaction_evaluation,
         custom_final_specification_form=forms.custom_final_specification,
     )
+
+
+def brainstorming_screen():
+    """
+    Brainstorming stage between instructions and presurvey.
+    Shows current specification, a reflection prompt, a large text box, and a countdown.
+    Submission is enabled only after brainstorm_time seconds have elapsed.
+    """
+    if st.session_state.current_screen != "brainstorming_screen":
+        return
+
+    header()
+
+    with st.container(key="narrow_body"):
+        # Banner with current specification
+        components.render_specification_banner()
+
+        # Start brainstorming timer if not already started
+        if getattr(st.session_state, "brainstorm_start_time", None) is None:
+            st.session_state.brainstorm_start_time = __import__("time").time()
+
+        # Countdown display
+        components.brainstorm_countdown()
+
+        def validate(form_values):
+            # Check if enough time has passed for brainstorming
+            brainstorm_time = getattr(st.session_state, "brainstorm_time", None)
+            if brainstorm_time is None:
+                return True  # No time requirement
+
+            brainstorm_start_time = st.session_state.get("brainstorm_start_time", None)
+            if brainstorm_start_time is None:
+                return False  # Timer not started
+
+            import time as _time
+
+            elapsed = _time.time() - brainstorm_start_time
+            if elapsed < brainstorm_time:
+                st.error(
+                    f"Please spend at least {brainstorm_time} seconds reflecting before continuing."
+                )
+                return False
+
+            return True
+
+        def on_completion(form_values):
+            st.session_state.form_results.setdefault("brainstorm", {})
+            st.session_state.form_results["brainstorm"].update(form_values)
+            complete_brainstorming()
+
+        forms.brainstorming(
+            should_show=lambda: not st.session_state.brainstorming_completed,
+            on_completion=on_completion,
+            validate=validate,
+        )
 
 
 def exit_survey_screen():
@@ -557,6 +620,8 @@ def main():
     #########################
     # Initialization
     #########################
+
+    files.setup_connection()
 
     authentication_screen()
 
@@ -603,9 +668,11 @@ def main():
         st.session_state.instructions_completed
         and not st.session_state.interaction_started
     ):
-        # dataset instructions are completed, but interaction is not started
-        # so we go to presurvey, which will then mark interaction started
-        st.session_state.current_screen = "presurvey_screen"
+        # Route through brainstorming controller, which will skip itself if unconfigured or already completed
+        if not st.session_state.brainstorming_completed:
+            st.session_state.current_screen = "brainstorming_screen"
+        else:
+            st.session_state.current_screen = "presurvey_screen"
     elif (
         st.session_state.onboarding_completed
         and not st.session_state.instructions_completed
@@ -623,6 +690,7 @@ def main():
         )
     ):
         dataset_screen()
+        brainstorming_screen()
         presurvey_screen()
         chat_screen()
         evaluation_screen()

@@ -1,16 +1,10 @@
-from datasets import load_dataset
+from datasets import load_dataset  # noqa: F401
 import numpy as np
-from collections import defaultdict
-import tqdm
-from typing import List, Tuple, Optional, Dict, Callable, Any
+from typing import List, Tuple, Optional, Dict, Any
 import dill
-import sys
 import os
 import json
-import sys
 import streamlit as st
-from langchain_core.tools import tool
-import re
 
 
 from data.dataset import (
@@ -18,12 +12,11 @@ from data.dataset import (
     FixedSpecification,
     CustomSpecification,
 )
-from data.actions import Action, get_jupyter_actions
+from data.actions import get_jupyter_actions
 import data.workout_planning.streamlit_render as renderer
-from utils.streamlit_types import FormElement, DisplayElement, form_element_to_streamlit
+from utils.streamlit_types import FormElement
 
 from utils.misc import (
-    get_recursive,
     parse_json,
     subset_data,
     add_section,
@@ -35,17 +28,18 @@ from data.workout_planning.db import (
     TIMES_OF_DAY,
 )
 from data.reward import linear_reward, Constraint
+from data.workout_planning.parser import parse_workout_plan
 
 DEV_FRAC = 0.1
 DATASET_ROOT = os.path.dirname(os.path.abspath(__file__))
 
-FMT_INSTRUCTIONS = (
+PREDICTION_FMT_INSTRUCTIONS = (
     """You MUST use ONLY exercises in the database, and you MUST structure your plan as a JSON string with the following structure:
 {
     "sunday": {
         "early morning (6-9am)": [
             {
-                "exercise_name": str (required), 
+                "exercise_name": str (required),
                 "time_or_reps": Optional[Literal["time", "reps"]],
                 "num_sets": Optional[int],
                 "rest_time": Optional[int],
@@ -68,21 +62,12 @@ FMT_INSTRUCTIONS = (
     - `time_per_set` is the time per set of the exercise, copied exactly from the database.
     - `num_reps_per_set` is the number of reps per set of the exercise, copied exactly from the database.
 Only exercises and variations from the database can be used.
-
-To render a description of a single exercise (instead of a full workout plan) to the user, you can mention its exercise_name and wrap it in <exercise></exercise>, e.g.: '<exercise>Bodyweight Glute Bridge</exercise>'. Do not put <exercise></exercise> tags inside the JSON of a full workout plan.
 """.strip()
 )
 
-CUSTOM_INSTRUCTIONS = """
-### What you need to prompt the assistant to do
-In this task, **your goal is to get the assistant to write you a perfect workout plan that you can actually follow this coming week.** A workout plan is a week-long calendar that specifies when to work out and what to do for each workout.
-
-The plan should work with your schedule, ability level, equipment access, goals, and preferences. The assistant actually needs to specify when you will work out, and how long to do each exercise in the workout. 
-
-Make sure you review the exercises and watch any provided videos to understand their difficulty level.
-
-If you don't have any experience with exercise, the assistant should help you figure out what to do.
-"""
+MSG_FMT_INSTRUCTIONS = (
+    """To render a description of a single exercise to the user, you can mention its exercise_name and wrap it in <exercise></exercise>, e.g.: '<exercise>Bodyweight Glute Bridge</exercise>'. You should wrap all exercises you mention by default."""
+)
 
 FIXED_INSTRUCTIONS = """
 ### What you need to prompt the assistant to do
@@ -96,24 +81,12 @@ Some of the client's details may be missing. For example, they may not have spec
 To maximize your score, you will have to try different workout plans and ask the client to evaluate them. The client's score will be between 0 and 100. If the workout plan is invalid, dangerous for the client to follow, or does not fit their schedule, then the score will be -infinity.
 """
 
-COMMONSENSE_INSTRUCTIONS = """
-A valid workout plan:
-* ONLY uses exercises from the assistant's database. Using other exercises is not allowed.
-* Specifies the plan for each day of the week. A plan that says, "You decide" is not valid; all details must be ironed out.
-* Specifies the time of day to work out for each day.
-* Specifies the exercises to do for each workout.
-"""
+COMMONSENSE_INSTRUCTIONS = """A workout plan is a week-long calendar that specifies when to work out and a list of exercises for each workout. Workout plans must uses exercises from the provided database. Using other exercises is not allowed."""
 
 
 def render_fixed_task_explanation():
     """Render the fixed task explanation for workout planning."""
     st.markdown(FIXED_INSTRUCTIONS)
-    st.markdown(COMMONSENSE_INSTRUCTIONS)
-
-
-def render_custom_task_explanation():
-    """Render the custom task explanation for workout planning."""
-    st.markdown(CUSTOM_INSTRUCTIONS)
     st.markdown(COMMONSENSE_INSTRUCTIONS)
 
 
@@ -379,6 +352,7 @@ class WorkoutPlanningDataset(SpecificationCollection):
                 index=f"fixed_{ix}",
                 full_specification=theta,
                 initial_specification=signature,
+                commonsense_description=COMMONSENSE_INSTRUCTIONS,
                 validity_fn=validity_fn,
                 validity_kwargs={
                     "hard_constraints": hard_constraints,
@@ -399,7 +373,8 @@ class WorkoutPlanningDataset(SpecificationCollection):
                 # baseline_scores=None,  # Not provided
                 render_task_explanation=render_fixed_task_explanation,
                 actions=actions,
-                fmt_instructions=FMT_INSTRUCTIONS,
+                msg_fmt_instructions=MSG_FMT_INSTRUCTIONS,
+                prediction_fmt_instructions=PREDICTION_FMT_INSTRUCTIONS,
                 render_msg_fn=output_to_streamlit,
                 render_msg_kwargs=["db"],
                 db=self._exercise_db,
@@ -424,6 +399,7 @@ class WorkoutPlanningDataset(SpecificationCollection):
         specs = {}
         for ix in indexes:
             if self._persist_docker_container and self._docker_image is not None:
+                from llm_sandbox import SandboxSession
                 session = SandboxSession(image=self._docker_image)
                 session.open()
                 container_id = session.container.id
@@ -461,6 +437,7 @@ class WorkoutPlanningDataset(SpecificationCollection):
                 dataset_name=self.dataset_name,
                 index=f"custom_{ix}",
                 initial_specification="Design a workout plan for your next week.",
+                commonsense_description=COMMONSENSE_INSTRUCTIONS,
                 user_specification_form_initial=self._create_user_specification_form_initial(),
                 user_specification_form_final=self._create_user_specification_form_final(),
                 user_specification_callback=user_specification_callback,
@@ -479,7 +456,8 @@ class WorkoutPlanningDataset(SpecificationCollection):
                 validity_fn_tool_description="Check if the workout plan is valid and follows constraints",
                 render_task_explanation=self._render_custom_task_explanation,
                 actions=actions,
-                fmt_instructions=FMT_INSTRUCTIONS,
+                msg_fmt_instructions=MSG_FMT_INSTRUCTIONS,
+                prediction_fmt_instructions=PREDICTION_FMT_INSTRUCTIONS,
                 render_msg_fn=output_to_streamlit,
                 render_msg_kwargs=["db"],
                 db=self._exercise_db,
@@ -491,7 +469,7 @@ class WorkoutPlanningDataset(SpecificationCollection):
                 user_expertise_form=self._create_user_expertise_form(),
                 _y0_mapping=self._y0_mapping,
                 _extractor_lookup=self._extractor_lookup,
-                render_evaluation_fn=lambda **kwargs: renderer.render_eval_workout(
+                render_evaluation_fn=lambda **kwargs: renderer.render_eval(
                     **kwargs, db=self._exercise_db
                 ),
             )
@@ -820,89 +798,6 @@ def reward_fn(
     )
 
 
-def parse_workout_plan(
-    yhat: str,
-    exercise_db: ExerciseDB,
-    raise_errors: bool = False,
-    leave_invalid: bool = False,
-) -> Dict[str, Dict[str, Dict[str, Any]]]:
-    """
-    Parse a workout plan from a JSON string.
-    Assumes a dictionary with the following structure:
-    {
-        "sunday": {
-            "early morning (6-9am)": [
-                {"exercise_name": str, "variation": str},
-                ...
-            ],
-        }
-    }
-    and returns a dictionary with the following structure:
-    {
-        "sunday": {
-            "early morning (6-9am)": [
-                Exercise (pd.series, row from exercise_db),
-                ...
-            ],
-        }
-    }
-    """
-    workout_plan = parse_json(yhat)
-    if workout_plan is None:
-        return None
-
-    # do some automatic correction for case, missing fields, etc.
-    try:
-        # lower case all the keys
-        workout_plan = {
-            k.lower(): (
-                {ki.lower(): vi for ki, vi in v.items()} if type(v) == dict else {}
-            )
-            for k, v in workout_plan.items()
-        }
-    except Exception as e:
-        print(f"Error parsing workout plan: {workout_plan}: {e}")
-        return None
-
-    corrected_workout_plan = {}
-    for day in DAYS_OF_THE_WEEK:
-        for time_of_day in TIMES_OF_DAY:
-            # first, make sure to add the fields to the new dict
-            if day not in corrected_workout_plan:
-                corrected_workout_plan[day] = {}
-            if time_of_day not in corrected_workout_plan[day]:
-                corrected_workout_plan[day][time_of_day] = []
-
-            # then, copy over the fields from the old dict
-            if (
-                day not in workout_plan
-                or time_of_day not in workout_plan[day]
-                or workout_plan[day][time_of_day] is None
-                or len(workout_plan[day][time_of_day]) == 0
-            ):
-                corrected_workout_plan[day][time_of_day] = None
-            else:
-                new_list = []
-                for d in workout_plan[day][time_of_day]:
-                    exercise_name = d.pop("exercise_name")
-                    exercise = exercise_db.get_exercise_by_variation(
-                        name=exercise_name, **d
-                    )
-                    if exercise is None and raise_errors:
-                        raise Exception(
-                            f"Exercise not found in database: {exercise_name}. For this task, plans are only valid if all exercises are from the database."
-                        )
-                    if exercise is None and not leave_invalid:
-                        continue
-                    if exercise is None and leave_invalid:
-                        exercise = {
-                            "exercise_name": exercise_name,
-                            "invalid": True,
-                        }
-                    new_list.append(exercise)
-                corrected_workout_plan[day][time_of_day] = new_list
-
-    return corrected_workout_plan
 
 
 def output_to_streamlit(msg: str, db: ExerciseDB) -> str:
@@ -911,6 +806,7 @@ def output_to_streamlit(msg: str, db: ExerciseDB) -> str:
     """
     from utils.misc import parse_for_answer_tags
 
+    msg = msg.replace("$", "\$")
     # Parse workout plan JSON
     js, start_end = parse_json(msg, return_start_end=True)
 
@@ -925,24 +821,32 @@ def output_to_streamlit(msg: str, db: ExerciseDB) -> str:
             for exercise in mentions.split(",")
             if exercise.strip()
         ]
-        mentioned_exercises = list(set(mentioned_exercises))
+        mentioned_exercises = list(dict.fromkeys(mentioned_exercises))
 
-    if js is None:
+    if not js and not mentioned_exercises:
+        st.write(msg)
+        return
+
+    # Generate unique ID for this message to avoid conflicts when multiple messages are rendered
+    message_hash = str(hash(msg))[:8]
+    unique_id = f"mentioned-exercises-{message_hash}"
+
+    if js is None or start_end is None:
         # No workout plan, just render the message with exercise mentions
         st.markdown(
-            replace_tags_with_link(msg, "exercise", "#mentioned-exercises"),
+            replace_tags_with_link(msg, "exercise", f"#{unique_id}"),
             unsafe_allow_html=True,
         )
         if mentioned_exercises:
-            with st.expander("Exercises mentioned in message", expanded=False):
+            with st.expander("Exercises mentioned in message", expanded=True):
+                st.markdown(f'<div id="{unique_id}"></div>', unsafe_allow_html=True)
                 renderer.render_exercise_mentions(mentioned_exercises, db)
         return
 
     # Render message before workout plan
     st.markdown(
-        msg[: start_end[0]]
-        .replace("<exercise>", "<a href='#mentioned-exercises'>")
-        .replace("</exercise>", "</a>")
+        replace_tags_with_link(msg[: start_end[0]], "exercise", f"#{unique_id}"),
+        unsafe_allow_html=True,
     )
 
     # Render workout plan
@@ -952,14 +856,14 @@ def output_to_streamlit(msg: str, db: ExerciseDB) -> str:
 
     # Render message after workout plan
     st.markdown(
-        replace_tags_with_link(msg[start_end[1] :], "exercise", "#mentioned-exercises"),
+        replace_tags_with_link(msg[start_end[1] :], "exercise", f"#{unique_id}"),
         unsafe_allow_html=True,
     )
 
     # Render exercise mentions if any
     if mentioned_exercises:
         st.markdown("---")
-        with st.expander("Exercises mentioned in message", expanded=False):
+        with st.expander("Exercises mentioned in message", expanded=True):
             renderer.render_exercise_mentions(mentioned_exercises, db)
 
 

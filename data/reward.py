@@ -590,7 +590,7 @@ def linear_reward(
         assert np.all(weights >= 0), "Weights must be non-negative"
         assert np.all(weights <= 1), "Weights must be less than or equal to 1"
         assert np.isclose(np.sum(weights), 1), "Weights must sum to 1"
-    
+
     results = {i: constraint(y) for i, constraint in enumerate(constraints)}
 
     # Collect detailed messages from extractors
@@ -621,11 +621,12 @@ def linear_reward(
             i for i, constraint in enumerate(constraints) if not constraint.is_hard
         ]
         if weights is not None:
-            assert len(weights) == len(
-                soft_constraint_indices
-            ), "Weights and constraints must have the same length"
+            assert len(weights) == len(soft_constraint_indices), (
+                "Weights and constraints must have the same length"
+            )
             score = sum(
-                weight * results[i] for weight, i in zip(weights, soft_constraint_indices)
+                weight * results[i]
+                for weight, i in zip(weights, soft_constraint_indices)
             )
             max_unconstrained_score = sum(
                 weight * constraints[i].oracle_value
@@ -653,11 +654,12 @@ def linear_reward(
                 score = float("-inf")
     else:
         if weights is not None:
-            assert len(weights) == len(
-                constraints
-            ), "Weights and constraints must have the same length"
+            assert len(weights) == len(constraints), (
+                "Weights and constraints must have the same length"
+            )
             score = sum(
-                weight * results[i] for weight, i in zip(weights, range(len(constraints)))
+                weight * results[i]
+                for weight, i in zip(weights, range(len(constraints)))
             )
             max_unconstrained_score = sum(
                 weight * constraints[i].oracle_value
@@ -672,5 +674,113 @@ def linear_reward(
             score = None
             max_unconstrained_score = None
             min_unconstrained_score = None
-    
-    return (score != float("-inf")), score, min_unconstrained_score, max_unconstrained_score, metadata
+
+    return (
+        (score != float("-inf")),
+        score,
+        min_unconstrained_score,
+        max_unconstrained_score,
+        metadata,
+    )
+
+
+def pairwise_win_rate(A: List[List[int]], B: List[List[int]]) -> float:
+    """
+    Compute the aggregated pairwise win rate of A over B across multiple levels.
+
+    Suppose A and B are objects that contain "kinds" of items. If we sample two items of the same "kind" from both objects, this function computes the probability that A's item beats B's item.
+
+    Parameters
+    ----------
+    A[i] : list of ranks (ints) for items in y's set at level i
+    B[i] : list of ranks (ints) for items in y0's set at level i
+        Lower rank = better.
+        Ranks within each level i must be unique.
+
+    Returns
+    -------
+    float
+        Overall score in [0, 1]:
+        - 1   : A completely dominates B
+        - 0   : B completely dominates A
+        - 0.5 : no information (both empty at that level or balanced overall)
+    """
+
+    total_wins = 0
+    total_pairs = 0
+
+    for Ai, Bi in zip(A, B):
+        # Handle empty sets explicitly
+        if not Ai and not Bi:
+            level_score = 0.5  # no information
+            level_pairs = 0
+        elif not Ai:  # A empty, B non-empty
+            level_score = 0.0  # B wins by default
+            level_pairs = 1  # count as one "virtual" comparison
+        elif not Bi:  # B empty, A non-empty
+            level_score = 1.0  # A wins by default
+            level_pairs = 1
+        else:
+            wins = 0
+            for a in Ai:
+                for b in Bi:
+                    if a < b:  # lower rank = better
+                        wins += 1
+            level_pairs = len(Ai) * len(Bi)
+            level_score = wins / level_pairs
+
+        # accumulate weighted by number of comparable pairs
+        total_wins += level_score * level_pairs
+        total_pairs += level_pairs
+
+    # If all levels empty (no pairs at all), return neutral 0.5
+    if total_pairs == 0:
+        return 0.5
+
+    return total_wins / total_pairs
+
+
+def likert_to_win_rate(comparison_likert_scores: List[str], return_total: bool = False) -> float:
+    """
+    Convert a list of comparison likert scores ("A much more", "A slightly more", "Neutral", "B slightly more", "B much more") to P(A wins).
+
+    Converts the likert score to a "pseudo-win":
+    * A much more -> A wins 2x
+    * A slightly more -> A wins 1x
+    * Neutral -> A wins 1x and B wins 1x
+    * B slightly more -> B wins 1x
+    * B much more -> B wins 2x
+
+    Parameters
+    ----------
+    comparison_likert_scores: List[str]
+        List of comparison likert scores ("A much more", "A slightly more", "Neutral", "B slightly more", "B much more")
+
+    Returns
+    -------
+    float
+    """
+    mapping = {
+        "A much more": (2, 0),
+        "A slightly more": (1, 0),
+        "Neutral": (1, 1),
+        "B slightly more": (0, 1),
+        "B much more": (0, 2),
+    }
+
+    a_wins = 0
+    b_wins = 0
+
+    for score in comparison_likert_scores:
+        if score not in mapping:
+            raise ValueError(f"Invalid score: {score}")
+        a_add, b_add = mapping[score]
+        a_wins += a_add
+        b_wins += b_add
+
+    total = a_wins + b_wins
+    if total == 0:
+        return float("nan")  # undefined if no comparisons
+    if return_total:
+        return a_wins, total
+    return a_wins / total

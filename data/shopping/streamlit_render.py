@@ -99,12 +99,19 @@ def _shopping_recommendations_to_markdown(
     cart: str,
     catalog: Any,
     header_type: Literal["cart", "mention", None] = "cart",
+    scale_price_to_budget: float = None,
 ) -> str:
     products, total_cost, num_valid, has_invalid = _process_cart_with_invalid_tracking(
         cart, catalog
     )
     if len(products) == 0:
         return ""
+
+    if scale_price_to_budget is not None and total_cost > scale_price_to_budget:
+        scale_factor = scale_price_to_budget / total_cost
+        total_cost = scale_price_to_budget
+        for product in products:
+            product["product"]["price"] = product["product"]["price"] * scale_factor
 
     markdown_lines: List[str] = []
     if header_type == "cart":
@@ -261,19 +268,22 @@ def _product_details_to_markdown(i: int, product: Dict[str, Any]) -> str:
 
 
 def render_eval(
-    *, final_prediction: str, y0: List[str] | None, db
+    *, final_prediction: str, y0: List[str] | None, budget: float, db
 ) -> tuple[bool, dict | None]:
     """
     Render evaluation UI for shopping custom specs and return (completed, feedback).
     """
     if "ranking" not in st.session_state.form_results["final_evaluation"]:
-        render_eval_first_page(final_prediction=final_prediction, y0=y0, db=db)
+        render_eval_first_page(
+            final_prediction=final_prediction, y0=y0, budget=budget, db=db
+        )
         return False, None
 
-    return render_eval_second_page(final_prediction=final_prediction, y0=y0, db=db)
+    # Second page is now handled generically by control_flow using a callback we provide via kwargs
+    return True, None
 
 
-def render_eval_first_page(*, final_prediction: str, y0: List[str], db):
+def render_eval_first_page(*, final_prediction: str, y0: List[str], budget: float, db):
     st.markdown("### Review the assistant's recommendations")
     st.markdown(
         "The assistant has generated several recommendations for you. Select your favorite below. **Note that you must buy all the items in the cart together.**"
@@ -292,11 +302,11 @@ def render_eval_first_page(*, final_prediction: str, y0: List[str], db):
     if not carousel_completed:
         options = y0 + [final_prediction]
         random.shuffle(options)
-        print(options)
     else:
         options = list(
             st.session_state.form_results["final_evaluation"]["index_to_cart"].values()
         )
+    final_prediction_index = options.index(final_prediction)
 
     def on_completion(index):
         print(f"Selected cart {index}")
@@ -311,7 +321,12 @@ def render_eval_first_page(*, final_prediction: str, y0: List[str], db):
 
     def display_fn(i):
         st.markdown(
-            _shopping_recommendations_to_markdown(options[i], db, header_type="cart"),
+            _shopping_recommendations_to_markdown(
+                options[i],
+                db,
+                header_type="cart",
+                scale_price_to_budget=budget if i != final_prediction_index else None,
+            ),
             unsafe_allow_html=True,
         )
 
@@ -380,18 +395,11 @@ def render_eval_first_page(*, final_prediction: str, y0: List[str], db):
                 if len(must_haves_nice_to_haves) == 0:
                     st.error("Please fill out all fields")
                     return
-                final_prediction_index = next(
-                    k
-                    for k, v in st.session_state.form_results["final_evaluation"][
-                        "index_to_cart"
-                    ].items()
-                    if v == final_prediction
-                )
                 final_prediction_rank = rank.index(final_prediction_index)
                 st.session_state.form_results["final_evaluation"].update(
                     {
                         "ranking": rank,
-                        "score": len(options) - final_prediction_rank,
+                        "score": (len(options) - final_prediction_rank) / len(options),
                         "styles_favorites": styles_favorites,
                         "colors_favorites": colors_favorites,
                         "prices_favorites": prices_favorites,
@@ -437,7 +445,7 @@ def render_eval_second_page(*, final_prediction: str, y0: List[str], db):
             input_type="text_area",
             label="If you were to continue your search with the assistant for 10 more minutes, what would you want it to change?",
             height=120,
-        )
+        ),
     ]
 
     with st.form(key="shopping_custom_eval_form"):

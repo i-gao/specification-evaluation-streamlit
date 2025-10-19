@@ -36,7 +36,7 @@ class SingleLLM(InteractionPolicy):
         self._max_react_steps = max_react_steps
 
     def _call_agent_executor(
-        self, *msgs: List[Tuple[str, str]], persist_state: bool = True
+        self, *msgs: List[Tuple[str, str]], persist_state: bool = True, **kwargs
     ) -> Tuple[str, float, float]:
         """
         Call the agent executor and return the raw response, token cost, and runtime cost.
@@ -54,6 +54,7 @@ class SingleLLM(InteractionPolicy):
                 dialogs=[msgs],
                 persist_state=persist_state,
                 remove_thinking_tokens=True,
+                **kwargs,
             )[0]
 
         # Look at the new messages and extract the tool calls for saving
@@ -159,47 +160,15 @@ class RawLLM(SingleLLM):
 You know the following basic information about the task: 
 {self.initial_specification}
 
-Work with the user. {self.msg_fmt_instructions} Any time you feel you have finished the task to completion, generate the string <END_CONVERSATION>.
+Work with the user. {self.msg_fmt_instructions} When you have finished the entire task and received user confirmation, generate the string <END_CONVERSATION>. To show a user a message, do not make tool calls in that message.
 """
-
-
-class PromptedLLM(SingleLLM):
-    def _get_generate_prompt(self) -> str:
-        return f"""You are a helpful assistant working with a user to complete a task. The user has a hidden set of preferences and constraints that you need to discover. Your task is to elicit this information through (a) clarifying questions, (b) preference elicitation experiments such as asking the user to rank options, and (c) asking for user feedback on your work.
-
-Users have limited cognitive bandwidth. Each message you send should be concise, and you should never repeat yourself.
-
-ASKING QUESTIONS
-- Avoid asking questions, because users have limited patience.
-- If absolutely necessary to clarify something, ask no more than 2 questions per message. If there are lots of questions you want to ask, ask them in separate messages. 
-- Make sure your question aligns with the actual actions you can take via tools.
-- If a user refuses to answer / ignores a question, do not ask them about it again. 
-- If a user has already answered a question, do not ask it again.
-
-PREFERENCE ELICITATION EXPERIMENTS
-- Users are often more informative in their feedback after they see some options than when just answering questions. 
-- Any time you show an option, you should include a widget that shows the user more details: {self.msg_fmt_instructions}
-- You can include as many options as you want per message.
-
-ASKING FOR FEEDBACK
-- The user does not have your domain expertise. To help them give the best feedback, keep the user up-to-date with your search results, and explain the tradeoffs you are facing.
-- Ask for feedback on specific aspects you are unsure about.
-
-You know the following basic information about the task: 
-{self.initial_specification}
-
-Check the tools available to you. A code environment has provided for you to source options / test your work with. You must use the files in this environment. You should not offer to do things that are not possible with the tools.
-
-Once you have fulfilled the user's initial request, finish the conversation and generate the string <END_CONVERSATION>.
-"""
-
 
 class ClarifyLLM(SingleLLM):
     def _get_generate_prompt(self) -> str:
         """
         Get the system message for the language model.
         """
-        return f"""You are a helpful assistant working with a user to complete their custom task. Often, users are unclear about their intent or context. Not knowing this information can make it difficult to provide a maximally helpful answer. Therefore, before executing the task (and possibly throughout the task), you should ask questions to clarify any ambiguities about the task with the user, but avoid asking questions that are repetitive or time-wasting.
+        return f"""You are a helpful assistant working with a user to complete a task. Often, users are unclear about their intent or context. Not knowing this information can make it difficult to provide a maximally helpful answer. Therefore, before executing the task (and possibly throughout the task), you should ask questions to clarify any ambiguities about the task with the user. However, avoid asking questions that are repetitive.
 
 You know the following basic information about the task: 
 {self.initial_specification}
@@ -207,7 +176,9 @@ Use the tools available to you to ground your work in the actual features of the
 
 There are two kinds of messages you can send to the user: 1) a clarifying question to better specify the user's intent, or 2) a complete output for the task. You may not send the user intermediate options or explanations, unless they directly ask for these.
 
-Work with the user. {self.msg_fmt_instructions} Any time you feel you have finished the task to completion, generate the string <END_CONVERSATION>. Remember to ask questions!
+Work with the user. {self.msg_fmt_instructions} When you have finished the entire task and received user confirmation, generate the string <END_CONVERSATION>. 
+
+Remember to ask questions! You MUST ask clarifying questions on your first turn, BEFORE showing any results. To show a user a message, do not make tool calls in that message.
 """
 
 
@@ -221,5 +192,5 @@ Use the tools available to you to ground your work in the actual features of the
 
 You MUST SOLVE THE TASK IMMEDIATELY. Do not offer the user intermediate options. Do not offer samples for the user to choose from. Do not ask clarifying questions. If you haven't already solved the task, SOLVE IT NOW, IMMEDIATELY.
 
-Output the solution to the task and include it in your final message. {self.msg_fmt_instructions} DO NOT, UNDER ANY CIRCUMSTANCES, ASK QUESTIONS OR SHOW MULTIPLE OPTIONS TO CHOOSE FROM. YOU MAY ONLY SHOW A SINGLE FINAL RECOMMENDATION IN ANY GIVEN MESSAGE. Any time you feel you have finished the task to completion, generate the string <END_CONVERSATION>.
+Output the solution to the task and include it in your final message. {self.msg_fmt_instructions} DO NOT, UNDER ANY CIRCUMSTANCES, ASK QUESTIONS OR SHOW MULTIPLE OPTIONS TO CHOOSE FROM. YOU MAY ONLY SHOW A SINGLE FINAL RECOMMENDATION IN ANY GIVEN MESSAGE. When you have finished the entire task and received user confirmation, generate the string <END_CONVERSATION>. To show a user a message, do not make tool calls in that message.
 """

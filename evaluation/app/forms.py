@@ -1,6 +1,12 @@
 import streamlit as st
 import random
 from typing import Callable, List
+from utils.streamlit_types import FormElement, form_element_to_streamlit
+from evaluation.qualitative_eval import (
+    COMPARISON_LIKERT,
+    ASSISTANT_INSTRUMENTS,
+    INSTRUMENT_LIKERT,
+)
 
 """
 This file contains code to generate the form interfaces.
@@ -15,14 +21,7 @@ Functions take in:
 Note that the form will always show unless on_completion modifies the result of should_show.
 """
 
-from utils.streamlit_types import FormElement, form_element_to_streamlit
-from evaluation.qualitative_eval import (
-    ASSISTANT_DESCRIPTIONS,
-    FEELINGS,
-    COMPARISON_LIKERT,
-    ASSISTANT_INSTRUMENTS,
-    INSTRUMENT_LIKERT,
-)
+
 
 
 def presurvey(
@@ -31,6 +30,7 @@ def presurvey(
     on_completion: Callable = None,
     user_expertise_form: List[FormElement] = None,
     user_specification_form_initial: List[FormElement] = None,
+    include_trust_question: bool = False,
 ):
     """
     Form that appears at the beginning of the experiment.
@@ -57,6 +57,12 @@ def presurvey(
                 if form_element["input_type"] != "text":
                     form_values["specification"][form_element["label"]] = o
 
+        if include_trust_question:
+            form_values["trust"] = st.radio(
+                "How much do you agree with this statement? 'I think working with the assistant will be more efficient than using a web browser to solve the task myself.'",
+                options=["-"] + INSTRUMENT_LIKERT,
+            )
+
         if st.form_submit_button("Submit", type="primary"):
             valid = validate is None or validate(form_values)
             if not valid:
@@ -65,6 +71,32 @@ def presurvey(
             if on_completion is not None:
                 on_completion(form_values)
 
+
+def brainstorming(
+    should_show: Callable = None,
+    validate: Callable = None,
+    on_completion: Callable = None,
+):
+    """
+    Brainstorming form that appears between instructions and presurvey.
+    Shows a reflection prompt, a large text area, and enforces a countdown gate.
+    The countdown duration is taken from st.session_state.brainstorm_time.
+    """
+    if should_show is not None and not should_show():
+        return
+
+    with st.form(key="brainstorming_form"):
+        st.write("Reflect on the task. How will you decide if the assistant's solution is good? What requirements, likes, and dislikes do you have?")
+        notes = st.text_area("Write your thoughts here", height=250)
+
+        submitted = st.form_submit_button("Continue to presurvey", type="primary")
+        if submitted:
+            form_values = {"notes": notes}
+            valid = validate is None or validate(form_values)
+            if not valid:
+                return
+            if on_completion is not None:
+                on_completion(form_values)
 
 def message_feedback(
     should_show: Callable = None,
@@ -240,3 +272,61 @@ def interaction_evaluation(
                 return
             if on_completion is not None:
                 on_completion(form_results)
+
+
+def final_prediction_evaluation(
+    *,
+    likert_label: str = 'How much do you agree with this statement: "I would rather accept this solution as is than continue my search with the assistant for 10 more minutes."',
+    stars_label: str = "Rate the overall quality.",
+    text_area_label: str = "If you were to continue working the assistant for 10 more minutes, what would you want to change?",
+    submit_key: str = "custom_eval_second_page_form",
+):
+    """
+    Generic second-page evaluation: render the final prediction, then ask 3 questions.
+    Returns (completed, feedback) like dataset-specific renderers.
+    """
+    from utils.streamlit_types import FormElement, form_element_to_streamlit
+    from evaluation.qualitative_eval import INSTRUMENT_LIKERT
+
+    # Render the final prediction view
+    st.session_state.spec.render_msg_fn(st.session_state.final_prediction)
+
+    form_elements = [
+        FormElement(
+            input_type="stars",
+            label=stars_label,
+        ),
+        FormElement(
+            input_type="radio",
+            label=likert_label,
+            options=["-"] + INSTRUMENT_LIKERT,
+        ),
+        FormElement(
+            input_type="text_area",
+            label=text_area_label,
+            height=120,
+        ),
+    ]
+
+    with st.form(key=submit_key):
+        feedback = {}
+        for element in form_elements:
+            st_fn, st_kwargs, required = form_element_to_streamlit(element)
+            value = st_fn(**st_kwargs)
+            label = element.get("label", "question")
+            feedback[label] = value
+        submit = st.form_submit_button("Submit", type="primary")
+        if submit:
+            for element in form_elements:
+                if element.get("required", False):
+                    label = element.get("label")
+                    if (
+                        not feedback.get(label)
+                        or feedback.get(label) == ""
+                        or feedback.get(label) == "-"
+                    ):
+                        st.error("Please fill in all required fields.")
+                        return False, None
+            return True, feedback
+
+    return False, None

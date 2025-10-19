@@ -21,3 +21,4 @@ _*.txt
 _*.json
 experiments/test/
 *.pt
+.streamlit/secrets.toml

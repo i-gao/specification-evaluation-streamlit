@@ -1,9 +1,7 @@
 from dataclasses import dataclass, field, asdict, is_dataclass, fields
 from typing import List, Dict, Any, Optional, Literal, Union
 import json
-import numpy as np
 import os
-from typing import TypedDict
 from user_simulator.user import UserSimulator
 from new_baselines.policy import InteractionPolicy
 from utils.misc import _clean_for_json
@@ -111,6 +109,7 @@ def save_interaction(
     save_hooks: List[str] = DEFAULT_SAVE_HOOKS,
     skip_grading: bool = False,
     spec: Specification = None,
+    connection=None,
     **kwargs,
 ) -> Interaction:
     """
@@ -292,15 +291,19 @@ def save_interaction(
 
     # Save to file
     try:
-        with open(output_path, "w") as f:
-            json.dump(out, f, indent=2)
+        # Use connection if provided, otherwise fall back to direct file operations
+        if connection is not None:
+            connection.write(output_path, json.dumps(out, indent=2))
+        else:
+            with open(output_path, "w") as f:
+                json.dump(out, f, indent=2)
         print(f"\nResults saved to {output_path}")
     except Exception as e:
         print(f"Error saving interaction to {output_path}: {e}")
 
     # Save policy checkpoint if checkpointing is enabled
     try:
-        policy.save_checkpoint()
+        policy.save_checkpoint(connection=connection)
     except Exception as e:
         print(f"Error saving policy checkpoint: {e}")
 

@@ -18,6 +18,7 @@ from utils.misc import get_recursive, parse_json, add_section, replace_tags_with
 from utils.streamlit_types import FormElement, form_element_to_streamlit
 import streamlit as st
 import data.travel_planner.streamlit_render as renderer
+from data.travel_planner.parser import parse_travel_plan
 
 # Add TravelPlanner to path
 travel_planner_path = os.path.join(os.path.dirname(__file__), "reward_utils")
@@ -29,7 +30,9 @@ from evaluation.hard_constraint import evaluation as hard_eval
 from evaluation.preferences import evaluation as preferences_eval, compute_linear_reward
 
 
-FORMATTING_INSTRUCTIONS = """All items in the itinerary must exactly match names from the database. Format the response as a JSON array of dictionaries, where each dictionary represents one day's itinerary. Each dictionary must include the following fields:
+COMMONSENSE_DESCRIPTION = "A travel plan is a day-by-day plan which specifies, for each day, the restaurants to eat at for breakfast / lunch / dinner, the attractions to visit, and the accommodation to stay at, along with how to get to the destination city on the first day and back to the origin city on the last day. Transportation (driving / flying) cannot be split into multiple legs. All entries in the travel plan must come from the database."
+
+PREDICTION_FMT_INSTRUCTIONS = """Format the response as a JSON array of dictionaries, where each dictionary represents one day's itinerary. Each dictionary must include the following fields:
 
 Required Fields:
    - days: Day number (integer)
@@ -50,9 +53,10 @@ Required Fields:
    - accommodation: "Hotel/lodging name, City", or "-" if skipping
       * Format: "Hotel/lodging name, City" (e.g., "Bushwick Music Mansion, Peoria")
 
-Remove any "$" symbols from costs.
+All items in the itinerary must exactly match names from the database.  Remove any "$" symbols from costs.
+"""
 
-To render a description of a single restaurant, attraction, or accommodation (instead of a full travel plan) to the user, you can mention its name and wrap it in <travel></travel>, e.g.: '<travel>Restaurant Name, City</travel>' or '<travel>Attraction Name, City</travel>' or '<travel>Hotel Name, City</travel>'. Do not put <travel></travel> tags inside the JSON of a full travel plan.
+MSG_FMT_INSTRUCTIONS = """To render a description of a single restaurant, attraction, or accommodation to the user, you can mention its name and wrap it in <travel></travel>, e.g.: '<travel>Restaurant Name, City</travel>' or '<travel>Attraction Name, City</travel>' or '<travel>Hotel Name, City</travel>'. Do not put <travel></travel> tags inside the JSON of a full travel plan.
 """
 
 PREFERENCE_KEYS_TO_TEXT = {
@@ -352,7 +356,7 @@ class TravelPlannerDataset(SpecificationCollection):
         )  # first row is used as a demo in render_task_explanation
         self.fixed_length = len(self._rows)
         # only pick "simple" prompts for custom: <= 3 days
-        self._custom_rows = self._rows.filter(lambda x: x["days"] <= 3  )
+        self._custom_rows = self._rows.filter(lambda x: x["days"] <= 3)
         self.custom_length = len(
             self._custom_rows
         )  # Each fixed spec has a corresponding custom spec
@@ -433,6 +437,7 @@ class TravelPlannerDataset(SpecificationCollection):
 
             if self._persist_docker_container and self._docker_image is not None:
                 from llm_sandbox import SandboxSession
+
                 session = SandboxSession(image=self._docker_image)
                 session.open()
                 container_id = session.container.id
@@ -453,6 +458,7 @@ class TravelPlannerDataset(SpecificationCollection):
                 index=f"fixed_{ix}",
                 full_specification=theta,
                 initial_specification=signature,
+                commonsense_description=COMMONSENSE_DESCRIPTION,
                 validity_fn=validity_fn,
                 validity_kwargs={
                     "query_data": task,
@@ -471,7 +477,8 @@ class TravelPlannerDataset(SpecificationCollection):
                 # baseline_scores=None,  # Not provided
                 render_task_explanation=render_fixed_task_explanation,
                 actions=actions + get_driving_actions(task["driving_info"]),
-                fmt_instructions=FORMATTING_INSTRUCTIONS,
+                msg_fmt_instructions=MSG_FMT_INSTRUCTIONS,
+                prediction_fmt_instructions=PREDICTION_FMT_INSTRUCTIONS,
                 render_msg_fn=output_to_streamlit,
                 render_msg_kwargs=["db", "people_number"],
                 name=f"travel_planner_{task['level']}_{task['org']}_{task['dest']}",
@@ -519,17 +526,19 @@ class TravelPlannerDataset(SpecificationCollection):
                 "dest": fixed_task["dest"],
                 "days": fixed_task["days"],
                 "visiting_city_number": fixed_task["visiting_city_number"],
-                "date": fixed_task["date"],
+                "date": eval(fixed_task["date"]),
                 "people_number": fixed_task["people_number"],
                 "cities": fixed_task["cities"],
                 "local_constraint": {},  # drop local constraints from the fixed task
                 "driving_info": json.loads(fixed_task["driving_info"]),
-                "budget": fixed_task["budget"],
+                "budget": fixed_task["budget"] * 1.2,  # give a bit of leeway
                 # drop preferences and preference weights from the fixed task
             }
 
             # Create Docker container
             if self._persist_docker_container and self._docker_image is not None:
+                from llm_sandbox import SandboxSession
+
                 session = SandboxSession(image=self._docker_image)
                 session.open()
                 container_id = session.container.id
@@ -546,13 +555,15 @@ class TravelPlannerDataset(SpecificationCollection):
 
             # Create custom specification
             spec = CustomSpecification(
-                initial_specification=f"Plan a trip from {task['org']} to {task['dest']} over {task['days']} days, with a budget of ${task['budget']}",
+                initial_specification=f"Plan a trip from {task['org']} to {task['dest']} over {task['days']} days from {task['date'][0]} to {task['date'][-1]}, with a budget of ${task['budget']}",
+                commonsense_description=COMMONSENSE_DESCRIPTION,
                 user_specification_form_initial=[],
                 user_specification_form_final=self._create_user_specification_form_final(),
                 user_specification_callback=user_specification_callback,
                 user_specification_callback_kwargs=[
                     "_validity_kwargs",
                     "initial_specification",
+                    "_render_evaluation_kwargs",
                 ],
                 validity_fn=validity_fn,
                 validity_kwargs={
@@ -564,7 +575,8 @@ class TravelPlannerDataset(SpecificationCollection):
                 y0=fixed_task["annotated_plan"],
                 render_task_explanation=self._render_custom_task_explanation,
                 actions=actions + get_driving_actions(task["driving_info"]),
-                fmt_instructions=FORMATTING_INSTRUCTIONS,
+                msg_fmt_instructions=MSG_FMT_INSTRUCTIONS,
+                prediction_fmt_instructions=PREDICTION_FMT_INSTRUCTIONS,
                 render_msg_fn=output_to_streamlit,
                 render_comparison_fn=output_to_streamlit_comparison,
                 render_msg_kwargs=["db", "people_number"],
@@ -574,10 +586,16 @@ class TravelPlannerDataset(SpecificationCollection):
                 container_ids=[container_id],
                 user_expertise_form=self._create_user_expertise_form(),
                 db=self._travel_db,
-                render_evaluation_fn=lambda **kwargs: renderer.render_eval_travel(
-                    **kwargs, db=self._travel_db, people_number=1
+                render_evaluation_fn=lambda **kwargs: renderer.render_eval(
+                    **kwargs, db=self._travel_db
                 ),
+                render_evaluation_kwargs={
+                    "people_number": 1,
+                    "y0": fixed_task["annotated_plan"],
+                    "dest": task["dest"],
+                },
                 dataset_name=self.dataset_name,
+                driving_options=task["driving_info"],
                 index=f"custom_{ix}",
             )
             specs[ix] = spec
@@ -632,7 +650,9 @@ class TravelPlannerDataset(SpecificationCollection):
             st.markdown(renderer._render_round_trip_check(plan))
             st.markdown(
                 renderer._render_travel_summary_table(
-                    plan,
+                    parse_travel_plan(
+                        json.dumps(plan), include_info=True, db=self._travel_db
+                    ),
                     self._travel_db,
                     1,
                     header=True,
@@ -694,7 +714,9 @@ class TravelPlannerDataset(SpecificationCollection):
             st.markdown(renderer._render_round_trip_check(modified_plan))
             st.markdown(
                 renderer._render_travel_summary_table(
-                    modified_plan,
+                    parse_travel_plan(
+                        json.dumps(modified_plan), include_info=True, db=self._travel_db
+                    ),
                     self._travel_db,
                     1,
                     header=True,
@@ -747,7 +769,9 @@ class TravelPlannerDataset(SpecificationCollection):
             st.markdown(renderer._render_round_trip_check(modified_plan))
             st.markdown(
                 renderer._render_travel_summary_table(
-                    modified_plan,
+                    parse_travel_plan(
+                        json.dumps(modified_plan), include_info=True, db=self._travel_db
+                    ),
                     self._travel_db,
                     1,
                     header=True,
@@ -804,7 +828,9 @@ class TravelPlannerDataset(SpecificationCollection):
             st.markdown(renderer._render_round_trip_check(modified_plan))
             st.markdown(
                 renderer._render_travel_summary_table(
-                    modified_plan,
+                    parse_travel_plan(
+                        json.dumps(modified_plan), include_info=True, db=self._travel_db
+                    ),
                     self._travel_db,
                     1,
                     header=True,
@@ -870,10 +896,15 @@ def user_specification_callback(
         new_specification += f" | Party size: {people_number}"
     if kids:
         new_specification += " | Kid friendly"
+    updated_render_evaluation_kwargs = callback_kwargs.get(
+        "_render_evaluation_kwargs", {}
+    )
+    updated_render_evaluation_kwargs["people_number"] = people_number
     return {
         "validity_kwargs": validity_kwargs,
         "people_number": people_number,
         "current_specification": new_specification,
+        "_render_evaluation_kwargs": updated_render_evaluation_kwargs,
     }
 
 
@@ -883,7 +914,7 @@ def validity_fn(
     """
     Check if the travel plan is valid by checking commonsense constraints and budget.
     """
-    yhat_parsed = parse_json(yhat)
+    yhat_parsed = parse_travel_plan(yhat)
     if yhat_parsed is None:
         if raise_errors:
             raise Exception("Could not parse a travel plan from the message.")
@@ -952,7 +983,7 @@ def reward_fn(
     Returns:
         Tuple of (score, metadata) where score is the preference score
     """
-    yhat_parsed = parse_json(yhat)
+    yhat_parsed = parse_travel_plan(yhat)
     if yhat_parsed is None:
         if raise_errors:
             raise Exception("Could not parse a travel plan from the message.")
@@ -991,23 +1022,31 @@ def output_to_streamlit_comparison(
     validity_fn=None,
     validity_kwargs=None,
 ) -> None:
-    parsed1 = parse_json(y1)
-    parsed2 = parse_json(y2)
-    a_valid = a_metadata = b_valid = b_metadata = None
+    # Compute validity
+    valid1 = metadata1 = valid2 = metadata2 = None
     if validity_fn and validity_kwargs:
-        a_valid, a_metadata = validity_fn(
+        valid1, metadata1 = validity_fn(
             y1, **(validity_kwargs or {}), raise_errors=False
         )
-        b_valid, b_metadata = validity_fn(
+        valid2, metadata2 = validity_fn(
             y2, **(validity_kwargs or {}), raise_errors=False
         )
-    renderer.output_to_streamlit_comparison(
-        parsed1, parsed2, db, people_number, a_valid, b_valid, a_metadata, b_metadata
+
+    renderer.render_comparison(
+        y1, y2, db, people_number, valid1, valid2, metadata1, metadata2
     )
 
 
-def output_to_streamlit(msg: str, db: TravelDB, people_number: int) -> None:
+def output_to_streamlit(
+    msg: str,
+    db: TravelDB,
+    people_number: int,
+    render_plan: bool = True,
+    render_items: bool = True,
+) -> None:
     from utils.misc import parse_for_answer_tags
+
+    msg = msg.replace("$", "\$")
 
     # Parse travel plan JSON
     js, start_end = parse_json(msg, return_start_end=True)
@@ -1021,39 +1060,43 @@ def output_to_streamlit(msg: str, db: TravelDB, people_number: int) -> None:
         mentioned_travel = [
             travel.strip() for travel in mentioned_travel if travel.strip()
         ]
-        mentioned_travel = list(set(mentioned_travel))
+        mentioned_travel = list(dict.fromkeys(mentioned_travel))
 
-    if js is None:
+    if not js and not mentioned_travel:
+        st.write(msg)
+        return
+
+    # Generate unique ID for this message to avoid conflicts when multiple messages are rendered
+    message_hash = str(hash(msg))[:8]
+    unique_id = f"mentioned-travel-{message_hash}"
+
+    if js is None or start_end is None:
         # No travel plan, just render the message with travel mentions
-        st.markdown(
-            replace_tags_with_link(msg, "travel", "#options-mentioned-in-message"),
-            unsafe_allow_html=True,
+        st.write(
+            replace_tags_with_link(msg, "travel", f"#{unique_id}"),
         )
         if mentioned_travel:
-            with st.expander("Travel items mentioned in message", expanded=False):
+            with st.expander("Travel items mentioned in message", expanded=True):
+                st.markdown(f'<div id="{unique_id}"></div>', unsafe_allow_html=True)
                 renderer.render_travel_mentions(mentioned_travel, db)
         return
 
     if start_end[0] > 0:
         st.markdown(
-            replace_tags_with_link(
-                msg[: start_end[0]], "travel", "#options-mentioned-in-message"
-            ),
+            replace_tags_with_link(msg[: start_end[0]], "travel", f"#{unique_id}"),
             unsafe_allow_html=True,
         )
 
-    renderer.render_travel_plan_streamlit(js, db, people_number)
+    renderer.render_travel_plan_streamlit(json.dumps(js), db, people_number)
 
     if start_end[1] < len(msg):
         st.markdown(
-            replace_tags_with_link(
-                msg[start_end[1] :], "travel", "#options-mentioned-in-message"
-            ),
+            replace_tags_with_link(msg[start_end[1] :], "travel", f"#{unique_id}"),
             unsafe_allow_html=True,
         )
 
     # Render travel mentions if any
     if mentioned_travel:
         st.markdown("---")
-        with st.expander("Travel items mentioned in message", expanded=False):
+        with st.expander("Travel items mentioned in message", expanded=True):
             renderer.render_travel_mentions(mentioned_travel, db)

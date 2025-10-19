@@ -21,12 +21,12 @@ from utils.misc import (
     parse_for_answer_tags,
     replace_tags_with_link,
 )
-from utils.streamlit_types import FormElement, form_element_to_streamlit
+from utils.streamlit_types import FormElement
 from data.reward import Constraint
 from data.shopping.reward_utils.helpers import soft_jaccard, clip_score
 import data.shopping.streamlit_render as renderer
 import streamlit as st
-from typing import Callable
+from typing import Callable  # noqa: F401
 
 DEV_FRAC = 0.3
 DATASET_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -60,11 +60,11 @@ You will need to use the tools on the side panel to get more information about t
 To maximize your score, you may have to recommend different products and ask the client to evaluate them. The client's score will be between 0 and 100.
 """
 
-COMMONSENSE_DESCRIPTION = "You are actually putting items in the shopping cart, so you should make sure the cart fits within budget. Additionally, ONLY real products from the H&M catalog are valid."
+COMMONSENSE_DESCRIPTION = "Recommend products from the given catalog. All products must come from the catalog."
 
 PREDICTION_FMT_INSTRUCTIONS = "Return the article_ids of the products to recommend to the customer, separated by commas and wrapped in <cart></cart>, e.g.: '<cart>123456,123457,123458</cart>'."
 
-MSG_FMT_INSTRUCTIONS = "Communicate with the user in language. To render a widget description of a single product, including a picture of the product, you can mention its article_id and wrap it in <item></item>, e.g.: '<item>123456</item>'. This will append a widget describing the product at the end of your message."
+MSG_FMT_INSTRUCTIONS = "Communicate with the user in language. To render a widget description of a single product, including a picture of the product, you can mention its article_id and wrap it in <item></item>, e.g.: '<item>123456</item>'. This will append a widget describing the product at the end of your message. You should always do this by default."
 
 
 def render_fixed_task_explanation():
@@ -327,6 +327,7 @@ class ShoppingDataset(SpecificationCollection):
 
             if self._persist_docker_container and self._docker_image is not None:
                 from llm_sandbox import SandboxSession
+
                 session = SandboxSession(image=self._docker_image)
                 session.open()
                 container_id = session.container.id
@@ -345,6 +346,7 @@ class ShoppingDataset(SpecificationCollection):
                 index=f"fixed_{ix}",
                 full_specification=theta,
                 initial_specification=signature,
+                commonsense_description=COMMONSENSE_DESCRIPTION,
                 validity_fn=validity_fn,
                 validity_kwargs={
                     "hard_constraints": initial_constraints,
@@ -396,6 +398,8 @@ class ShoppingDataset(SpecificationCollection):
         specs = {}
         for ix in indexes:
             if self._persist_docker_container and self._docker_image is not None:
+                from llm_sandbox import SandboxSession
+
                 session = SandboxSession(image=self._docker_image)
                 session.open()
                 container_id = session.container.id
@@ -436,6 +440,7 @@ class ShoppingDataset(SpecificationCollection):
                 dataset_name=self.dataset_name,
                 index=f"custom_{ix}",
                 initial_specification=f"Buy {prompt_as_str} from H&M tailored for the person you have in mind. You can assume that all products are available in all sizes.",
+                commonsense_description=COMMONSENSE_DESCRIPTION,
                 user_specification_form_initial=self._create_user_specification_form_initial(
                     custom_intent
                 ),
@@ -462,7 +467,7 @@ class ShoppingDataset(SpecificationCollection):
                 msg_fmt_instructions=MSG_FMT_INSTRUCTIONS,
                 prediction_fmt_instructions=PREDICTION_FMT_INSTRUCTIONS,
                 render_msg_fn=lambda msg, db: output_to_streamlit(
-                    msg, db, render_cart=False
+                    msg, db
                 ),
                 render_msg_kwargs=["db"],
                 db=self._catalog,
@@ -831,14 +836,14 @@ def output_to_streamlit(
             for id in mentions.split(",")
             if id.strip().isdigit()
         ]
-        mentioned_products = list(set(mentioned_products))
+        mentioned_products = list(dict.fromkeys(mentioned_products))
 
     if not predicted_products and not mentioned_products:
         st.write(msg)
         return
 
     # Generate unique ID for this message to avoid conflicts when multiple messages are rendered
-    message_hash = hash(msg)[:8]
+    message_hash = str(hash(msg))[:8]
     unique_id = f"mentioned-products-{message_hash}"
 
     if predicted_products and render_cart:
@@ -969,6 +974,7 @@ def user_specification_callback(
         "current_specification": new_specification,
         "_render_evaluation_kwargs": {
             "y0": y0,
+            "budget": budget,
         },
     }
 

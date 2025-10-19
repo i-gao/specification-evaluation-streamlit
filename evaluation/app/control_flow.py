@@ -23,7 +23,8 @@ from evaluation.namer import get_experiment_name
 # forms is imported elsewhere if needed; remove unused import here
 import evaluation.app.authentication as authentication
 import evaluation.app.components as components
-from evaluation.qualitative_eval import COMPARISON_LIKERT, COMPARISON_LIKERT_NUMERIC
+from evaluation.app.files import setup_connection
+from evaluation.qualitative_eval import COMPARISON_LIKERT, COMPARISON_LIKERT_NUMERIC  # noqa: F401
 
 SAVE_INTERVAL = 60  # Save every minute
 BENCHMARK_TIMES_FILE = Path(__file__).parent.parent.parent / "benchmark_times.jsonl"
@@ -39,30 +40,34 @@ For each round:
 1. Instructions
     - shows: dataset screen
     - flag: instructions_completed
-2. Presurvey
+2. Brainstorming (optional; skipped if brainstorm_time is None)
+    - shows: free-write textbox with countdown
+    - flag: brainstorming_started
+    - flag: brainstorming_completed
+3. Presurvey
     - shows: presurvey form
     - flag: presurvey_completed
-3. Interaction
+4. Interaction
     - shows: chat interface
     - flag: interaction_started (prevents double starts)
     - flag: interaction_completed
     3a. Post-user message, pre-assistant response feedback (optional survey)
         - flag: waiting_for_message_feedback
-4. Final specification (survey)
+5. Final specification (survey)
     - shows: final specification form
     - flag: final_specification_completed
-5. Final generation
+6. Final generation
     - shows: nothing
     - flag: final_prediction is not None
-6. Final prediction evaluation (optional survey)
+7. Final prediction evaluation (optional survey)
     - shows: final prediction and final evaluation form
     - flag: final_evaluation_completed
-7. Chat evaluation (optional survey)
+8. Chat evaluation (optional survey)
     - shows: chat history and chat evaluation form
     - flag: chat_evaluation_completed
 
 End:
-8. Exit survey (optional survey)
+9. Exit survey (optional survey)
     - shows: exit survey form
     - flag: exit_survey_completed
 
@@ -72,6 +77,8 @@ The app screens are responsible for displaying the appropriate form if necessary
 CONTROL_FLOW_KEYS = [
     "onboarding_completed",
     "instructions_completed",
+    "brainstorming_started",
+    "brainstorming_completed",
     "presurvey_completed",
     "interaction_started",
     "interaction_completed",
@@ -82,6 +89,8 @@ CONTROL_FLOW_KEYS = [
 ]
 SESSION_STATE_ROUND_DEFAULTS = {
     "instructions_completed": False,
+    "brainstorming_started": False,
+    "brainstorming_completed": False,
     "presurvey_completed": False,
     "interaction_started": False,
     "interaction_completed": False,
@@ -102,6 +111,7 @@ SESSION_STATE_ROUND_DEFAULTS = {
     "final_prediction": None,
     "final_grade": None,
     "interaction_start_time": None,
+    "brainstorm_start_time": None,
     "evaluation_start_time": None,
 }
 ROUND_CONFIGS = [
@@ -143,12 +153,11 @@ def initialize_session_state(
     json_kwargs = {}
     if app_config_jsons is not None:
         for app_config_json in app_config_jsons:
-            try:
-                app_config = json.load(open(app_config_json))
-                for key, value in app_config.items():
-                    json_kwargs[key] = value
-            except Exception as e:
-                warnings.warn(f"Error loading config file: {e}.")
+            # assume this is in the current folder
+            with open(Path(__file__).parent / app_config_json, "r") as f:
+                app_config = json.load(f)
+            for key, value in app_config.items():
+                json_kwargs[key] = value
     json_kwargs.update(kwargs)
 
     # Mark as initialized upon success; save the initialization parameters
@@ -176,11 +185,11 @@ def reset_session_state_for_round(round_index, save_user_progress: bool = True):
     # save / load the user's progress
     message_history = []
     if save_user_progress:
-        os.makedirs(Path(__file__).parent / "user_progress", exist_ok=True)
-        user_progress_file = Path(__file__).parent / f"user_progress/{token}.json"
-        if user_progress_file.exists():
-            with open(user_progress_file, "r") as f:
-                user_progress = json.load(f)
+        user_progress_path = f"streamlit_logs/user_progress/{token}.json"
+        try:
+            user_progress = st.session_state.connection.read(user_progress_path)
+        except FileNotFoundError:
+            user_progress = {}
 
             saved_round_index = 0
             for i in range(len(user_progress)):
@@ -206,10 +215,13 @@ def reset_session_state_for_round(round_index, save_user_progress: bool = True):
                 round_index = saved_round_index + 1
 
     # look for a exit_survey file
-    os.makedirs(Path(__file__).parent / "exit_surveys", exist_ok=True)
-    exit_survey_file = Path(__file__).parent / f"exit_surveys/{token}.json"
-    if exit_survey_file.exists() and round_index == -1:
-        st.session_state.exit_survey_completed = True
+    exit_survey_path = f"streamlit_logs/exit_surveys/{token}.json"
+    try:
+        st.session_state.connection.read(exit_survey_path)
+        if round_index == -1:
+            st.session_state.exit_survey_completed = True
+    except FileNotFoundError:
+        pass
 
     # Clean up previous session state
     for key in ROUND_CONFIGS:
@@ -284,7 +296,7 @@ def reset_session_state_for_round(round_index, save_user_progress: bool = True):
         st.session_state.policy_selector,
         spec=st.session_state.spec,
         checkpoint_file=os.path.join(
-            st.session_state.output_path.replace(".json", ".pkl")
+            st.session_state.output_path.replace(".json", "_policy_state.json")
         ),
         **st.session_state.config["policy_kwargs"],
     )
@@ -310,11 +322,33 @@ def finish_onboarding():
     st.rerun()
 
 
+def start_brainstorming():
+    """Start the brainstorming stage if configured"""
+    st.session_state.instructions_completed = True
+    if getattr(st.session_state, "brainstorm_time", None) is None:
+        # Skip brainstorming if no time is configured
+        complete_brainstorming()
+        return
+    if st.session_state.brainstorming_started:
+        return
+    st.session_state.brainstorming_started = True
+    st.session_state.brainstorm_start_time = time.time()
+    st.rerun()
+
+
+def complete_brainstorming():
+    """Mark brainstorming complete and proceed"""
+    if st.session_state.brainstorming_completed:
+        return
+    st.session_state.brainstorming_completed = True
+    # Proceed to presurvey immediately after brainstorming completes
+    start_presurvey()
+
+
 def start_presurvey():
     """ """
     if st.session_state.presurvey_completed:
         return
-    st.session_state.instructions_completed = True
     st.rerun()
 
 
@@ -372,19 +406,17 @@ def save_session_data(save_user_progress: bool = True, **kwargs):
     # Save user progress if the interaction is completed and save_user_progress is True
     if save_user_progress and st.session_state.interaction_completed:
         token = authentication.check_token()
-        user_progress_file = Path(__file__).parent / f"user_progress/{token}.json"
-        if user_progress_file.exists():
-            with open(user_progress_file, "r") as f:
-                user_progress = json.load(f)
-        else:
+        user_progress_path = f"streamlit_logs/user_progress/{token}.json"
+        try:
+            user_progress = st.session_state.connection.read(user_progress_path)
+        except FileNotFoundError:
             user_progress = {}
         user_progress[st.session_state.round_index] = {
             "output_filename": st.session_state.output_path,
             "round_index": st.session_state.round_index,
             "messages": st.session_state.messages,
         }
-        with open(user_progress_file, "w") as f:
-            json.dump(user_progress, f)
+        st.session_state.connection.write(user_progress_path, json.dumps(user_progress))
 
     if st.session_state.interaction_completed:
         st.session_state.message_history.append(
@@ -415,6 +447,7 @@ def save_session_data(save_user_progress: bool = True, **kwargs):
         form_results=st.session_state.form_results,
         final_prediction=st.session_state.get("final_prediction", None),
         final_grade=st.session_state.get("final_grade", None),
+        connection=st.session_state.connection,
         **kwargs,
     )
 
@@ -469,6 +502,7 @@ def get_config():
                 if st.session_state.include_fmt_instructions
                 else None
             ),
+            "initial_specification": st.session_state.spec.commonsense_description,
             "msg_fmt_instructions": st.session_state.spec.msg_fmt_instructions,
             "cost_type": st.session_state.cost_type,
             "model_kwargs": {
@@ -538,19 +572,10 @@ def get_expected_message_time(
     Assumes the benchmark times t_i ~ N(mu, sigma^2)
     and return T s.t. P(t <= T) = 0.95
     """
-    with open(BENCHMARK_TIMES_FILE, "r") as f:
-        benchmark_times = [json.loads(line) for line in f]
-    benchmark_times = [
-        time
-        for time in benchmark_times
-        if time["dataset_name"] == st.session_state.dataset_selector
-    ]
-    if filter_to_model:
-        benchmark_times = [
-            time
-            for time in benchmark_times
-            if time["model"] == st.session_state.model_selector
-        ]
+    try:
+        benchmark_times = st.session_state.connection.read(BENCHMARK_TIMES_FILE)
+    except:
+        return None
     if filter_to_max_react_steps:
         benchmark_times = [
             time
@@ -658,6 +683,7 @@ def chat_flow(
     autovalidate: bool = False,
     autoscore: bool = False,
     show_response_time: bool = False,
+    show_end_conversation_button: bool = False,
 ):
     """
     Chat flow. Handles the conversation between the user and the assistant.
@@ -680,13 +706,18 @@ def chat_flow(
     )
 
     # Display the input box for the user to send a message
-    if not st.session_state.interaction_completed:
-        if _get_current_speaker() == "user" and (
-            user_msg := st.chat_input("Type your message here...", key="chat_input")
-        ):
-            _log_user_message(
-                user_msg, collect_feedback=(message_feedback_form is not None)
-            )
+    if not st.session_state.interaction_completed and _get_current_speaker() == "user":
+        with st.container(horizontal=True):
+            if (
+                show_end_conversation_button
+                and st.session_state.policy.wants_to_end_conversation
+            ):
+                if st.button("End conversation", type="primary"):
+                    end_interaction("user_end")
+            if user_msg := st.chat_input("Type your message here...", key="chat_input"):
+                _log_user_message(
+                    user_msg, collect_feedback=(message_feedback_form is not None)
+                )
 
     # Display message feedback form if appropriate
     # Note: the feedback time currently DOES count towards the interaction budget
@@ -871,25 +902,36 @@ def _run_custom_evaluation(custom_final_evaluation_form: Callable = None):
     if not isinstance(st.session_state.spec, CustomSpecification):
         raise ValueError("Custom evaluation can only be run for custom specifications")
 
-    # Ensure timer start
+    # Ensure timer start and evaluation state
     if st.session_state.evaluation_start_time is None:
         st.session_state.evaluation_start_time = time.time()
+    if "final_evaluation" not in st.session_state.form_results:
         st.session_state.form_results["final_evaluation"] = {}
 
     final_prediction = st.session_state.final_prediction
     assert final_prediction is not None, "final_prediction is not set"
 
-    # Delegate rendering and form collection to the dataset
+    # Two-page flow orchestrated here:
+    # 1) Ask the dataset to render its first page and update session state.
     render_fn = getattr(st.session_state.spec, "render_evaluation", None)
     if not callable(render_fn):
         st.error("This dataset does not implement render_evaluation(final_prediction).")
         st.stop()
 
     try:
-        completed, feedback = render_fn(final_prediction)
+        first_page_done, _ = render_fn(final_prediction)
     except Exception as e:
-        st.error(f"Error in dataset render_evaluation: {e}")
+        st.error(f"Error in dataset render_evaluation (first page): {e}")
         st.stop()
+
+    if not first_page_done:
+        return
+
+    # 2) Render the generic second page using the spec's render_msg_fn to display the final prediction
+
+    from evaluation.app.forms import final_prediction_evaluation
+
+    completed, feedback = final_prediction_evaluation()
 
     # If custom_final_evaluation_form is provided, display it
     if custom_final_evaluation_form is not None:
@@ -944,7 +986,7 @@ def _run_chat_evaluation(chat_evaluation_form: Callable = None):
 
     # Display the chat history
     st.markdown("Review your chat session with the assistant.")
-    with st.container(border=True, height=500):
+    with st.container(border=True, height=700):
         components.chat_conversation(
             st.session_state.messages,
             show_raw_message=False,
@@ -959,6 +1001,7 @@ def _run_chat_evaluation(chat_evaluation_form: Callable = None):
     def on_completion(feedback):
         st.session_state.chat_evaluation_completed = True
         st.session_state.form_results["chat_evaluation"] = feedback
+        st.rerun()
 
     def validate(feedback):
         return all(item != "-" for item in feedback.values())
@@ -1018,9 +1061,10 @@ def exit_survey_flow(exit_survey_form: Callable = None):
         st.session_state.form_results["exit_survey"] = feedback
 
         token = authentication.check_token()
-        user_exit_survey = Path(__file__).parent / f"exit_surveys/{token}.json"
-        with open(user_exit_survey, "w") as f:
-            json.dump(st.session_state.form_results, f)
+        user_exit_survey_path = f"streamlit_logs/exit_surveys/{token}.json"
+        st.session_state.connection.write(
+            user_exit_survey_path, json.dumps(st.session_state.form_results)
+        )
 
         st.session_state.exit_survey_completed = True
         st.rerun()

@@ -64,6 +64,15 @@ def render_specification():
         st.markdown(st.session_state.spec.current_specification)
 
 
+def render_specification_banner():
+    """
+    Render a banner with the current specification, if available.
+    """
+    text = getattr(st.session_state.spec, "current_specification", None)
+    if text:
+        st.info("*Your task:* " + text)
+
+
 def sidebar_specification():
     """
     Display the task signature in the sidebar
@@ -279,6 +288,22 @@ def countdown():
         st.write(
             f"{st.session_state.interaction_budget - (time.time() - st.session_state.interaction_start_time):.0f} seconds remaining",
         )
+
+
+@st.fragment(run_every=1)
+def brainstorm_countdown():
+    """
+    Countdown timer for brainstorming stage
+    """
+    if getattr(st.session_state, "brainstorm_time", None) is None:
+        return
+    if st.session_state.get("brainstorm_start_time", None) is None:
+        return
+    with st.container(key="countdown"):
+        remaining = st.session_state.brainstorm_time - (
+            time.time() - st.session_state.brainstorm_start_time
+        )
+        st.write(f"{max(0, remaining):.0f} seconds remaining")
 
 
 ######### Helper functions ################
@@ -601,6 +626,7 @@ def carousel(
     include_select_button: bool = False,
     select_on_click: callable = None,
     noun: str = "option",
+    height: int = 700,
 ):
     """
     Given a list of display functions, display them in a carousel.
@@ -675,7 +701,7 @@ def carousel(
                 unsafe_allow_html=True,
             )
 
-            with st.container(key=f"{instance_key}_center", border=True, height=700):
+            with st.container(key=f"{instance_key}_center", border=True, height=height):
                 current_index = st.session_state[index_key]
                 # Display the current item
                 try:
