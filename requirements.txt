@@ -4,7 +4,7 @@ datasets
 lotus-ai>=1.1
 langchain-anthropic==0.3
 langchain-openai==0.3
-langchain-core==0.3
+langchain-core>=0.3,<0.4
 langchain>=0.3,<0.4
 langgraph==0.4.8
 langgraph-checkpoint==2.1.0
