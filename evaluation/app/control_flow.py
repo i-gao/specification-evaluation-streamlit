@@ -191,7 +191,7 @@ def reset_session_state_for_round(round_index, save_user_progress: bool = True):
         except FileNotFoundError:
             user_progress = {}
 
-            saved_round_index = 0
+            saved_round_index = -1
             for i in range(len(user_progress)):
                 # check if round index i is in user_progress
                 if str(i) in user_progress:
