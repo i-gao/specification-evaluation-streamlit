@@ -1,0 +1,71 @@
+{
+  "citation": "",
+  "description": "",
+  "features": {
+    "org": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "dest": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "days": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "visiting_city_number": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "date": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "local_constraint": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "budget": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "query": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "level": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "people_number": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "annotated_plan": {
+      "dtype": "null",
+      "_type": "Value"
+    },
+    "preferences": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "preference_weights": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "driving_info": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "cities": {
+      "feature": {
+        "dtype": "string",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    }
+  },
+  "homepage": "",
+  "license": ""
+}
