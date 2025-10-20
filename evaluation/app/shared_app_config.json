@@ -1,6 +1,7 @@
 {
     "max_react_steps": 25,
     "evaluation_minimum": 120,
+    "brainstorm_time": null,
     "reasoning_effort": "minimal",
     "include_fmt_instructions": true,
     "cost_type": "user",
