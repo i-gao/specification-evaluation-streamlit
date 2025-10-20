@@ -10,7 +10,6 @@ from data.dataset import (
     FixedSpecification,
     CustomSpecification,
 )
-from data.database import Database
 from data.actions import Action, get_jupyter_actions
 from collections import Counter
 import inflect
@@ -27,6 +26,8 @@ from data.shopping.reward_utils.helpers import soft_jaccard, clip_score
 import data.shopping.streamlit_render as renderer
 import streamlit as st
 from typing import Callable  # noqa: F401
+
+from data.shopping.db import Catalog
 
 DEV_FRAC = 0.3
 DATASET_ROOT = os.path.dirname(os.path.abspath(__file__))

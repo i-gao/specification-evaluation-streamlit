@@ -32,7 +32,7 @@ SCREENS = [
     "exit_survey_screen",
     "end_screen",
 ]
-DEBUG_MODE = True
+DEBUG_MODE = st.secrets.get("debug_mode", False)
 
 STYLESHEET = """
 <style>

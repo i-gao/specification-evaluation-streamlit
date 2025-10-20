@@ -145,33 +145,43 @@ def get_reasoning_effort_kwargs(
 
 
 @lru_cache(maxsize=10)
-def is_openai_model(model_name: str) -> bool:
+def is_openai_model(model_name: str, api_key: str = None) -> bool:
     """
     Check if a model is an OpenAI model.
     Args:
         model_name: The name of the model to check.
+        api_key: Optional API key for OpenAI client.
     Returns:
         True if the model is an OpenAI model, False otherwise.
     """
     from openai import OpenAI
 
-    client = OpenAI()
-    return model_name in [m.id for m in client.models.list()]
+    try:
+        client = OpenAI(api_key=api_key) if api_key else OpenAI()
+        return model_name in [m.id for m in client.models.list()]
+    except Exception:
+        # If we can't connect to OpenAI API, fall back to name-based detection
+        return model_name.startswith(("gpt-", "o1", "o3"))
 
 
 @lru_cache(maxsize=10)
-def is_anthropic_model(model_name: str) -> bool:
+def is_anthropic_model(model_name: str, api_key: str = None) -> bool:
     """
     Check if a model is an Anthropic model.
     Args:
         model_name: The name of the model to check.
+        api_key: Optional API key for Anthropic client.
     Returns:
         True if the model is an Anthropic model, False otherwise.
     """
     from anthropic import Anthropic
 
-    client = Anthropic()
-    return model_name in [m.id for m in client.models.list()]
+    try:
+        client = Anthropic(api_key=api_key) if api_key else Anthropic()
+        return model_name in [m.id for m in client.models.list()]
+    except Exception:
+        # If we can't connect to Anthropic API, fall back to name-based detection
+        return model_name.startswith("claude")
 
 
 def init_model(model_name: str, **kwargs):
@@ -184,15 +194,18 @@ def init_model(model_name: str, **kwargs):
         A model.
     """
     try:
-        if is_openai_model(model_name):
+        # Extract API keys from kwargs for helper functions
+        api_key = kwargs.get("api_key")
+        
+        if is_openai_model(model_name, api_key=api_key):
             return OpenAIModel(model_name, **kwargs)
 
-        elif is_anthropic_model(model_name):
+        elif is_anthropic_model(model_name, api_key=api_key):
             return AnthropicModel(model_name, **kwargs)
 
         else:
             return TransformersModel(model_name, **kwargs)
-    except Exception as e:
+    except Exception:
         raise ValueError(f"Unknown model: {model_name}")
 
 
@@ -207,11 +220,14 @@ def init_langchain_model(model_name: str, **kwargs):
     """
     from langchain.chat_models import init_chat_model
 
+    # Extract API key from kwargs for helper functions
+    api_key = kwargs.get("api_key")
+    
     provider = (
         "openai"
-        if is_openai_model(model_name)
+        if is_openai_model(model_name, api_key=api_key)
         else "anthropic"
-        if is_anthropic_model(model_name)
+        if is_anthropic_model(model_name, api_key=api_key)
         else "huggingface"
     )
     if "reasoning_effort" in kwargs:
@@ -257,13 +273,20 @@ def init_langchain_model(model_name: str, **kwargs):
         hf = HuggingFacePipeline(pipeline=pipe)
         return ChatHuggingFaceTools(llm=hf, verbose=True)
     else:
+        # Prepare kwargs for LangChain init_chat_model
+        langchain_kwargs = kwargs.copy()
+        
+        # Map our API key parameter to LangChain's expected format
+        if provider in ["openai", "anthropic"] and api_key:
+            langchain_kwargs["api_key"] = api_key
+            
         return init_chat_model(
             model_name,
             model_provider=provider,
             max_tokens=(
                 None if provider != "anthropic" else 64000
             ),  # anthropic needs max tokens
-            **kwargs,
+            **langchain_kwargs,
         )
 
 def view_messages_hook(state: dict) -> dict:
@@ -293,6 +316,7 @@ class LangChainModel(Model):
         list_tools_in_prompt: bool = False,
         thinking_tokens: Tuple[str, str] = ("<think>", "</think>"),
         add_thinking_tag: bool = True,
+        api_key: str = None,
         **kwargs,
     ):
         super().__init__(model_name)
@@ -306,16 +330,16 @@ class LangChainModel(Model):
             "min_react_steps must be less than or equal to max_react_steps"
         )
 
-        self.model_no_tools = init_langchain_model(model_name, **kwargs)
+        self.model_no_tools = init_langchain_model(model_name, api_key=api_key, **kwargs)
 
-        if is_anthropic_model(model_name):
+        if is_anthropic_model(model_name, api_key=api_key):
             bind_tools_kwargs = {
                 "tool_choice": {
                     "type": "auto",
                     "disable_parallel_tool_use": True,
                 }
             }
-        elif is_openai_model(model_name):
+        elif is_openai_model(model_name, api_key=api_key):
             bind_tools_kwargs = {
                 "parallel_tool_calls": False,
             }
@@ -366,8 +390,8 @@ class LangChainModel(Model):
         self._add_thinking_tag = add_thinking_tag
 
         # whether to change system-only prompts to user-only prompts
-        self._is_anthropic = is_anthropic_model(model_name)
-        self._is_openai = is_openai_model(model_name)
+        self._is_anthropic = is_anthropic_model(model_name, api_key=api_key)
+        self._is_openai = is_openai_model(model_name, api_key=api_key)
         self._prompt_cache = prompt_cache
         self.thread_id = str(uuid.uuid4())
 

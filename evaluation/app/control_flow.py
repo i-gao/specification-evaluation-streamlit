@@ -18,6 +18,7 @@ from data import get_dataset, get_spec
 from new_baselines import get_policy
 from evaluation.interaction_types import save_interaction, Grade
 from utils import seed_everything
+from utils.model import is_openai_model
 from evaluation.namer import get_experiment_name
 
 # forms is imported elsewhere if needed; remove unused import here
@@ -382,6 +383,22 @@ def end_interaction(end_reason: str):
 
 ######### HELPER FUNCTIONS #########
 
+def get_model_api_key(model_name: str) -> dict:
+    """
+    Determine which API key to use based on the model type.
+    
+    Args:
+        model_name: The name of the model to check.
+        
+    Returns:
+        dict: Dictionary containing the appropriate api_key parameter for model_kwargs.
+    """
+    if is_openai_model(model_name, api_key=st.secrets.get("openai_api_key")):
+        # Use OpenAI API key from secrets
+        return {"api_key": st.secrets.get("openai_api_key")}
+    else:
+        # Use Anthropic API key from secrets (assumes non-OpenAI models are Anthropic)
+        return {"api_key": st.secrets.get("anthropic_api_key")}
 
 def check_intermediate_save():
     """
@@ -508,6 +525,8 @@ def get_config():
             "model_kwargs": {
                 "reasoning_effort": st.session_state.reasoning_effort,
                 **getattr(st.session_state, "model_kwargs", {}),
+                # Add appropriate API key from st.secrets based on model type
+                **get_model_api_key(st.session_state.model_selector),
             },
         },
         "interaction_budget": st.session_state.interaction_budget,
