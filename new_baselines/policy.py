@@ -110,6 +110,7 @@ class InteractionPolicy:
         self.wants_to_end_conversation: bool = False
         self.action_history: Dict[int, List[PolicyAction]] = defaultdict(list)
         self.hook_history: Dict[int, Dict[str, Any]] = defaultdict(dict)
+        self._model_lock = False
 
     ######## PROPERTIES ##########
 
@@ -237,6 +238,10 @@ class InteractionPolicy:
             AssertionError: If user_response and user_cost are not provided on all turns except the first
         """
         print("Calling __call__; current_unanswered_msg", self.current_unanswered_msg)
+        if self._model_lock:
+            print("Model is locked")
+            return
+        
         if self.current_unanswered_msg is not None:
             assert user_response is not None and user_cost is not None, (
                 f"User response and cost must be provided on all turns except the first. The assistant's last message was '{self.current_unanswered_msg}'"

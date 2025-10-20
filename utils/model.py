@@ -196,7 +196,7 @@ def init_model(model_name: str, **kwargs):
     try:
         # Extract API keys from kwargs for helper functions
         api_key = kwargs.get("api_key")
-        
+
         if is_openai_model(model_name, api_key=api_key):
             return OpenAIModel(model_name, **kwargs)
 
@@ -222,7 +222,7 @@ def init_langchain_model(model_name: str, **kwargs):
 
     # Extract API key from kwargs for helper functions
     api_key = kwargs.get("api_key")
-    
+
     provider = (
         "openai"
         if is_openai_model(model_name, api_key=api_key)
@@ -275,11 +275,11 @@ def init_langchain_model(model_name: str, **kwargs):
     else:
         # Prepare kwargs for LangChain init_chat_model
         langchain_kwargs = kwargs.copy()
-        
+
         # Map our API key parameter to LangChain's expected format
         if provider in ["openai", "anthropic"] and api_key:
             langchain_kwargs["api_key"] = api_key
-            
+
         return init_chat_model(
             model_name,
             model_provider=provider,
@@ -288,6 +288,7 @@ def init_langchain_model(model_name: str, **kwargs):
             ),  # anthropic needs max tokens
             **langchain_kwargs,
         )
+
 
 def view_messages_hook(state: dict) -> dict:
     """
@@ -330,7 +331,9 @@ class LangChainModel(Model):
             "min_react_steps must be less than or equal to max_react_steps"
         )
 
-        self.model_no_tools = init_langchain_model(model_name, api_key=api_key, **kwargs)
+        self.model_no_tools = init_langchain_model(
+            model_name, api_key=api_key, **kwargs
+        )
 
         if is_anthropic_model(model_name, api_key=api_key):
             bind_tools_kwargs = {
@@ -351,7 +354,9 @@ class LangChainModel(Model):
 
             # multiturn memory must be true if prompt_cache is true
             if prompt_cache:
-                assert multiturn_memory, "For HF models, multiturn_memory must be true if prompt_cache is true"
+                assert multiturn_memory, (
+                    "For HF models, multiturn_memory must be true if prompt_cache is true"
+                )
 
         # setup ReAct style prompt
         if list_tools_in_prompt:
@@ -745,7 +750,7 @@ class LangChainModel(Model):
             _final_msg(cfg)
 
         stub = self.state[og_len:]
-        
+
         # Ensure content is a string
         try:
             for m in stub:
@@ -773,15 +778,18 @@ class LangChainModel(Model):
                 ids=[
                     m.id
                     for m in stub[:-1]
-                    if isinstance(m, AIMessage) and m.content.strip() != ""
+                    if isinstance(m, AIMessage)
+                    and m.content.strip() != ""
+                    and not m.content.startswith(self._thinking_tokens[0])
                 ],
                 content=[
                     f"{self._thinking_tokens[0]}{m.content}{self._thinking_tokens[1]}"
                     for m in stub[:-1]
-                    if isinstance(m, AIMessage) and m.content.strip() != ""
+                    if isinstance(m, AIMessage)
+                    and m.content.strip() != ""
+                    and not m.content.startswith(self._thinking_tokens[0])
                 ],
             )
-
 
         # Modify the state (but not the returned stub)
         if not self._multiturn_memory:
@@ -790,7 +798,7 @@ class LangChainModel(Model):
 
         elif not persist_state:
             self._delete_messages(ids=[m.id for m in stub])
-        
+
         # Cut out prompt messages before returning
         return stub[len(messages) :]
 
@@ -1363,6 +1371,7 @@ def read_anthropic_batch_job(
         )
     return jsons
 
+
 @lru_cache(maxsize=1)
 def load_clip(model_name: str = "ViT-B/32"):
     """
@@ -1370,6 +1379,7 @@ def load_clip(model_name: str = "ViT-B/32"):
     """
     import torch
     import clip
+
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model, preprocess = clip.load(model_name, device=device)
     return model, preprocess, device

@@ -34,7 +34,6 @@ class SingleLLM(InteractionPolicy):
             **model_kwargs,
         )
         self._max_react_steps = max_react_steps
-        self._model_lock = False
 
     def _call_agent_executor(
         self, *msgs: List[Tuple[str, str]], persist_state: bool = True, **kwargs
@@ -48,11 +47,7 @@ class SingleLLM(InteractionPolicy):
 
         Returns:
             Tuple[str, float, float]: The final response, token cost, and runtime cost
-        """
-        if self._model_lock:
-            print("Model is locked; waiting for it to unlock")
-            time.sleep(10) # this is a hack
-        
+        """        
         with Stopwatch() as sw:
             self._model_lock = True
             # This method automatically handles out of steps errors & null prompts

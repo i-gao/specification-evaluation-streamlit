@@ -797,7 +797,8 @@ def chat_flow(
                     _get_last_msg_by_role("user"),
                     st.session_state.user_costs[-1],
                 )
-                st.session_state.bar_start_time = None
+                if response is None:
+                    st.stop()
             except Exception as e:
                 st.error(f"Error: {str(e)}")
                 st.stop()
