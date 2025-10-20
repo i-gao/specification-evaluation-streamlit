@@ -488,12 +488,13 @@ def get_cached_dataset(dataset_name, **dataset_kwargs):
 def get_cached_spec(dataset_name, spec_index, **dataset_kwargs):
     """Get cached spec"""
     print(f"Getting cached spec for {dataset_name} {spec_index} {dataset_kwargs}")
-    return get_spec(
-        dataset_name,
-        spec_index,
-        **dataset_kwargs,
-        allow_multimodal_actions=True,
-    )
+    with st.spinner("Loading your tasks..."):
+        return get_spec(
+            dataset_name,
+            spec_index,
+            **dataset_kwargs,
+            allow_multimodal_actions=True,
+        )
 
 
 def get_output_path(config: Dict[str, Union[dict, str]]):
@@ -729,6 +730,7 @@ def chat_flow(
     )
 
     # Display the input box for the user to send a message
+    print("Current speaker", _get_current_speaker())
     if not st.session_state.interaction_completed and _get_current_speaker() == "user":
         with st.container(horizontal=True):
             if (
@@ -776,6 +778,7 @@ def chat_flow(
         message_feedback_form(should_show=should_show, on_completion=on_completion)
 
     # Call generate() to get assistant response
+    print("Calling generate")
     if st.session_state.waiting_for_spinner:
         print("Waiting for spinner; returning")
         return
