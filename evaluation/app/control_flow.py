@@ -9,6 +9,9 @@ from typing import Dict, Union, List, Callable
 import warnings
 import copy
 
+# Add parent directory to path
+sys.path.append(str(Path(__file__).parent.parent.parent)) # evaluation/app/ -> evaluation/ -> root
+
 from data.dataset import FixedSpecification, CustomSpecification
 from user_simulator import get_simulator
 from data import get_dataset, get_spec
@@ -21,7 +24,6 @@ from evaluation.namer import get_experiment_name
 # forms is imported elsewhere if needed; remove unused import here
 import evaluation.app.authentication as authentication
 import evaluation.app.components as components
-from evaluation.app.files import setup_connection
 from evaluation.qualitative_eval import COMPARISON_LIKERT, COMPARISON_LIKERT_NUMERIC  # noqa: F401
 
 SAVE_INTERVAL = 60  # Save every minute
