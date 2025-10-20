@@ -280,8 +280,8 @@ def header():
                     type="primary",
                 )
 
-        if not DEBUG_MODE and st.session_state.current_screen == "chat_screen":
-            components.countdown()
+        # if not DEBUG_MODE and st.session_state.current_screen == "chat_screen":
+        #     components.countdown()
 
 
 def authentication_screen():
