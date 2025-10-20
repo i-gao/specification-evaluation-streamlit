@@ -673,6 +673,7 @@ def _log_assistant_message(message: str):
     """
     Add the assistant message to the messages list and update the total time
     """
+    print("Logging assistant message", message)
     assistant_sent_time = time.time()
     assistant_cost = assistant_sent_time - st.session_state.messages[-1]["sent_time"]
     st.session_state.user_costs.append(assistant_cost)
@@ -779,6 +780,7 @@ def chat_flow(
         not st.session_state.interaction_completed
         and not st.session_state.waiting_for_message_feedback
         and _get_current_speaker() == "assistant"
+        and not st.session_state.waiting_for_spinner
     ):
         lock_interface()
         expected_time = get_expected_message_time()
@@ -798,11 +800,11 @@ def chat_flow(
                     st.session_state.user_costs[-1],
                 )
                 if response is None:
-                    st.stop()
+                    st.stop()    
+                _log_assistant_message(response)
             except Exception as e:
                 st.error(f"Error: {str(e)}")
                 st.stop()
-            _log_assistant_message(response)
 
 
 ################## EVALUATION FLOW ######################
