@@ -508,6 +508,9 @@ def chat_screen():
             st.session_state.current_screen = "evaluation_screen"
             end_interaction("user_end")
 
+    if st.button("Refresh page (in case of bugs)"):
+        st.rerun()
+
     if isinstance(st.session_state.spec, CustomSpecification):
         _custom_chat_screen()
     else:
