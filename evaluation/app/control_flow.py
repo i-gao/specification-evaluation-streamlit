@@ -9,9 +9,6 @@ from typing import Dict, Union, List, Callable
 import warnings
 import copy
 
-# Add parent directory to path
-sys.path.append(str(Path(__file__).parent.parent.parent))
-
 from data.dataset import FixedSpecification, CustomSpecification
 from user_simulator import get_simulator
 from data import get_dataset, get_spec
