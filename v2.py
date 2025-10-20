@@ -2,8 +2,9 @@ import streamlit as st
 import sys
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).parent.parent.parent))
-print(sys.path)
+if str(Path(__file__).parent.parent.parent) not in sys.path:
+    sys.path.append(str(Path(__file__).parent.parent.parent))
+
 from data.dataset import FixedSpecification, CustomSpecification
 from evaluation.app.control_flow import (
     start_interaction,

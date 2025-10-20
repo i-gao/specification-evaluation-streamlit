@@ -9,8 +9,8 @@ from typing import Dict, Union, List, Callable
 import warnings
 import copy
 
-# Add parent directory to path
-sys.path.append(str(Path(__file__).parent.parent.parent)) # evaluation/app/ -> evaluation/ -> root
+if str(Path(__file__).parent.parent.parent) not in sys.path:
+    sys.path.append(str(Path(__file__).parent.parent.parent)) # evaluation/app/ -> evaluation/ -> root
 
 from data.dataset import FixedSpecification, CustomSpecification
 from user_simulator import get_simulator
