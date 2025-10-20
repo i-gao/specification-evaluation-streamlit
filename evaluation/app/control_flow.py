@@ -210,19 +210,21 @@ def reset_session_state_for_round(round_index, save_user_progress: bool = True):
                 else:
                     break
 
+            print("Saved round index", saved_round_index, "round index", round_index)
+
             # user progressed further than we currently are; jump to round index where they left off
             if round_index < saved_round_index + 1:
                 print("Fast forwarding to round index", saved_round_index + 1)
                 round_index = saved_round_index + 1
 
     # look for a exit_survey file
-    exit_survey_path = f"streamlit_logs/exit_surveys/{token}.json"
-    try:
-        st.session_state.connection.read(exit_survey_path)
-        if round_index == -1:
+    if round_index == -1 and not st.session_state.exit_survey_completed:
+        exit_survey_path = f"streamlit_logs/exit_surveys/{token}.json"
+        try:
+            st.session_state.connection.read(exit_survey_path)
             st.session_state.exit_survey_completed = True
-    except FileNotFoundError:
-        pass
+        except FileNotFoundError:
+            pass
 
     # Clean up previous session state
     for key in ROUND_CONFIGS:

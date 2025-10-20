@@ -236,6 +236,7 @@ class InteractionPolicy:
         Raises:
             AssertionError: If user_response and user_cost are not provided on all turns except the first
         """
+        print("Calling __call__; current_unanswered_msg", self.current_unanswered_msg)
         if self.current_unanswered_msg is not None:
             assert user_response is not None and user_cost is not None, (
                 f"User response and cost must be provided on all turns except the first. The assistant's last message was '{self.current_unanswered_msg}'"

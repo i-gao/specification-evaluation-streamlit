@@ -10,7 +10,7 @@ from utils.misc import (
 )
 from utils.model import LangChainModel, is_openai_model, is_anthropic_model
 
-
+import time
 class SingleLLM(InteractionPolicy):
     def __init__(
         self,
@@ -34,6 +34,7 @@ class SingleLLM(InteractionPolicy):
             **model_kwargs,
         )
         self._max_react_steps = max_react_steps
+        self._model_lock = False
 
     def _call_agent_executor(
         self, *msgs: List[Tuple[str, str]], persist_state: bool = True, **kwargs
@@ -48,7 +49,12 @@ class SingleLLM(InteractionPolicy):
         Returns:
             Tuple[str, float, float]: The final response, token cost, and runtime cost
         """
+        if self._model_lock:
+            print("Model is locked; waiting for it to unlock")
+            time.sleep(10) # this is a hack
+        
         with Stopwatch() as sw:
+            self._model_lock = True
             # This method automatically handles out of steps errors & null prompts
             raw = self.agent_executor.generate(
                 dialogs=[msgs],
@@ -56,6 +62,7 @@ class SingleLLM(InteractionPolicy):
                 remove_thinking_tokens=True,
                 **kwargs,
             )[0]
+            self._model_lock = False
 
         # Look at the new messages and extract the tool calls for saving
         action_history = self._parse_langchain_response_to_actions(raw)
@@ -97,6 +104,8 @@ class SingleLLM(InteractionPolicy):
         Returns:
             str: The next message in the conversation
         """
+        print("Calling generate_message; user_response", user_response)
+
         # If this is the first turn, prepend the generate prompt
         if not self.has_seen_system_prompt:
             system_msg = self._get_generate_prompt()
