@@ -192,30 +192,30 @@ def reset_session_state_for_round(round_index, save_user_progress: bool = True):
         except FileNotFoundError:
             user_progress = {}
 
-            saved_round_index = -1
-            for i in range(len(user_progress)):
-                # check if round index i is in user_progress
-                if str(i) in user_progress:
-                    message_history.append(
-                        (
-                            {
-                                "dataset_name": user_configs[i]["dataset_selector"],
-                                "spec_index": user_configs[i]["spec_selector"],
-                                "dataset_kwargs": user_configs[i]["dataset_kwargs"],
-                            },
-                            user_progress[str(i)]["messages"],
-                        )
+        saved_round_index = -1
+        for i in range(len(user_progress)):
+            # check if round index i is in user_progress
+            if str(i) in user_progress:
+                message_history.append(
+                    (
+                        {
+                            "dataset_name": user_configs[i]["dataset_selector"],
+                            "spec_index": user_configs[i]["spec_selector"],
+                            "dataset_kwargs": user_configs[i]["dataset_kwargs"],
+                        },
+                        user_progress[str(i)]["messages"],
                     )
-                    saved_round_index = i
-                else:
-                    break
+                )
+                saved_round_index = i
+            else:
+                break
 
-            print("Saved round index", saved_round_index, "round index", round_index)
+        print("Saved round index", saved_round_index, "round index", round_index)
 
-            # user progressed further than we currently are; jump to round index where they left off
-            if round_index < saved_round_index + 1:
-                print("Fast forwarding to round index", saved_round_index + 1)
-                round_index = saved_round_index + 1
+        # user progressed further than we currently are; jump to round index where they left off
+        if round_index < saved_round_index + 1:
+            print("Fast forwarding to round index", saved_round_index + 1)
+            round_index = saved_round_index + 1
 
     # look for a exit_survey file
     if round_index == -1 and not st.session_state.exit_survey_completed:
