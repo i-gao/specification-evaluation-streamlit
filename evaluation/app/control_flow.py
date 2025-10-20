@@ -471,7 +471,6 @@ def save_session_data(save_user_progress: bool = True, **kwargs):
     )
 
 
-@st.cache_resource(show_spinner=True)
 def get_cached_dataset(dataset_name, **dataset_kwargs):
     """Get cached dataset"""
     with st.spinner("Loading your tasks..."):
@@ -484,7 +483,6 @@ def get_cached_dataset(dataset_name, **dataset_kwargs):
             st.stop()
 
 
-@st.cache_resource(show_spinner=True)
 def get_cached_spec(dataset_name, spec_index, **dataset_kwargs):
     """Get cached spec"""
     print(f"Getting cached spec for {dataset_name} {spec_index} {dataset_kwargs}")
@@ -778,10 +776,6 @@ def chat_flow(
         message_feedback_form(should_show=should_show, on_completion=on_completion)
 
     # Call generate() to get assistant response
-    print("Calling generate")
-    if st.session_state.waiting_for_spinner:
-        print("Waiting for spinner; returning")
-        return
     if (
         not st.session_state.interaction_completed
         and not st.session_state.waiting_for_message_feedback
@@ -806,10 +800,10 @@ def chat_flow(
                 )
                 if response is None:
                     st.stop()    
-                _log_assistant_message(response)
             except Exception as e:
                 st.error(f"Error: {str(e)}")
                 st.stop()
+            _log_assistant_message(response)
 
 
 ################## EVALUATION FLOW ######################

@@ -51,5 +51,6 @@ def get_dataset(dataset_name: str, **kwargs):
 
 
 def get_spec(dataset_name: str, index: int, **kwargs):
+    print("Getting spec for", dataset_name, index, kwargs)
     dataset = get_dataset(dataset_name, **kwargs)
     return dataset[index]
