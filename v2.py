@@ -551,7 +551,7 @@ def brainstorming_screen():
             st.session_state.brainstorm_start_time = __import__("time").time()
 
         # Countdown display
-        components.brainstorm_countdown()
+        # components.brainstorm_countdown()
 
         def validate(form_values):
             # Check if enough time has passed for brainstorming
