@@ -468,7 +468,7 @@ def save_session_data(save_user_progress: bool = True, **kwargs):
     )
 
 
-@st.cache_resource(show_spinner=False)
+@st.cache_resource(show_spinner=True)
 def get_cached_dataset(dataset_name, **dataset_kwargs):
     """Get cached dataset"""
     with st.spinner("Loading your tasks..."):
@@ -481,9 +481,10 @@ def get_cached_dataset(dataset_name, **dataset_kwargs):
             st.stop()
 
 
-@st.cache_resource(show_spinner=False)
+@st.cache_resource(show_spinner=True)
 def get_cached_spec(dataset_name, spec_index, **dataset_kwargs):
     """Get cached spec"""
+    print(f"Getting cached spec for {dataset_name} {spec_index} {dataset_kwargs}")
     return get_spec(
         dataset_name,
         spec_index,
