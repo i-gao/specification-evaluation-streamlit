@@ -201,7 +201,7 @@ def render_eval_second_page(
         ),
         FormElement(
             input_type="radio",
-            label='How much do you agree with this statement? "I would rather follow this plan as is than continue my search with the assistant for 10 more minutes."',
+            label='How much do you agree with this statement? "I would rather follow this plan as is than continue my search for 10 more minutes."',
             options=["-"] + INSTRUMENT_LIKERT,
         ),
         FormElement(

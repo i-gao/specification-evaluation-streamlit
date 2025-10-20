@@ -128,6 +128,7 @@ ROUND_CONFIGS = [
     "policy",
     "simulator",
     "config",
+    "brainstorm_time",
     "output_path",
 ]
 
@@ -966,7 +967,7 @@ def _run_custom_evaluation(custom_final_evaluation_form: Callable = None):
         current_time = time.time() - st.session_state.evaluation_start_time
         if current_time < st.session_state.evaluation_minimum:
             st.error(
-                f"Please spend at least {st.session_state.evaluation_minimum / 60:.1f} minutes on the evaluation before submitting."
+                f"Please spend at least {st.session_state.evaluation_minimum / 60:.1f} minutes on the evaluation before submitting. You've spent {current_time / 60:.1f} minutes so far."
             )
             return
         st.session_state.final_evaluation_completed = True
