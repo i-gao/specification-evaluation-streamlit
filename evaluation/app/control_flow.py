@@ -776,11 +776,13 @@ def chat_flow(
         message_feedback_form(should_show=should_show, on_completion=on_completion)
 
     # Call generate() to get assistant response
+    if st.session_state.waiting_for_spinner:
+        print("Waiting for spinner; returning")
+        return
     if (
         not st.session_state.interaction_completed
         and not st.session_state.waiting_for_message_feedback
         and _get_current_speaker() == "assistant"
-        and not st.session_state.waiting_for_spinner
     ):
         lock_interface()
         expected_time = get_expected_message_time()
