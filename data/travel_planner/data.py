@@ -28,6 +28,7 @@ if travel_planner_path not in sys.path:
 from evaluation.commonsense_constraint import evaluation as commonsense_eval
 from evaluation.hard_constraint import evaluation as hard_eval
 from evaluation.preferences import evaluation as preferences_eval, compute_linear_reward
+from tp_utils.func import get_valid_name_city
 
 
 COMMONSENSE_DESCRIPTION = "A travel plan is a day-by-day plan which specifies, for each day, the restaurants to eat at for breakfast / lunch / dinner, the attractions to visit, and the accommodation to stay at, along with how to get to the destination city on the first day and back to the origin city on the last day. Transportation (driving / flying) cannot be split into multiple legs. All entries in the travel plan must come from the database."
@@ -354,6 +355,14 @@ class TravelPlannerDataset(SpecificationCollection):
         self._rows = self._rows.select(
             range(1, len(self._rows))
         )  # first row is used as a demo in render_task_explanation
+
+        # Normalize accommodation names
+        self._rows = self._rows.map(
+            lambda x: {
+                "annotated_plan": _normalize_accommodation_name_in_plan(x["annotated_plan"]),
+            }
+        )
+
         self.fixed_length = len(self._rows)
         # only pick "simple" prompts for custom: <= 3 days
         self._custom_rows = self._rows.filter(lambda x: x["days"] <= 3)
@@ -1100,3 +1109,49 @@ def output_to_streamlit(
         st.markdown("---")
         with st.expander("Travel items mentioned in message", expanded=True):
             renderer.render_travel_mentions(mentioned_travel, db)
+
+
+def _normalize_accommodation_name(name: str) -> str:
+    banned_words = {
+        "manhattan": "city",
+        "manhttn": "city",
+        "nyc": "city",
+        "ny": "",
+        "new york": "city",
+        "new york city": "city",
+        "brooklyn": "city",
+        "bklyn": "city",
+        "chelsea": "neighborhood",
+        "fort greene": "neighborhood",
+        "greenwich village": "neighborhood",
+        "williamsburg": "neighborhood",
+        "midtown": "neighborhood",
+        "harlem": "neighborhood",
+        "east village": "neighborhood",
+        "west village": "neighborhood",
+        "central park": "park",
+        "times sq": "downtown",
+        "jfk": "airport",
+        "lga": "airport",
+        "ewr": "airport",
+        "jfk": "airport",
+        "lga": "airport",
+        "ewr": "airport",
+        "greenpoint": "neighborhood",
+        "bushwick": "neighborhood",
+    }
+    name = name.lower()
+    for word, replacement in banned_words.items():
+        name = name.replace(word, replacement)
+    name = name.capitalize()
+    return name
+
+def _normalize_accommodation_name_in_plan(plan: str) -> str:
+    if plan is None:
+        return None
+    js = json.loads(plan)
+    for day in js:
+        if "accommodation" in day and day["accommodation"] != "-":
+            name, city = get_valid_name_city(day["accommodation"])
+            day["accommodation"] = f"{_normalize_accommodation_name(name)}, {city}"
+    return json.dumps(js)
