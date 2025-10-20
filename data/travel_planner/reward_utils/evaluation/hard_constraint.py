@@ -4,13 +4,7 @@ import re
 import math
 import numpy as np
 
-# Add parent directory to path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-if parent_dir not in sys.path:
-    sys.path.append(parent_dir)
-
-from tp_utils.func import (
+from data.travel_planner.reward_utils.tp_utils.func import (
     get_valid_name_city,
     extract_from_to,
     get_tools,

@@ -20,15 +20,17 @@ import streamlit as st
 import data.travel_planner.streamlit_render as renderer
 from data.travel_planner.parser import parse_travel_plan
 
-# Add TravelPlanner to path
-travel_planner_path = os.path.join(os.path.dirname(__file__), "reward_utils")
-if travel_planner_path not in sys.path:
-    sys.path.append(travel_planner_path)
-
-from evaluation.commonsense_constraint import evaluation as commonsense_eval
-from evaluation.hard_constraint import evaluation as hard_eval
-from evaluation.preferences import evaluation as preferences_eval, compute_linear_reward
-from tp_utils.func import get_valid_name_city
+from data.travel_planner.reward_utils.evaluation.commonsense_constraint import (
+    evaluation as commonsense_eval,
+)
+from data.travel_planner.reward_utils.evaluation.hard_constraint import (
+    evaluation as hard_eval,
+)
+from data.travel_planner.reward_utils.evaluation.preferences import (
+    evaluation as preferences_eval,
+    compute_linear_reward,
+)
+from data.travel_planner.reward_utils.tp_utils.func import get_valid_name_city
 
 
 COMMONSENSE_DESCRIPTION = "A travel plan is a day-by-day plan which specifies, for each day, the restaurants to eat at for breakfast / lunch / dinner, the attractions to visit, and the accommodation to stay at, along with how to get to the destination city on the first day and back to the origin city on the last day. Transportation (driving / flying) cannot be split into multiple legs. All entries in the travel plan must come from the database."
@@ -359,7 +361,9 @@ class TravelPlannerDataset(SpecificationCollection):
         # Normalize accommodation names
         self._rows = self._rows.map(
             lambda x: {
-                "annotated_plan": _normalize_accommodation_name_in_plan(x["annotated_plan"]),
+                "annotated_plan": _normalize_accommodation_name_in_plan(
+                    x["annotated_plan"]
+                ),
             }
         )
 
@@ -1145,6 +1149,7 @@ def _normalize_accommodation_name(name: str) -> str:
         name = name.replace(word, replacement)
     name = name.capitalize()
     return name
+
 
 def _normalize_accommodation_name_in_plan(plan: str) -> str:
     if plan is None:

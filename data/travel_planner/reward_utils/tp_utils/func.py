@@ -27,11 +27,11 @@ FILE_PATH = os.path.dirname(
 
 @cache
 def get_tools():
-    from tools.flights.apis import Flights
-    from tools.accommodations.apis import Accommodations
-    from tools.restaurants.apis import Restaurants
-    from tools.googleDistanceMatrix.apis import GoogleDistanceMatrix
-    from tools.attractions.apis import Attractions
+    from data.travel_planner.reward_utils.tools.flights.apis import Flights
+    from data.travel_planner.reward_utils.tools.accommodations.apis import Accommodations
+    from data.travel_planner.reward_utils.tools.restaurants.apis import Restaurants
+    from data.travel_planner.reward_utils.tools.googleDistanceMatrix.apis import GoogleDistanceMatrix
+    from data.travel_planner.reward_utils.tools.attractions.apis import Attractions
 
     flight = Flights()
     accommodation = Accommodations()

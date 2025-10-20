@@ -1,5 +1,5 @@
 import requests
-from tp_utils.func import extract_before_parenthesis
+from data.travel_planner.reward_utils.tp_utils.func import extract_before_parenthesis
 import os
 from requests.exceptions import SSLError
 import time

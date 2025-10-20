@@ -1,7 +1,7 @@
 import pandas as pd
 from pandas import DataFrame
 from typing import Optional
-from tp_utils.func import extract_before_parenthesis
+from data.travel_planner.reward_utils.tp_utils.func import extract_before_parenthesis
 import os
 
 FILE_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))) # accomodations/ -> tools/ -> reward_utils/ -> travel_planner/

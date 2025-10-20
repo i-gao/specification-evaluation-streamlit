@@ -4,13 +4,7 @@ import sys
 
 ROOT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
 
-
-# Add TravelPlanner to path
-travel_planner_path = os.path.join(os.path.dirname(__file__), "reward_utils")
-if travel_planner_path not in sys.path:
-    sys.path.append(travel_planner_path)
-
-from tp_utils.func import (
+from data.travel_planner.reward_utils.tp_utils.func import (
     extract_before_parenthesis,
     get_valid_name_city,
 )

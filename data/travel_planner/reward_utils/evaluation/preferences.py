@@ -4,13 +4,11 @@ import re
 import numpy as np
 from typing import Dict, List, Any, Tuple
 
-# Add parent directory to path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-if parent_dir not in sys.path:
-    sys.path.append(parent_dir)
-
-from tp_utils.func import get_valid_name_city, get_tools, get_attractions
+from data.travel_planner.reward_utils.tp_utils.func import (
+    get_valid_name_city,
+    get_tools,
+    get_attractions,
+)
 
 
 def hinge_reward(
@@ -927,12 +925,12 @@ def compute_linear_reward(
         "attraction_repeats_results": 0,
         "restaurant_attributes_results": 1,
     }
-    INFO_KEY_TO_WORST_CASE_REWARD = {# what is the worst possible score? 0 if you can earn a positive reward; -1 if you are just trying to avoid a negative reward
-        "tag_results": -1, # disliked tags possible
-        "attraction_type_results": -1, # disliked attraction types possible
-        "room_type_results": -1, # disliked room types possible
-        "restaurant_ratings_results": -1, # disliked restaurant ratings possible
-        "accommodation_reviews_results": -1, # -1 if < min_reviews
+    INFO_KEY_TO_WORST_CASE_REWARD = {  # what is the worst possible score? 0 if you can earn a positive reward; -1 if you are just trying to avoid a negative reward
+        "tag_results": -1,  # disliked tags possible
+        "attraction_type_results": -1,  # disliked attraction types possible
+        "room_type_results": -1,  # disliked room types possible
+        "restaurant_ratings_results": -1,  # disliked restaurant ratings possible
+        "accommodation_reviews_results": -1,  # -1 if < min_reviews
         "specific_liked_restaurant_results": 0,
         "specific_disliked_restaurant_results": -1,
         "specific_liked_accommodations_results": 0,

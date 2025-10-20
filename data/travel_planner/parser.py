@@ -1,11 +1,11 @@
 from data.travel_planner.db import TravelDB
 from utils.misc import parse_json
-from tp_utils.func import (
+from data.travel_planner.reward_utils.tp_utils.func import (
     extract_from_to,
     extract_before_parenthesis,
     get_valid_name_city,
 )
-from evaluation.hard_constraint import get_total_cost
+from data.travel_planner.reward_utils.evaluation.hard_constraint import get_total_cost
 from typing import Dict, Any, List
 
 

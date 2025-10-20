@@ -5,13 +5,7 @@ import numpy as np
 import string
 from datetime import datetime
 
-# Add parent directory to path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-if parent_dir not in sys.path:
-    sys.path.append(parent_dir)
-
-from tp_utils.func import (
+from data.travel_planner.reward_utils.tp_utils.func import (
     get_valid_name_city,
     extract_from_to,
     extract_before_parenthesis,
@@ -351,7 +345,10 @@ def is_valid_information_in_sandbox(question, tested_data):
 
     for i in range(min(question["days"], len(tested_data))):
         unit = tested_data[i]
-        unit_date = eval(question["date"])[i]
+        if isinstance(question["date"], str):
+            unit_date = eval(question["date"])[i]
+        else:
+            unit_date = question["date"][i]
 
         if unit["transportation"] and unit["transportation"] != "-":
             value = unit["transportation"]
