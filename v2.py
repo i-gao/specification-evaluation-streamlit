@@ -502,15 +502,11 @@ def chat_screen():
         return
 
     header()
-    if st.button("End and save conversation (debug mode)"):
-        print("Ending interaction")
-        st.session_state.current_screen = "evaluation_screen"
-        end_interaction("user_end")
-    # if DEBUG_MODE:
-    #     if st.button("End and save conversation"):
-    #         print("Ending interaction")
-    #         st.session_state.current_screen = "evaluation_screen"
-    #         end_interaction("user_end")
+    if DEBUG_MODE:
+        if st.button("End and save conversation"):
+            print("Ending interaction")
+            st.session_state.current_screen = "evaluation_screen"
+            end_interaction("user_end")
 
     if isinstance(st.session_state.spec, CustomSpecification):
         _custom_chat_screen()
