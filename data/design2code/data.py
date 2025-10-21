@@ -187,8 +187,8 @@ class Design2CodeDataset(SpecificationCollection):
         self.fixed_length = len(task_paths)
         self.custom_length = len(self._custom_intents)
         self._docker_image = docker_image
-        self._judge_model_name = judge_model_name
-        self._judge_model = init_langchain_model(judge_model_name)
+        # self._judge_model_name = judge_model_name
+        # self._judge_model = init_langchain_model(judge_model_name)
         self._persist_docker_container = persist_docker_container
 
         # All subclasses must have these attributes set
@@ -260,14 +260,14 @@ class Design2CodeDataset(SpecificationCollection):
                 # metric_name=None,  # Not provided
                 # baseline_scores=None,  # Not provided
                 render_task_explanation=render_fixed_task_explanation,
-                actions=get_actions(
-                    docker_image=self._docker_image,
-                    docker_container_id=container_id,
-                    test_id=id,
-                    text_description=summary,
-                    model_name=self._judge_model_name,
-                    judge_model=self._judge_model,
-                ),
+                # actions=get_actions(
+                #     docker_image=self._docker_image,
+                #     docker_container_id=container_id,
+                #     test_id=id,
+                #     text_description=summary,
+                #     model_name=self._judge_model_name,
+                #     judge_model=self._judge_model,
+                # ),
                 render_msg_fn=lambda msg: renderer.render_output(
                     msg,
                     docker_image=self._docker_image,
