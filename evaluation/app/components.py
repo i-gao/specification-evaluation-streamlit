@@ -286,7 +286,12 @@ def countdown():
     """
     with st.container(key="countdown"):
         st.write(
-            f"{st.session_state.interaction_budget - (time.time() - st.session_state.interaction_start_time):.0f} seconds remaining",
+            f"{
+                max(
+                    0,
+                    st.session_state.interaction_budget
+                    - (time.time() - st.session_state.interaction_start_time),
+                ):.0f} seconds remaining",
         )
 
 
