@@ -820,15 +820,6 @@ def chat_flow(
                 show_end_conversation_button
                 and st.session_state.policy.wants_to_end_conversation
             )
-            if show_end_button:
-                btn_txt = "End conversation"
-                if st.session_state.get("budget_exhausted", False):
-                    btn_txt += " (time exhausted)"
-                if st.button(btn_txt, type="primary"):
-                    if st.session_state.get("budget_exhausted", False):
-                        end_interaction("budget_exhausted")
-                    else:
-                        end_interaction("user_end")
             # Disable input when budget is exhausted
             if user_msg := st.chat_input(
                 "Type your message here...",
@@ -838,6 +829,15 @@ def chat_flow(
                 _log_user_message(
                     user_msg, collect_feedback=(message_feedback_form is not None)
                 )
+            if show_end_button:
+                btn_txt = "End conversation"
+                if st.session_state.get("budget_exhausted", False):
+                    btn_txt += " (time exhausted)"
+                if st.button(btn_txt, type="primary"):
+                    if st.session_state.get("budget_exhausted", False):
+                        end_interaction("budget_exhausted")
+                    else:
+                        end_interaction("user_end")
 
     # Display message feedback form if appropriate
     # Note: the feedback time currently DOES count towards the interaction budget
