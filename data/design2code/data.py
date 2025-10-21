@@ -166,7 +166,7 @@ class Design2CodeDataset(SpecificationCollection):
     def __init__(
         self,
         dev: bool = False,
-        docker_image: str = "design2code",
+        docker_image: str = None,
         judge_model_name: str = "gpt-4o-mini",
         fixed_indexes: Optional[List[int]] = None,
         custom_indexes: Optional[List[int]] = None,
