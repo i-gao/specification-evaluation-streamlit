@@ -120,12 +120,13 @@ STYLESHEET = """
         flex: 5;
         flex-shrink: 1;
         text-align: left;
+        margin-right: 1rem;
     }
     .st-key-floating_header > :last-child:not(:first-child) {
         /* The countdown */
-        flex: 2;
+        flex: 1;
         flex-shrink: 1;
-        text-align: right;
+        text-align: center;
         white-space: nowrap;  /* prevents line breaks */
         overflow: hidden;     /* (optional) hides overflow */
         text-overflow: ellipsis; /* (optional) adds "..." if clipped */
@@ -283,6 +284,7 @@ def header():
                     on_click=task_instructions_dialog,
                     type="primary",
                     disabled=st.session_state.waiting_for_spinner,
+                    width="content",
                 )
 
         if not DEBUG_MODE and st.session_state.current_screen == "chat_screen":
