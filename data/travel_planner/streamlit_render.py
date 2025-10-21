@@ -302,7 +302,18 @@ def _render_carousel(
     else:
         options = predicted_options + y0_options
 
-    random.shuffle(options)
+    state_key = f"options_order_{name}"
+    if state_key not in st.session_state:
+        # Store stable order as indices into the current options list
+        order = list(range(len(options)))
+        random.shuffle(order)
+        st.session_state[state_key] = order
+    order = st.session_state[state_key]
+    # Reorder options according to stored order, truncating/expanding safely
+    if len(order) != len(options):
+        order = list(range(len(options)))
+        st.session_state[state_key] = order
+    options = [options[i] for i in order]
 
     # display the carousel
     from evaluation.app.components import carousel
