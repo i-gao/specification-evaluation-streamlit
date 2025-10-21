@@ -521,8 +521,9 @@ def evaluation_screen():
 
     components.render_specification_banner()
 
-    if st.button("Emergency save (in case of bugs)"):
-        save_session_data(skip_grading=True)
+    if st.secrets.get("debug_mode", False):
+        if st.button("Emergency save (in case of bugs)"):
+            save_session_data(skip_grading=True)
 
     evaluation_flow(
         chat_evaluation_form=forms.interaction_evaluation,

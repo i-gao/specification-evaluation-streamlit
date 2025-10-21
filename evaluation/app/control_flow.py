@@ -115,6 +115,7 @@ SESSION_STATE_ROUND_DEFAULTS = {
     "interaction_start_time": None,
     "brainstorm_start_time": None,
     "evaluation_start_time": None,
+    "budget_exhausted": False,
 }
 ROUND_CONFIGS = [
     "human_id",
@@ -699,7 +700,8 @@ def _check_interaction_budget():
     """
     st.session_state.total_cost = get_total_cost()
     if st.session_state.total_cost >= st.session_state.interaction_budget:
-        end_interaction("budget_exhausted")
+        # Mark budget as exhausted and return to let the UI present an end button
+        st.session_state.budget_exhausted = True
 
 
 def chat_flow(
@@ -735,16 +737,25 @@ def chat_flow(
     print("Current speaker", _get_current_speaker())
     if not st.session_state.interaction_completed and _get_current_speaker() == "user":
         with st.container(horizontal=True):
-            if (
-                show_end_conversation_button
-                and st.session_state.policy.wants_to_end_conversation
-            ):
-                if st.button("End conversation", type="primary"):
-                    end_interaction("user_end")
-            if user_msg := st.chat_input("Type your message here...", key="chat_input"):
-                _log_user_message(
-                    user_msg, collect_feedback=(message_feedback_form is not None)
+            show_end_button = (
+                st.session_state.get("budget_exhausted", False)
+                or (
+                    show_end_conversation_button
+                    and st.session_state.policy.wants_to_end_conversation
                 )
+            )
+            if show_end_button:
+                if st.button("End conversation", type="primary"):
+                    if st.session_state.get("budget_exhausted", False):
+                        end_interaction("budget_exhausted")
+                    else:
+                        end_interaction("user_end")
+            # Disable input when budget is exhausted
+            if not st.session_state.get("budget_exhausted", False):
+                if user_msg := st.chat_input("Type your message here...", key="chat_input"):
+                    _log_user_message(
+                        user_msg, collect_feedback=(message_feedback_form is not None)
+                    )
 
     # Display message feedback form if appropriate
     # Note: the feedback time currently DOES count towards the interaction budget
