@@ -4,6 +4,7 @@ from pathlib import Path
 
 if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.append(str(Path(__file__).parent.parent.parent))
+import time
 
 from data.dataset import FixedSpecification, CustomSpecification
 from evaluation.app.control_flow import (
@@ -17,6 +18,8 @@ from evaluation.app.control_flow import (
     finish_onboarding,
     complete_brainstorming,
     save_session_data,
+    interaction_countdown,
+    brainstorm_countdown,
 )
 import evaluation.app.authentication as authentication
 import evaluation.app.forms as forms
@@ -283,7 +286,7 @@ def header():
                 )
 
         if not DEBUG_MODE and st.session_state.current_screen == "chat_screen":
-            components.countdown()
+            interaction_countdown()
 
 
 def authentication_screen():
@@ -548,10 +551,10 @@ def brainstorming_screen():
 
         # Start brainstorming timer if not already started
         if getattr(st.session_state, "brainstorm_start_time", None) is None:
-            st.session_state.brainstorm_start_time = __import__("time").time()
+            st.session_state.brainstorm_start_time = time.time()
 
         # Countdown display
-        components.brainstorm_countdown()
+        brainstorm_countdown()
 
         def validate(form_values):
             # Check if enough time has passed for brainstorming
@@ -563,9 +566,7 @@ def brainstorming_screen():
             if brainstorm_start_time is None:
                 return False  # Timer not started
 
-            import time as _time
-
-            elapsed = _time.time() - brainstorm_start_time
+            elapsed = time.time() - brainstorm_start_time
             if elapsed < brainstorm_time:
                 st.error(
                     f"Please spend at least {brainstorm_time} seconds reflecting before continuing. You've spent {elapsed:.0f} seconds so far."

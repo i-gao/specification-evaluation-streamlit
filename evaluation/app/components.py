@@ -279,37 +279,20 @@ def create_quick_actions(message_content: str):
             )
 
 
-@st.fragment(run_every=2)
-def countdown():
+def countdown(
+    start_time: float,
+    target_time: float,
+    time_to_remove: float = 0.0,
+    label: str = "seconds remaining",
+):
     """
     Countdown timer
     """
     with st.container(key="countdown"):
-        st.write(
-            f"{
-                max(
-                    0,
-                    st.session_state.interaction_budget
-                    - (time.time() - st.session_state.interaction_start_time),
-                ):.0f} seconds remaining",
-        )
-
-
-@st.fragment(run_every=1)
-def brainstorm_countdown():
-    """
-    Countdown timer for brainstorming stage
-    """
-    if getattr(st.session_state, "brainstorm_time", None) is None:
-        return
-    if st.session_state.get("brainstorm_start_time", None) is None:
-        return
-    with st.container(key="countdown"):
-        remaining = st.session_state.brainstorm_time - (
-            time.time() - st.session_state.brainstorm_start_time
-        )
-        st.write(f"{max(0, remaining):.0f} seconds remaining")
-
+        now = time.time()
+        elapsed = now - float(start_time) - float(time_to_remove)
+        remaining = max(0.0, float(target_time) - elapsed)
+        st.write(f"{remaining:.0f} {label}")
 
 ######### Helper functions ################
 

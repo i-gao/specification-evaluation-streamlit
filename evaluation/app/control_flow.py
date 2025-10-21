@@ -6,7 +6,6 @@ import json
 import os
 from collections import defaultdict
 from typing import Dict, Union, List, Callable
-import warnings
 import copy
 
 if str(Path(__file__).parent.parent.parent) not in sys.path:
@@ -551,26 +550,18 @@ def get_config():
 
 def get_total_cost():
     """
-    Get the total cost of the conversation. This is called right answer the user responds
-    but before the assistant receives the response; therefore policy.total_cost is missing
-    the new cost. We instead rely on st.session_state.user_costs to get the user cost.
+    Get the total completed cost of the conversation according to cost_type.
+    Uses recorded segment costs and does NOT include live in-progress time.
     """
-    user_cost = sum(st.session_state.user_costs)
-    policy_cost = sum(
-        [
-            turn.assistant_cost
-            for turn in st.session_state.policy.conversation_history
-            if turn.assistant_cost is not None
-        ]
-    )
-    if st.session_state.cost_type == "user":
-        return user_cost
-    elif st.session_state.cost_type == "policy":
-        return policy_cost
-    elif st.session_state.cost_type == "both":
-        return user_cost + policy_cost
-    else:
-        raise ValueError(f"Invalid cost type: {st.session_state.cost_type}")
+    user_completed, assistant_completed = _get_completed_segment_costs()
+    cost_type = st.session_state.get("cost_type", "user")
+    if cost_type == "user":
+        return user_completed
+    if cost_type == "policy":
+        return assistant_completed
+    if cost_type == "both":
+        return user_completed + assistant_completed
+    raise ValueError(f"Invalid cost type: {cost_type}")
 
 
 def lock_interface():
@@ -600,7 +591,7 @@ def get_expected_message_time(
     """
     try:
         benchmark_times = st.session_state.connection.read(BENCHMARK_TIMES_FILE)
-    except:
+    except Exception:
         return None
     if filter_to_max_react_steps:
         benchmark_times = [
@@ -645,6 +636,74 @@ def _get_last_msg_by_role(role: str):
         if msg["role"] == role:
             return msg["content"]
     return None
+
+
+def _get_completed_segment_costs() -> tuple:
+    """
+    Return (user_completed_seconds, assistant_completed_seconds) from recorded segments.
+    Uses alternating entries in st.session_state.user_costs: user at even indices, assistant at odd indices.
+    Does not include live (in-progress) segments.
+    """
+    segment_costs = st.session_state.get("user_costs", [])
+    user_completed = sum(segment_costs[0::2]) if segment_costs else 0.0
+    assistant_completed = sum(segment_costs[1::2]) if len(segment_costs) > 1 else 0.0
+    return float(user_completed), float(assistant_completed)
+
+
+def _get_live_segment_seconds() -> float:
+    """
+    Return the live (in-progress) segment duration since the last message sent_time,
+    or 0.0 if the interaction is completed or there are no messages yet.
+    """
+    if st.session_state.get("interaction_completed", False):
+        return 0.0
+    if len(st.session_state.get("messages", [])) == 0:
+        return 0.0
+    return max(0.0, time.time() - st.session_state.messages[-1]["sent_time"])
+
+
+def _get_spent_seconds(cost_type: str) -> float:
+    """
+    Compute spent seconds based on cost_type in {"user", "policy", "both"}.
+    Includes live segment time only for the current speaker when appropriate.
+    Falls back to wall-clock since interaction start if cost_type is unknown.
+    """
+    user_completed, assistant_completed = _get_completed_segment_costs()
+    live = _get_live_segment_seconds()
+    is_user_turn = _get_current_speaker() == "user"
+
+    if cost_type == "user":
+        return user_completed + (live if is_user_turn else 0.0)
+    if cost_type == "policy":
+        return assistant_completed + (live if not is_user_turn else 0.0)
+    if cost_type == "both":
+        return user_completed + assistant_completed + live
+
+    # Fallback to wall-clock
+    start_time = st.session_state.get("interaction_start_time", time.time())
+    return max(0.0, time.time() - start_time)
+
+
+def get_countdown_params() -> tuple:
+    """
+    Return (start_time, time_to_remove) suitable for components.countdown(start_time, time_to_remove).
+
+    The countdown displays: start_time - time.time() - time_to_remove,
+    which equals budget - elapsed_costing_time when start_time is end_of_budget_time
+    and time_to_remove removes non-costing elapsed time.
+    """
+    now = time.time()
+    start_time_sec = st.session_state.get("interaction_start_time", None)
+    budget = float(st.session_state.get("interaction_budget", 0.0))
+    if start_time_sec is None:
+        # Not started yet; show full budget
+        return now + budget, 0.0
+
+    wall_elapsed = max(0.0, now - start_time_sec)
+    spent = _get_spent_seconds(st.session_state.get("cost_type", "user"))
+    time_to_remove = max(0.0, wall_elapsed - float(spent))
+    end_time = start_time_sec + budget
+    return end_time, time_to_remove
 
 
 def _log_user_message(message: str, collect_feedback: bool = False):
@@ -704,6 +763,26 @@ def _check_interaction_budget():
         st.session_state.budget_exhausted = True
 
 
+@st.fragment(run_every=2)
+def brainstorm_countdown():
+    """
+    Countdown timer for brainstorming
+    """
+    components.countdown(
+        start_time=st.session_state.brainstorm_start_time,
+        target_time=st.session_state.get("brainstorm_time", 0),
+    )
+
+@st.fragment(run_every=2)
+def interaction_countdown():
+    start_time, to_remove = get_countdown_params()
+    components.countdown(
+        start_time=start_time,
+        time_to_remove=to_remove,
+        target_time=st.session_state.interaction_budget,
+    )
+
+
 def chat_flow(
     show_quick_actions: bool = False,
     show_raw_message: bool = False,
@@ -737,25 +816,28 @@ def chat_flow(
     print("Current speaker", _get_current_speaker())
     if not st.session_state.interaction_completed and _get_current_speaker() == "user":
         with st.container(horizontal=True):
-            show_end_button = (
-                st.session_state.get("budget_exhausted", False)
-                or (
-                    show_end_conversation_button
-                    and st.session_state.policy.wants_to_end_conversation
-                )
+            show_end_button = st.session_state.get("budget_exhausted", False) or (
+                show_end_conversation_button
+                and st.session_state.policy.wants_to_end_conversation
             )
             if show_end_button:
-                if st.button("End conversation", type="primary"):
+                btn_txt = "End conversation"
+                if st.session_state.get("budget_exhausted", False):
+                    btn_txt += " (time exhausted)"
+                if st.button(btn_txt, type="primary"):
                     if st.session_state.get("budget_exhausted", False):
                         end_interaction("budget_exhausted")
                     else:
                         end_interaction("user_end")
             # Disable input when budget is exhausted
-            if not st.session_state.get("budget_exhausted", False):
-                if user_msg := st.chat_input("Type your message here...", key="chat_input"):
-                    _log_user_message(
-                        user_msg, collect_feedback=(message_feedback_form is not None)
-                    )
+            if user_msg := st.chat_input(
+                "Type your message here...",
+                key="chat_input",
+                disabled=st.session_state.get("budget_exhausted", False),
+            ):
+                _log_user_message(
+                    user_msg, collect_feedback=(message_feedback_form is not None)
+                )
 
     # Display message feedback form if appropriate
     # Note: the feedback time currently DOES count towards the interaction budget
