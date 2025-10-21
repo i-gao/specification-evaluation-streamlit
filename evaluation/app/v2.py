@@ -573,7 +573,7 @@ def brainstorming_screen():
             elapsed = _time.time() - brainstorm_start_time
             if elapsed < brainstorm_time:
                 st.error(
-                    f"Please spend at least {brainstorm_time} seconds reflecting before continuing. You've spent {elapsed} seconds so far."
+                    f"Please spend at least {brainstorm_time} seconds reflecting before continuing. You've spent {elapsed:.0f} seconds so far."
                 )
                 return False
 
