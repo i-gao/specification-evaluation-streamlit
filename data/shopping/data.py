@@ -61,7 +61,7 @@ You will need to use the tools on the side panel to get more information about t
 To maximize your score, you may have to recommend different products and ask the client to evaluate them. The client's score will be between 0 and 100.
 """
 
-COMMONSENSE_DESCRIPTION = "Recommend products from the given catalog. All products must come from the catalog."
+COMMONSENSE_DESCRIPTION = "Recommend products from the given catalog. All products must come from the catalog. You can assume that all sizes are in stock."
 
 PREDICTION_FMT_INSTRUCTIONS = "Return the article_ids of the products to recommend to the customer, separated by commas and wrapped in <cart></cart>, e.g.: '<cart>123456,123457,123458</cart>'."
 

@@ -1085,8 +1085,8 @@ def output_to_streamlit(
 
     if js is None or start_end is None:
         # No travel plan, just render the message with travel mentions
-        st.write(
-            replace_tags_with_link(msg, "travel", f"#{unique_id}"),
+        st.markdown(
+            replace_tags_with_link(msg, "travel", f"#{unique_id}"), unsafe_allow_html=True,
         )
         if mentioned_travel:
             with st.expander("Travel items mentioned in message", expanded=True):

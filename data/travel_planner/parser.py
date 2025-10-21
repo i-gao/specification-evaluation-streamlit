@@ -20,6 +20,10 @@ def parse_travel_plan(
         print(f"Error parsing travel plan: {yhat}")
         return None
 
+    if not isinstance(plan, list) or not all(isinstance(day, dict) for day in plan):
+        print(f"Error parsing travel plan: {plan}")
+        return None
+
     # Do some automatic correction for missing fields
     for day in plan:
         for field in [

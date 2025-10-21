@@ -35,6 +35,28 @@ ASSISTANT_INSTRUMENTS = {
         "The assistant would think for too long before responding.",
     ]
 }
+ASSISTANT_INSTRUMENTS_DIRECTIONS = {
+    "technical_competence": {
+        "The assistant seemed highly competent at the task.": 1,
+        "Working with the assistant was more efficient than using a web browser to solve the task myself.": 1,
+        "It took the assistant multiple tries before executing the task correctly.": -1,
+    },
+    "transparency": {
+        "The assistant was honest about what it could or couldn't do.": 1,
+        "The assistant kept me updated on what it was trying throughout the conversation.": 1,
+        "The assistant thoroughly considered all options while helping me.": 1,
+    },
+    "personalization": {
+        "The assistant's recommendation felt generic / one-size-fits-all.": -1,
+        "The assistant understood and cared about my personal preferences / goals.": 1,
+        "I trust that the assistant found the best option for me.": 1,
+    },
+    "time": {
+        "The assistant talked too much.": -1,
+        "Reading the assistant's messages took a long time.": -1,
+        "The assistant would think for too long before responding.": -1,
+    },
+}
 INSTRUMENT_LIKERT = [
     "Strongly disagree",
     "Disagree",

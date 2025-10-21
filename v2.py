@@ -16,6 +16,7 @@ from evaluation.app.control_flow import (
     end_interaction,
     finish_onboarding,
     complete_brainstorming,
+    save_session_data,
 )
 import evaluation.app.authentication as authentication
 import evaluation.app.forms as forms
@@ -527,6 +528,9 @@ def evaluation_screen():
     header()
 
     components.render_specification_banner()
+
+    if st.button("Emergency save (in case of bugs)"):
+        save_session_data(skip_grading=True)
 
     evaluation_flow(
         chat_evaluation_form=forms.interaction_evaluation,

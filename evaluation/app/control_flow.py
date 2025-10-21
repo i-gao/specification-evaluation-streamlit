@@ -10,7 +10,9 @@ import warnings
 import copy
 
 if str(Path(__file__).parent.parent.parent) not in sys.path:
-    sys.path.append(str(Path(__file__).parent.parent.parent)) # evaluation/app/ -> evaluation/ -> root
+    sys.path.append(
+        str(Path(__file__).parent.parent.parent)
+    )  # evaluation/app/ -> evaluation/ -> root
 
 from data.dataset import FixedSpecification, CustomSpecification
 from user_simulator import get_simulator
@@ -385,13 +387,14 @@ def end_interaction(end_reason: str):
 
 ######### HELPER FUNCTIONS #########
 
+
 def get_model_api_key(model_name: str) -> dict:
     """
     Determine which API key to use based on the model type.
-    
+
     Args:
         model_name: The name of the model to check.
-        
+
     Returns:
         dict: Dictionary containing the appropriate api_key parameter for model_kwargs.
     """
@@ -401,6 +404,7 @@ def get_model_api_key(model_name: str) -> dict:
     else:
         # Use Anthropic API key from secrets (assumes non-OpenAI models are Anthropic)
         return {"api_key": st.secrets.get("anthropic_api_key")}
+
 
 def check_intermediate_save():
     """
@@ -513,7 +517,7 @@ def get_config():
         "policy_kwargs": {
             "max_react_steps": st.session_state.max_react_steps,
             "model_name": st.session_state.model_selector,
-            "verbosity": 2,
+            "verbosity": 2 if st.secrets.get("debug_mode", False) else 0,
             "interaction_budget": st.session_state.interaction_budget,
             "actions": st.session_state.spec.public_tools,
             "prediction_fmt_instructions": (
@@ -799,7 +803,7 @@ def chat_flow(
                     st.session_state.user_costs[-1],
                 )
                 if response is None:
-                    st.stop()    
+                    st.stop()
             except Exception as e:
                 st.error(f"Error: {str(e)}")
                 st.stop()

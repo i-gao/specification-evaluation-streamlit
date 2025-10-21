@@ -392,17 +392,22 @@ def _convert_to_dataclass(data: Dict[str, Any], target_class: type) -> Any:
 
 def load_interaction(
     path: str,
+    connection = None,
 ) -> Interaction:
     """
     Load the results of an interaction evaluation from a file as an Interaction object.
     Properly reconstructs all dataclass objects from JSON data.
     """
     try:
-        with open(path, "r") as f:
-            data = json.load(f)
-            if "filename" not in data:
-                data["filename"] = os.path.basename(path)
-            return _convert_to_dataclass(data, Interaction)
+        # use connection if provided, otherwise fall back to direct file operations
+        if connection is not None:
+            data = connection.read(path)
+        else:
+            with open(path, "r") as f:
+                data = json.load(f)
+        if "filename" not in data:
+            data["filename"] = os.path.basename(path)
+        return _convert_to_dataclass(data, Interaction)
     except Exception as e:
         print(f"Error loading interaction from {path}: {e}")
         raise e
