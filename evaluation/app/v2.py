@@ -279,6 +279,7 @@ def header():
                     "Task Instructions",
                     on_click=task_instructions_dialog,
                     type="primary",
+                    disabled=st.session_state.waiting_for_spinner
                 )
 
         # if not DEBUG_MODE and st.session_state.current_screen == "chat_screen":
