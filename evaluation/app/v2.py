@@ -361,12 +361,9 @@ def dataset_screen():
         if page_index == 0:
             # Page 1: General task explanation
             st.session_state.spec.render_task_explanation()
-            round_time = (
-                st.session_state.interaction_budget
-                + st.session_state.evaluation_minimum
-            )
+            round_time = st.session_state.interaction_budget
             st.markdown(
-                f"You will have {round_time} seconds ({round_time // 60} minutes) to complete the task. It is okay if you do not completely finish the task within this time. Both your typing time and the assistant's thinking time count towards the budget."
+                f"You will have {round_time} seconds ({round_time // 60} minutes) to complete the task. It is okay if you do not completely finish the task within this time. Only your typing time counts towards the budget."
             )
 
             # Show different buttons based on spec type
@@ -449,9 +446,6 @@ def _custom_chat_screen():
 
     st.markdown(
         ":small[Work with the AI assistant to complete the following task. Remember, create artifacts that are **maximally useful and realistic for *you***!]"
-    )
-    st.markdown(
-        ":small[You should not need to access any external websites. The AI only needs to show you a final recommendation; it does not have the ability to do anything else (e.g. place orders in the real world).]"
     )
     components.render_specification_banner()
 

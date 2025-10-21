@@ -237,7 +237,6 @@ class InteractionPolicy:
         Raises:
             AssertionError: If user_response and user_cost are not provided on all turns except the first
         """
-        print("Calling __call__; current_unanswered_msg", self.current_unanswered_msg)
         if self._model_lock:
             print("Model is locked")
             return
@@ -265,7 +264,6 @@ class InteractionPolicy:
                 self.conversation_history[-1].user_msg = user_response
                 self.conversation_history[-1].user_cost = user_cost
 
-        print("Calling generate_message")
         assistant_msg, wants_to_end_conversation = self.generate_message(user_response)
         assistant_cost = sum(
             [

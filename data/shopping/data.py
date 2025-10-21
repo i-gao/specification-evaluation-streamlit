@@ -145,8 +145,8 @@ class ShoppingDataset(SpecificationCollection):
                 input_type="slider",
                 label="How much are you willing to spend? (Budget in dollars)",
                 required=True,
-                help=f"Your maximum budget for this shopping trip (minimum: \${30:.2f})",
-                min_value=30,
+                help=f"Your maximum budget for this shopping trip (minimum: \${40:.2f})",
+                min_value=40,
                 value=150,
                 step=10,
                 max_value=300,
@@ -545,6 +545,9 @@ class ShoppingDataset(SpecificationCollection):
 
         st.markdown(
             "You can assume that all products are available in all sizes, so there is no need to worry about size."
+        )
+        st.markdown(
+            "You should not need to access any external websites. The AI only needs to show you a final recommendation; it does not have the ability to do anything else (e.g. place orders in the real world)."
         )
 
 
