@@ -1,0 +1,5 @@
+Request a clean, two-column webpage layout with a white background. The left column (larger) has a top header with black text "Deals Episodes," followed below by a large green title in a serif font, a small tag line in muted brownish text, and beneath that a large rectangular blue image with the source 'rick.jpg'. Below the image, include a centered italic subtitle and multiple paragraphs of black body text with bold subheadings and bullet points spaced comfortably. 
+
+The right column (narrower) includes a small black header "Recent Episodes," followed by three small stacked blue thumbnail images (also 'rick.jpg') aligned left, each with a green heading link to the right and a smaller burnt orange "WATCH EPISODE" link below the heading, aligned with it. 
+
+At the bottom spanning the full width, place a pale green footer with three columns of green text links, each column aligned vertically and separated by spacing. The fonts throughout should be simple serif styles. Maintain ample white space around elements for clarity.

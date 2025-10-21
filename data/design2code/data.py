@@ -14,7 +14,6 @@ import json
 from langchain_core.tools import tool
 import uuid
 import streamlit as st
-import functools
 
 from data.dataset import (
     SpecificationCollection,
@@ -24,18 +23,14 @@ from data.dataset import (
     FormElement,
 )
 from utils.streamlit_types import DisplayElement
-from utils.misc import get_recursive, parse_json, subset_data, parse_code
+from utils.misc import get_recursive, parse_json, subset_data
 from data.actions import Action
 
 from utils.model import init_langchain_model, encode_image_as_user_msg
 from utils.code_sandbox import run_python_script_with_json_input
 
-from bs4 import BeautifulSoup
-import html
-
-
-def is_html(s: str) -> bool:
-    return bool(BeautifulSoup(s, "html.parser").find())
+from data.design2code.parser import is_html, _render_html, parse_html
+import data.design2code.streamlit_render as renderer
 
 
 DEV_FRAC = 0.25
@@ -53,10 +48,8 @@ The description of the design describes the idea for the webpage. However, some 
 The score for the generated webpage will be between 0 and 100. If the score is 100, the webpage exactly matches the design. If the score is 0, the webpage is completely different from the design.
 """
 
-
-COMMONSENSE_INSTRUCTIONS = """Note that in this task, we are not able to put pictures on webpages or use animations. Therefore, all images should be replaced with a placeholder image called "rick.jpg". 
-
-Websites should be a single page (no navigation between pages), but the webpage can be as long as you want."""
+FMT_INSTRUCTIONS = "To render a preview of the webpage, include the HTML wrapped in ```html\n...\n``` tags."
+COMMONSENSE_INSTRUCTIONS = "Websites must be static and cannot use networking / Javascript. To render a blue rectangle, you can use an image named 'rick.jpg'. All code will go into a single, self-contained HTML file."
 
 
 def render_fixed_task_explanation():
@@ -173,7 +166,7 @@ class Design2CodeDataset(SpecificationCollection):
     def __init__(
         self,
         dev: bool = False,
-        docker_image: str = None,
+        docker_image: str = "design2code",
         judge_model_name: str = "gpt-4o-mini",
         fixed_indexes: Optional[List[int]] = None,
         custom_indexes: Optional[List[int]] = None,
@@ -188,17 +181,15 @@ class Design2CodeDataset(SpecificationCollection):
         )
         task_paths = subset_data(task_paths, DEV_FRAC, 1.0, dev)
         self._task_paths = task_paths
+        self._custom_intents = json.load(
+            open(f"{DATASET_ROOT}/assets/custom_intents.json")
+        )
         self.fixed_length = len(task_paths)
-        self.custom_length = 1  # Only one custom specification for design2code
+        self.custom_length = len(self._custom_intents)
         self._docker_image = docker_image
         self._judge_model_name = judge_model_name
         self._judge_model = init_langchain_model(judge_model_name)
         self._persist_docker_container = persist_docker_container
-
-        try:
-            self._y0 = open(f"{DATASET_ROOT}/assets/y0.html").read()
-        except Exception:
-            self._y0 = None
 
         # All subclasses must have these attributes set
         self._finish_init()
@@ -234,6 +225,7 @@ class Design2CodeDataset(SpecificationCollection):
             # persist one docker container
             if self._persist_docker_container and self._docker_image is not None:
                 from llm_sandbox import SandboxSession
+
                 session = SandboxSession(image=self._docker_image)
                 session.open()
                 container_id = session.container.id
@@ -261,6 +253,9 @@ class Design2CodeDataset(SpecificationCollection):
                 },
                 reward_fn_tool_name="score_html_design",
                 reward_fn_tool_description="Score the HTML code against the design requirements",
+                msg_fmt_instructions=FMT_INSTRUCTIONS,
+                prediction_fmt_instructions=FMT_INSTRUCTIONS,
+                commonsense_description=COMMONSENSE_INSTRUCTIONS,
                 ystar=f"```html\n{html}\n```",
                 # metric_name=None,  # Not provided
                 # baseline_scores=None,  # Not provided
@@ -273,7 +268,7 @@ class Design2CodeDataset(SpecificationCollection):
                     model_name=self._judge_model_name,
                     judge_model=self._judge_model,
                 ),
-                render_msg_fn=lambda msg: render_output(
+                render_msg_fn=lambda msg: renderer.render_output(
                     msg,
                     docker_image=self._docker_image,
                     docker_container_id=container_id,
@@ -282,12 +277,6 @@ class Design2CodeDataset(SpecificationCollection):
                 name=f"design2code_{ix}",
                 container_ids=[container_id],
                 user_expertise_form=self._create_user_expertise_form(),
-                render_evaluation_fn=lambda **kwargs: render_eval(
-                    **kwargs,
-                    docker_image=self._docker_image,
-                    docker_container_id=container_id,
-                    test_id=id,
-                ),
             )
             spec._container_ids = [container_id]
             specs[ix] = spec
@@ -304,9 +293,14 @@ class Design2CodeDataset(SpecificationCollection):
         for ix in indexes:
             # Generate a unique fake test_id for the custom spec so it can still render HTML
             fake_test_id = f"custom_{uuid.uuid4().hex[:8]}"
+            custom_intent = self._custom_intents[ix]["intent"]
+            y0_file = f"{DATASET_ROOT}/assets/y0/custom_{ix}_*.html"
+            y0_files = glob.glob(y0_file)
+            y0_files = [open(y0_file).read() for y0_file in y0_files]
 
             if self._persist_docker_container and self._docker_image is not None:
                 from llm_sandbox import SandboxSession
+
                 session = SandboxSession(image=self._docker_image)
                 session.open()
                 container_id = session.container.id
@@ -316,10 +310,7 @@ class Design2CodeDataset(SpecificationCollection):
             spec = CustomSpecification(
                 dataset_name=self.dataset_name,
                 index=f"custom_{ix}",
-                user_specification_form_initial=[],
-                user_specification_form_final=[],
-                # user_specification_callback=None,  # Not provided
-                # user_specification_callback_kwargs=None,  # Not provided
+                commonsense_description=COMMONSENSE_INSTRUCTIONS,
                 validity_fn=validity_fn,
                 validity_kwargs={
                     "test_id": fake_test_id,
@@ -328,19 +319,30 @@ class Design2CodeDataset(SpecificationCollection):
                 },
                 validity_fn_tool_name="check_html_validity",
                 validity_fn_tool_description="Check if the HTML code compiles and renders without errors",
-                initial_specification="Create a personal website for yourself / brand / social group / etc.",
-                y0=self._y0,  # Not provided
+                initial_specification=f"Create a {custom_intent}",
+                msg_fmt_instructions=FMT_INSTRUCTIONS,
+                prediction_fmt_instructions=FMT_INSTRUCTIONS,
+                y0=y0_files,  # Not provided
                 render_task_explanation=render_custom_task_explanation,
                 actions=[],
-                render_msg_fn=lambda msg: render_output(
+                render_msg_fn=lambda msg: renderer.render_output(
                     msg,
                     docker_image=self._docker_image,
                     docker_container_id=container_id,
                     test_id=fake_test_id,
                 ),
-                render_comparison_fn=lambda y1, y2, **kwargs: render_comparison(
+                render_comparison_fn=lambda y1,
+                y2,
+                **kwargs: renderer.render_comparison(
                     y1, y2, self._docker_image, container_id, fake_test_id, **kwargs
                 ),
+                render_evaluation_fn=lambda **kwargs: renderer.render_eval(
+                    **kwargs,
+                    docker_image=self._docker_image,
+                    docker_container_id=container_id,
+                    test_id=fake_test_id,
+                ),
+                render_evaluation_kwargs={"y0": y0_files},
                 name=f"custom_design2code_{ix}",
                 state_files=[],
                 files_to_clean=[],
@@ -373,17 +375,14 @@ def validity_fn(
     Returns:
         Tuple[bool, dict]: (is_valid, metadata)
     """
-    parsed_yhat = parse_code(yhat, language="html")
+    parsed_yhat = parse_html(yhat)
     if parsed_yhat is None:
-        if is_html(yhat):
-            return True, {}
-        else:
-            if raise_errors:
-                raise ValueError("Could not parse HTML code from message")
-            return False, {
-                "error": "No HTML code found",
-                "violated_constraints": ["No HTML code found"],
-            }
+        if raise_errors:
+            raise ValueError("Could not parse HTML code from message")
+        return False, {
+            "error": "No HTML code found",
+            "violated_constraints": ["No HTML code found"],
+        }
 
     is_valid, metadata = is_html(parsed_yhat), {"parsed_code": parsed_yhat}
     if not is_valid:
@@ -418,20 +417,18 @@ def reward_fn(
     Returns:
         Tuple[float, dict]: (score, metadata)
     """
-    parsed_yhat = parse_code(yhat, language="html")
+    parsed_yhat = parse_html(yhat)
     if parsed_yhat is None:
-        if is_html(yhat):
-            parsed_yhat = yhat
-        else:
-            if raise_errors:
-                raise ValueError("No code found in the response")
-            return (
-                float("-inf"),
-                {"evaluation_error": "No code found in the response"},
-            )
+        if raise_errors:
+            raise ValueError("No code found in the response")
+        return float("-inf"), {"evaluation_error": "No code found in the response"}
 
     # Execute
     try:
+        # When not using Docker, run from local reward_utils directory so relative imports work
+        reward_utils_dir = os.path.join(DATASET_ROOT, "reward_utils")
+        local_root_dir = reward_utils_dir if (docker_image is None and docker_container_id is None) else "/sandbox"
+
         run_id, log, output_filenames = run_python_script_with_json_input(
             input_dict={"predicted_html": parsed_yhat, "test_id": test_id},
             command="python check_correctness.py {uuid}",
@@ -439,16 +436,23 @@ def reward_fn(
             docker_container_id=docker_container_id,
             input_filename="_solution_to_grade_{uuid}.json",
             output_filenames=["_solution_output_{uuid}.pkl"],
+            root_dir=local_root_dir,
         )
     except Exception as e:
         if raise_errors:
             raise e
         return float("-inf"), {"evaluation_error": str(e)}
 
-    result = dill.load(open(output_filenames[0], "rb"))
+    output_file = output_filenames[0]
+    output_path = (
+        os.path.join(local_root_dir, output_file)
+        if (docker_image is None and docker_container_id is None)
+        else output_file
+    )
+    result = dill.load(open(output_path, "rb"))
     try:
-        os.remove(output_filenames[0])
-    except:
+        os.remove(output_path)
+    except Exception:
         pass
 
     score = result["final_score"]
@@ -470,6 +474,17 @@ def get_actions(
     """
 
     @tool(parse_docstring=True)
+    def render_html(code: str) -> str:
+        """
+        Renders the given HTML code and returns the path to the rendered image.
+        The code should be self-contained HTML code that can be executed in a browser.
+
+        Args:
+            code (str): The HTML code to render.
+        """
+        return _render_html(code, docker_image, docker_container_id, test_id)
+
+    @tool(parse_docstring=True)
     def render_html_and_reflect_on_design(code: str) -> List[dict]:
         """
         Takes a screenshot of the webpage generated by the given code and compares
@@ -480,7 +495,7 @@ def get_actions(
         Args:
             code (str): The HTML code to render.
         """
-        code = parse_code(code, language="html")
+        code = parse_html(code)
         if code is None:
             raise ValueError("No code found in the input")
         image = _render_html(code, docker_image, docker_container_id, test_id)
@@ -488,7 +503,7 @@ def get_actions(
         prompt = [
             {
                 "role": "system",
-                "content": f"Compare the following screenshot of a webpage to the text description of the intended design. Go sentence by sentence through the text description, and reflect on how well the webpage matches the design. Do not offer suggestions for improvement.",
+                "content": "Compare the following screenshot of a webpage to the text description of the intended design. Go sentence by sentence through the text description, and reflect on how well the webpage matches the design. Do not offer suggestions for improvement.",
             },
             encode_image_as_user_msg(
                 image=image, caption=text_description, model_name=model_name
@@ -509,150 +524,10 @@ def get_actions(
             is_human=False,
             name="Render HTML and reflect on design",
         ),
-    ]
-
-
-@functools.lru_cache(maxsize=50)
-def _render_html(
-    code: str, docker_image: str, docker_container_id: str, test_id: int
-) -> str:
-    """
-    Renders the given HTML code and returns the path to the rendered image.
-    """
-    try:
-        run_id, log, output_filenames = run_python_script_with_json_input(
-            input_dict={"predicted_html": code, "test_id": test_id},
-            command="python screenshot_single.py --html {input_filename} --png _solution_output.png",
-            docker_image=docker_image,
-            docker_container_id=docker_container_id,
-            output_filenames=["_solution_output.png"],
-        )
-    except Exception as e:
-        raise e
-
-    img = Image.open(output_filenames[0])
-    try:
-        os.remove(output_filenames[0])
-    except:
-        pass
-    return img
-
-
-def render_output(
-    msg: str,
-    docker_image: str = None,
-    docker_container_id: str = None,
-    test_id: str = None,
-    inject_styles_raw_code: str = "",
-):
-    """
-    Convert a message containing HTML code to markdown.
-    Shows both the code (in a collapsible section) and the rendered image.
-
-    Args:
-        msg: The message containing the HTML code
-        docker_image: Docker image for rendering HTML (optional)
-        docker_container_id: Docker container ID for rendering HTML (optional)
-        test_id: Test ID for the design2code task (optional)
-    """
-    # Extract HTML code from the message
-    html_code, start_end = parse_code(
-        msg, language="html", return_start_end=True, return_none_if_no_code=True
-    )
-    if html_code is None:
-        if is_html(msg):
-            html_code = msg
-            start_end = (0, len(msg))
-        else:
-            st.write(msg)
-            return
-
-    st.write(msg[: start_end[0]])
-
-    # Create markdown with rendered image
-    try:
-        # Use the existing render function to get the image
-        rendered_image = _render_html(
-            html_code, docker_image, docker_container_id, test_id
-        )
-
-        # Put image in buffer for streamlit
-        from io import BytesIO
-
-        buffer = BytesIO()
-        rendered_image.save(buffer, format="PNG")
-
-        # Create image HTML with base64 data
-        st.image(buffer, width="stretch", caption="Generated web design")
-    except Exception as e:
-        st.write(
-            ":red-background[:material/error: *The website code had errors in it and did not compile.*]"
-        )
-
-    with st.expander("Raw HTML code"):
-        st.code(html.escape(html_code))
-
-    if start_end[1] < len(msg):
-        st.write(msg[start_end[1] :])
-
-
-def render_comparison(
-    y1: str,
-    y2: str,
-    docker_image: str,
-    docker_container_id: str,
-    test_id: str,
-    **kwargs,
-) -> str:
-    """
-    Compare two HTML codes and return a markdown string.
-    """
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("## Design A")
-        render_output(y1, docker_image, docker_container_id, test_id)
-    with col2:
-        st.markdown("## Design B")
-        render_output(y2, docker_image, docker_container_id, test_id)
-
-def render_eval(
-    *,
-    final_prediction: str,
-    docker_image: str,
-    docker_container_id: str,
-    test_id: str,
-):
-    """
-    Render the evaluation for the design2code task.
-    """
-    import streamlit as st
-    from utils.streamlit_types import FormElement, form_element_to_streamlit
-
-    st.markdown("## Evaluate the assistant's design2code task")
-    with st.container(key="design2code_eval_display", width="stretch"):
-        render_output(final_prediction, docker_image, docker_container_id, test_id)
-
-    form_elements: List[FormElement] = [
-        FormElement(
-            input_type="text_area",
-            label="Describe the pros and cons of the design in a few sentences.",
-            height=120,
+        Action(
+            fn=render_html,
+            is_public=False,
+            is_human=False,
+            name="Render HTML",
         ),
     ]
-
-    with st.form(key="design2code_custom_eval_form"):
-        feedback: Dict[str, Any] = {}
-        for element in form_elements:
-            st_fn, st_kwargs, required = form_element_to_streamlit(element)
-            value = st_fn(**st_kwargs)
-            label = element.get("label", "question")
-            feedback[label] = value
-        submit = st.form_submit_button("Submit", type="primary")
-        if submit:
-            for element in form_elements:
-                if element.get("required", False):
-                    label = element.get("label")
-                    if not feedback.get(label):
-                        st.error("Please fill in all required fields.")
-                        return False, None
-    return False, None

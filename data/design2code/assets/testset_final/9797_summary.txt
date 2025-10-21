@@ -1,0 +1,7 @@
+Create a clean webpage with a light grey header bar containing the site name "Alpaca Farm (beta)" left aligned and navigation links "About," "Quizzes," "Create a Quiz," and "Players" right aligned in a small, subtle grey font. Below the header, place a large title on the left side in black text with a smaller grey subtitle next to it. Underneath, list Champion(s) and Runner(s)-Up with names aligned to the right and small grey captions below each name. 
+
+Below this, show a "Quiz Description" section in black text with a smaller explanatory line underneath. Then display a full results table with a white background, thin grey borders, and alternating light green shading on some cells. The table's header row should have grey background with center-aligned bold text, and the leftmost columns should have bold text. The table includes columns labeled Rank, Player, Total, %ile, and numbered columns from 1 to 15.
+
+On the right side of the page, add a vertical stack of rectangular question boxes with a light blue header containing the question label (like "Question 1"), a white content area with the question text, and a green bold clickable text area below reading "Click to Reveal Answer." Each question box is separated by subtle spacing. The background of the page is white, with a minimalistic and clean font style throughout for clarity.
+
+At the bottom of the page, include a narrow footer with small, light grey text reading "Created by Tablesaw Tablesawsen" on the left and "Contact: [EMAIL REDACTED]" on the right in the same style.

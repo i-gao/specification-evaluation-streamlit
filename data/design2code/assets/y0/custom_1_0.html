@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crumb - Artisan Bakery</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&family=Cabin:wght@500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Crimson Text', serif;
+            background: linear-gradient(135deg, #f5ebe0 0%, #e3d5ca 100%);
+            color: #5a4a3a;
+            overflow-x: hidden;
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(to bottom, rgba(245, 235, 224, 0.95), rgba(227, 213, 202, 0.95));
+            padding: 2rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            border-bottom: 3px solid #d4a574;
+            box-shadow: 0 4px 20px rgba(90, 74, 58, 0.1);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-family: 'Cabin', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #8b6f47;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        nav ul {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+        
+        nav a {
+            color: #5a4a3a;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 600;
+            position: relative;
+            transition: color 0.3s;
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #8b6f47;
+            transition: width 0.3s;
+        }
+        
+        nav a:hover {
+            color: #8b6f47;
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 6rem 5%;
+            text-align: center;
+            position: relative;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 10%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(212, 165, 116, 0.2), transparent);
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 10%;
+            right: 15%;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(139, 111, 71, 0.15), transparent);
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite 2s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero h1 {
+            font-family: 'Cabin', sans-serif;
+            font-size: 4rem;
+            font-weight: 700;
+            color: #8b6f47;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            letter-spacing: 1px;
+            animation: slideDown 1s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .hero p {
+            font-size: 1.5rem;
+            color: #6b5a4a;
+            margin-bottom: 2rem;
+            animation: fadeIn 1s ease-out 0.3s both;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, #8b6f47 0%, #a67c52 100%);
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.3rem;
+            font-weight: 600;
+            border-radius: 50px;
+            box-shadow: 0 6px 20px rgba(139, 111, 71, 0.3);
+            transition: all 0.3s;
+            animation: fadeIn 1s ease-out 0.6s both;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(139, 111, 71, 0.4);
+            background: linear-gradient(135deg, #a67c52 0%, #8b6f47 100%);
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 5rem 5%;
+            background: rgba(255, 255, 255, 0.4);
+        }
+        
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .section-title {
+            font-family: 'Cabin', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            text-align: center;
+            color: #8b6f47;
+            letter-spacing: 1px;
+            margin-bottom: 3rem;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 2.5rem;
+            border-radius: 30px;
+            border: 3px solid #d4a574;
+            box-shadow: 0 10px 30px rgba(90, 74, 58, 0.1);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(212, 165, 116, 0.1), transparent);
+            transition: transform 0.5s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px) rotate(1deg);
+            box-shadow: 0 15px 40px rgba(90, 74, 58, 0.2);
+        }
+        
+        .feature-card:hover::before {
+            transform: translate(25%, 25%);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.8rem;
+            color: #8b6f47;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .feature-card p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #6b5a4a;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Menu Section */
+        .menu {
+            padding: 5rem 5%;
+        }
+        
+        .menu-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .flavor-item {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border-radius: 25px;
+            border-left: 6px solid #8b6f47;
+            box-shadow: 0 5px 20px rgba(90, 74, 58, 0.08);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .flavor-item::after {
+            content: '';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(212, 165, 116, 0.2), transparent);
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        
+        .flavor-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 8px 25px rgba(90, 74, 58, 0.15);
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        .flavor-item:hover::after {
+            width: 120px;
+            height: 120px;
+        }
+        
+        .flavor-item h3 {
+            font-family: 'Cabin', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #8b6f47;
+            margin-bottom: 0.5rem;
+        }
+        
+        .flavor-item p {
+            font-size: 1.1rem;
+            color: #6b5a4a;
+            line-height: 1.6;
+        }
+        
+        /* Footer */
+        footer {
+            background: linear-gradient(to top, rgba(139, 111, 71, 0.2), rgba(212, 165, 116, 0.1));
+            padding: 3rem 5%;
+            text-align: center;
+            border-top: 3px solid #d4a574;
+        }
+        
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .footer-content h3 {
+            font-family: 'Cabin', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #8b6f47;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-content p {
+            font-size: 1.2rem;
+            color: #6b5a4a;
+            margin-bottom: 0.5rem;
+        }
+        
+        .social-links {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+        
+        .social-links a {
+            width: 50px;
+            height: 50px;
+            background: rgba(139, 111, 71, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #8b6f47;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: 2px solid #d4a574;
+        }
+        
+        .social-links a:hover {
+            background: #8b6f47;
+            color: #fff;
+            transform: translateY(-5px) rotate(360deg);
+        }
+        
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+            }
+            
+            nav ul {
+                gap: 1rem;
+            }
+            
+            nav a {
+                font-size: 1rem;
+            }
+            
+            .hero h1 {
+                font-size: 3rem;
+            }
+            
+            .hero p {
+                font-size: 1.2rem;
+            }
+            
+            .section-title {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">Crumb</div>
+            <nav>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#bakery">Bakery</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Handcrafted Bread & Pastries, Baked with Love</h1>
+            <p>Farm-fresh ingredients, locally sourced, artisan baked. Every loaf tells a story of our community and commitment to quality.</p>
+            <a href="#bakery" class="cta-button">Explore Our Bakery</a>
+        </div>
+    </section>
+
+    <section class="features" id="about">
+        <div class="features-container">
+            <h2 class="section-title">What Makes Us Special</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🌾</div>
+                    <h3>Stone Ground</h3>
+                    <p>We use stone-milled organic flour from local mills, creating rich flavors and wholesome nutrition in every bite.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🥖</div>
+                    <h3>Long Fermentation</h3>
+                    <p>Our doughs rest and develop for up to 48 hours, creating complex flavors and easier digestion through natural processes.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔥</div>
+                    <h3>Wood-Fired Ovens</h3>
+                    <p>Baked in our traditional brick ovens, each loaf gets the perfect crust and tender crumb that only fire can create.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="menu" id="bakery">
+        <div class="menu-container">
+            <h2 class="section-title">Our Daily Breads & Pastries</h2>
+            
+            <div class="flavor-item">
+                <h3>Sourdough Country Loaf</h3>
+                <p>Our signature bread with a crispy crust and open crumb. Made with 100-year-old starter and fermented for 24 hours.</p>
+            </div>
+            
+            <div class="flavor-item">
+                <h3>Whole Grain Seeded</h3>
+                <p>Hearty multigrain bread studded with sunflower, pumpkin, and sesame seeds. Perfect for sandwiches or toasted with butter.</p>
+            </div>
+            
+            <div class="flavor-item">
+                <h3>Honey Oat Sandwich</h3>
+                <p>Soft, tender crumb sweetened with local honey and rolled oats. A family favorite for every meal.</p>
+            </div>
+            
+            <div class="flavor-item">
+                <h3>Rosemary Olive Focaccia</h3>
+                <p>Fluffy Italian flatbread with fresh rosemary and Kalamata olives. Drizzled with olive oil and finished with flaky salt.</p>
+            </div>
+            
+            <div class="flavor-item">
+                <h3>Cinnamon Swirl</h3>
+                <p>Buttery brioche dough layered with cinnamon sugar and topped with cream cheese glaze. Weekend mornings made better.</p>
+            </div>
+            
+            <div class="flavor-item">
+                <h3>Rustic Baguette</h3>
+                <p>Classic French bread with a crackling crust and airy interior. Baked fresh three times daily.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact">
+        <div class="footer-content">
+            <h3>Visit Us Today</h3>
+            <p>123 Main Street, Hometown</p>
+            <p>Open Daily: 11am - 9pm</p>
+            <p>Phone: (555) 123-4567</p>
+            <div class="social-links">
+                <a href="#">📘</a>
+                <a href="#">📷</a>
+                <a href="#">🐦</a>
+            </div>
+            <p style="margin-top: 2rem; font-size: 1rem; opacity: 0.8;">© 2025 Crumb Bakery. Crafted with love.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoops - Artisan Ice Cream</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Quicksand', 'Poppins', 'Nunito', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #ffd1dc 0%, #e0f4ff 50%, #fff5e6 100%);
+            color: #5a4a6a;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 1rem;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 4rem;
+            color: #ff69b4;
+            text-shadow: 3px 3px 0 #ffd1dc, 6px 6px 0 #e0f4ff;
+            margin-bottom: 0.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            color: #9370db;
+            font-style: italic;
+        }
+
+        .ice-cream-cone {
+            width: 80px;
+            height: 120px;
+            margin: 2rem auto;
+            position: relative;
+            animation: wiggle 2s ease-in-out infinite;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .scoop {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            position: absolute;
+            left: 5px;
+        }
+
+        .scoop-1 { background: #ffb3d9; top: 0; }
+        .scoop-2 { background: #b3e5fc; top: 40px; }
+        .scoop-3 { background: #fff9c4; top: 80px; }
+
+        .cone {
+            width: 0;
+            height: 0;
+            border-left: 40px solid transparent;
+            border-right: 40px solid transparent;
+            border-top: 80px solid #daa520;
+            position: absolute;
+            top: 120px;
+            background: linear-gradient(45deg, #cd853f 25%, transparent 25%, transparent 75%, #cd853f 75%, #cd853f),
+                        linear-gradient(45deg, #cd853f 25%, transparent 25%, transparent 75%, #cd853f 75%, #cd853f);
+            background-size: 10px 10px;
+            background-position: 0 0, 5px 5px;
+        }
+
+        nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            text-align: center;
+            border-radius: 50px;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            box-shadow: 0 8px 20px rgba(255, 182, 193, 0.3);
+        }
+
+        nav a {
+            color: #ff69b4;
+            text-decoration: none;
+            margin: 0 1.5rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        nav a:hover {
+            color: #9370db;
+            transform: scale(1.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .flavors {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .flavor-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 30px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flavor-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(255, 182, 193, 0.4);
+        }
+
+        .flavor-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .flavor-card:hover::before {
+            opacity: 1;
+        }
+
+        .flavor-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .flavor-card h3 {
+            color: #ff69b4;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .flavor-card p {
+            color: #7a6a8a;
+            line-height: 1.6;
+        }
+
+        .about {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 40px;
+            padding: 3rem;
+            margin-bottom: 4rem;
+            box-shadow: 0 10px 30px rgba(255, 182, 193, 0.3);
+        }
+
+        .about h2 {
+            color: #9370db;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .about p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            text-align: center;
+            color: #5a4a6a;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-top: 3px dashed #ffb3d9;
+            margin-top: 4rem;
+        }
+
+        footer p {
+            color: #9370db;
+            font-size: 1.1rem;
+        }
+
+        .sprinkles {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🍦 Scoops 🍦</h1>
+        <p class="tagline">Happiness in Every Scoop!</p>
+        <div class="ice-cream-cone">
+            <div class="scoop scoop-1"></div>
+            <div class="scoop scoop-2"></div>
+            <div class="scoop scoop-3"></div>
+            <div class="cone"></div>
+        </div>
+    </header>
+
+    <nav>
+        <a href="#flavors">Flavors</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="container">
+        <section id="flavors">
+            <div class="flavors">
+                <div class="flavor-card">
+                    <div class="flavor-icon" style="background: linear-gradient(135deg, #ffb3d9, #ff69b4);">🍓</div>
+                    <h3>Strawberry Dream</h3>
+                    <p>Fresh strawberries swirled into creamy perfection. Sweet, smooth, and simply dreamy!</p>
+                </div>
+
+                <div class="flavor-card">
+                    <div class="flavor-icon" style="background: linear-gradient(135deg, #fff9c4, #ffd54f);">🍋</div>
+                    <h3>Lemon Sunshine</h3>
+                    <p>Bright and tangy lemon sorbet that brings sunshine to every bite. Refreshingly zesty!</p>
+                </div>
+
+                <div class="flavor-card">
+                    <div class="flavor-icon" style="background: linear-gradient(135deg, #b3e5fc, #64b5f6);">🫐</div>
+                    <h3>Blueberry Bliss</h3>
+                    <p>Bursting with real blueberries in a smooth vanilla base. Pure berry bliss!</p>
+                </div>
+
+                <div class="flavor-card">
+                    <div class="flavor-icon" style="background: linear-gradient(135deg, #f8bbd0, #ec407a);">🌸</div>
+                    <h3>Rose Petal</h3>
+                    <p>Delicate rose essence with a hint of vanilla. Floral, elegant, and absolutely enchanting!</p>
+                </div>
+
+                <div class="flavor-card">
+                    <div class="flavor-icon" style="background: linear-gradient(135deg, #d1c4e9, #9575cd);">🍇</div>
+                    <h3>Lavender Honey</h3>
+                    <p>Sweet honey meets calming lavender in a magical flavor combination you'll love!</p>
+                </div>
+
+                <div class="flavor-card">
+                    <div class="flavor-icon" style="background: linear-gradient(135deg, #ffe0b2, #ffb74d);">🍑</div>
+                    <h3>Peach Paradise</h3>
+                    <p>Sun-ripened peaches create a tropical escape in ice cream form. Simply peachy!</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="about">
+            <h2>About Scoops</h2>
+            <p>Welcome to Scoops, where every scoop is made with love and the finest ingredients! We believe ice cream should bring joy, spark smiles, and create sweet memories. Our artisan flavors are handcrafted daily using local ingredients and a whole lot of magic. Come visit us and taste the difference that passion makes!</p>
+        </section>
+    </div>
+
+    <footer id="contact">
+        <p>📍 123 Sweet Street, Dessert City | ☎️ (555) SCOOP-ME | 🕐 Open Daily 11am - 10pm</p>
+        <p style="margin-top: 1rem;">© 2025 Scoops Ice Cream Shop. Made with 💕</p>
+    </footer>
+
+    <script>
+        // Create floating sprinkles
+        function createSprinkle() {
+            const sprinkle = document.createElement('div');
+            sprinkle.className = 'sprinkles';
+            sprinkle.style.left = Math.random() * 100 + '%';
+            sprinkle.style.top = Math.random() * 100 + '%';
+            sprinkle.style.background = ['#ff69b4', '#9370db', '#ffd54f', '#64b5f6', '#ff8a80'][Math.floor(Math.random() * 5)];
+            sprinkle.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            document.body.appendChild(sprinkle);
+            
+            setTimeout(() => sprinkle.remove(), 5000);
+        }
+
+        for (let i = 0; i < 20; i++) {
+            setTimeout(createSprinkle, i * 200);
+        }
+
+        setInterval(createSprinkle, 1000);
+    </script>
+</body>
+</html>

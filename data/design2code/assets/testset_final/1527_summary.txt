@@ -1,0 +1,7 @@
+Create a clean, white background webpage with a top header containing a wide blue rectangular image on the left and a smaller blue square image on the right, with centered small gray text in between. Below the header, place a horizontal black menu bar centered with black bold text links spaced evenly: Home, Guarantee, Privacy Policy, Terms of Sale. 
+
+The main content area is divided into two columns. The left column shows two small blue rectangular images side by side at the top, followed by centered bold product model text with red highlights and smaller black text. Below that, a block of red instructional text is center-aligned, followed by a large blue rectangular product image in the center. Then black paragraph text with some sections in bold red and black, detailing product information and specifications, aligned left with consistent spacing. 
+
+The right column is narrower with a vertical line separating it from the main column. It contains a small section of bold black headings and lists, with a tall vertical blue rectangular image below, and a bold black contact subtitle beneath it.
+
+The footer is a full-width dark gray background with white and light gray text divided into four columns of headings with lists underneath in smaller font. At the very bottom, center a copyright line with smaller light gray text including links. Use simple, readable fonts, with bold used for headings and important text, and consistent spacing throughout.

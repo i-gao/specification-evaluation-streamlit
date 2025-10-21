@@ -1,0 +1,11 @@
+Create a clean webpage layout with a white background and a teal footer. At the top right, place small text links "Worldwide Locations" and "Contact us" with a search bar shaped as a rounded rectangle (light gray background) and a teal rounded right end for the search button. Centered below that, put a teal rectangular button labeled "PROJECTS."
+
+Below, create a three-column main content area on a white background. On the left, have a vertical filter section with black "Filter By" heading and dropdown menus for "By Sector," "By Country," and "By Year," in light gray with subtle borders. Below this, add a small teal button labeled "VIEW PROJECTS" and some small teal text links and paragraphs beneath it.
+
+In the center column, place a blue rectangular image box (use source 'rick.jpg') with a thin border above a project title in teal serif font.
+
+On the right column, create a table with gray and light gray rows showing project details in teal text. Below the table, include multiple paragraphs and bullet lists in a simple black font describing the project. 
+
+At the bottom, add a section labeled "OTHER PROJECTS IN THIS SECTOR" in teal serif font with a horizontal rule underneath. Below this, display three equal-sized blue rectangular images side by side (src 'rick.jpg') each with a narrow light gray label bar at the bottom with small text.
+
+Use consistent teal (#235757) for titles, links, and buttons, black or dark gray for paragraphs, and a serif font for headings with simpler sans-serif for body text. The entire layout should have ample white spacing and a neat, professional look.

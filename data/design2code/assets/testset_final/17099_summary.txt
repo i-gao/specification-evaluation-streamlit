@@ -1,0 +1,5 @@
+Create a webpage with a top header section in a solid medium green background. On the left of the header, place the site title in white, bold sans-serif font with a smaller subtitle below it in a lighter white font. On the right top side, align a horizontal navigation menu with four links spaced evenly in white text. Below the navigation, add a thin horizontal line in a lighter green shade. Centered below the line on the left side, include a large, bold white headline with a smaller, lighter subtext below it.
+
+Below the green header, place the main content area on a white background with black body text that includes multiple paragraphs. Certain text elements within paragraphs should be in a green accent color and some italicized text placed inside subtle vertical gray lines as blockquotes, spaced evenly with consistent margins.
+
+At the bottom of the page, use a horizontal footer bar in a very light gray background with a subtle top border line. Center four small green icons spaced evenly horizontally in the footer. The font throughout is a clean, modern sans-serif style with a consistent hierarchy of weights and colors for headings, links, and quotes.

@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>crumb — artisanal bakery</title>
+
+  <!-- Elegant serif + sans fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #f7f7f7;
+      --text: #111;
+      --muted: #555;
+      --border: #ddd;
+      --accent: #000;
+      --radius: 20px;
+      --max: 920px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: Inter, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+      scroll-behavior: smooth;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      background: rgba(255,255,255,0.95);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+      z-index: 10;
+    }
+
+    .nav {
+      max-width: var(--max);
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+    }
+
+    .brand h1 {
+      font-family: 'Playfair Display', serif;
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 1px;
+      text-transform: lowercase;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: var(--text);
+      margin-left: 24px;
+      font-weight: 500;
+      transition: opacity .2s ease;
+    }
+
+    nav a:hover {
+      opacity: .6;
+    }
+
+    section {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 80px 24px;
+    }
+
+    .hero {
+      text-align: center;
+      padding-top: 120px;
+      padding-bottom: 120px;
+    }
+
+    .hero h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 52px;
+      margin: 0 0 20px 0;
+      line-height: 1.1;
+    }
+
+    .hero p {
+      max-width: 600px;
+      margin: 0 auto 40px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .btn {
+      display: inline-block;
+      border: 1px solid var(--text);
+      padding: 12px 26px;
+      border-radius: var(--radius);
+      background: transparent;
+      text-transform: lowercase;
+      letter-spacing: .6px;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--text);
+      transition: all .25s ease;
+    }
+
+    .btn:hover {
+      background: var(--text);
+      color: #fff;
+    }
+
+    h3.section-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 600;
+      font-size: 34px;
+      margin-bottom: 30px;
+      text-align: center;
+      text-transform: lowercase;
+      position: relative;
+    }
+
+    h3.section-title::after {
+      content: "";
+      display: block;
+      width: 60px;
+      height: 1px;
+      background: var(--text);
+      margin: 14px auto 0;
+      opacity: 0.2;
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 28px;
+      margin-top: 40px;
+    }
+
+    .menu-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      background: #fff;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .menu-item:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 26px rgba(0,0,0,0.05);
+    }
+
+    .menu-item h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      margin: 0 0 8px 0;
+    }
+
+    .menu-item p {
+      color: var(--muted);
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .about {
+      background: #fff;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .about-content {
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .about-content p {
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .visit {
+      text-align: center;
+    }
+
+    .visit p {
+      font-size: 18px;
+      color: var(--muted);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    [data-fade] {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: all 0.8s ease-out;
+    }
+
+    [data-fade].visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width:600px) {
+      .hero h2 { font-size: 38px; }
+      .menu-grid { gap: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav">
+      <div class="brand">
+        <h1>crumb</h1>
+      </div>
+      <nav>
+        <a href="#menu">menu</a>
+        <a href="#about">about</a>
+        <a href="#visit">visit</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero" id="home">
+    <h2>artisanal breads & pastries.</h2>
+    <p>At <strong>crumb</strong>, every loaf and tart is hand-crafted with care. Simple ingredients, timeless flavors — pure delight.</p>
+    <a href="#menu" class="btn">explore menu</a>
+  </section>
+
+  <section id="menu">
+    <h3 class="section-title">our menu</h3>
+    <div class="menu-grid">
+      <div class="menu-item" data-fade>
+        <h4>sourdough loaf</h4>
+        <p>crusty, tangy, perfectly fermented.</p>
+      </div>
+      <div class="menu-item" data-fade>
+        <h4>butter croissant</h4>
+        <p>flaky, golden, indulgent layers.</p>
+      </div>
+      <div class="menu-item" data-fade>
+        <h4>chocolate tart</h4>
+        <p>rich, smooth, decadent.</p>
+      </div>
+      <div class="menu-item" data-fade>
+        <h4>multigrain bread</h4>
+        <p>nutty, wholesome, artisanal.</p>
+      </div>
+      <div class="menu-item" data-fade>
+        <h4>cinnamon roll</h4>
+        <p>soft, sweet, perfectly spiced.</p>
+      </div>
+      <div class="menu-item" data-fade>
+        <h4>lemon tartlet</h4>
+        <p>bright, zesty, elegantly tart.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="about" id="about">
+    <div class="about-content">
+      <h3 class="section-title">about us</h3>
+      <p><strong>crumb</strong> began as a small neighborhood bakery — a space for mindful indulgence.  
+      Each loaf, pastry, and tart is baked with care, balancing tradition with modern refinement.  
+      No shortcuts, just honest, handcrafted flavors.</p>
+    </div>
+  </section>
+
+  <section class="visit" id="visit">
+    <h3 class="section-title">visit us</h3>
+    <p>456 Baker St., downtown<br>
+    Tuesday – Sunday · 7am – 6pm</p>
+    <p><a href="#home" class="btn">back to top</a></p>
+  </section>
+
+  <footer>
+    © <span id="year"></span> crumb — all rights reserved.
+  </footer>
+
+  <script>
+    // Set year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Fade-in animation on scroll
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, {threshold: 0.2});
+    document.querySelectorAll('[data-fade]').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

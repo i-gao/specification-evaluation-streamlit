@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crumb - Artisan Bakery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Quicksand', 'Poppins', 'Nunito', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #fff4e6 0%, #ffe4e1 50%, #f5e6ff 100%);
+            color: #6b5d4f;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 1rem;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 4rem;
+            color: #d4a574;
+            text-shadow: 3px 3px 0 #f4d9c6, 6px 6px 0 #ffe4e1;
+            margin-bottom: 0.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            color: #a8896b;
+            font-style: italic;
+        }
+
+        .croissant {
+            width: 120px;
+            height: 80px;
+            margin: 2rem auto;
+            position: relative;
+            animation: wiggle 2s ease-in-out infinite;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+
+        .croissant-body {
+            width: 100px;
+            height: 60px;
+            background: linear-gradient(135deg, #f4c790 0%, #d4a574 100%);
+            border-radius: 50% 50% 40% 40%;
+            position: relative;
+            margin: 0 auto;
+            box-shadow: inset -5px -5px 10px rgba(180, 130, 80, 0.3);
+        }
+
+        .croissant-layer {
+            width: 80%;
+            height: 8px;
+            background: #c89968;
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .layer-1 { top: 15px; left: 10%; }
+        .layer-2 { top: 30px; left: 10%; }
+        .layer-3 { top: 45px; left: 10%; }
+
+        nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            text-align: center;
+            border-radius: 50px;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            box-shadow: 0 8px 20px rgba(212, 165, 116, 0.3);
+        }
+
+        nav a {
+            color: #d4a574;
+            text-decoration: none;
+            margin: 0 1.5rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        nav a:hover {
+            color: #a8896b;
+            transform: scale(1.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .baked-goods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .bakery-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 30px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bakery-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(212, 165, 116, 0.4);
+        }
+
+        .bakery-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .bakery-card:hover::before {
+            opacity: 1;
+        }
+
+        .bakery-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .bakery-card h3 {
+            color: #d4a574;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .bakery-card p {
+            color: #8a7a6a;
+            line-height: 1.6;
+        }
+
+        .about {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 40px;
+            padding: 3rem;
+            margin-bottom: 4rem;
+            box-shadow: 0 10px 30px rgba(212, 165, 116, 0.3);
+        }
+
+        .about h2 {
+            color: #a8896b;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .about p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            text-align: center;
+            color: #6b5d4f;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-top: 3px dashed #f4c790;
+            margin-top: 4rem;
+        }
+
+        footer p {
+            color: #a8896b;
+            font-size: 1.1rem;
+        }
+
+        .crumbs {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .wheat {
+            position: fixed;
+            font-size: 24px;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: -1;
+            animation: wheat-fall 8s linear infinite;
+        }
+
+        @keyframes wheat-fall {
+            0% { transform: translateY(-100px) rotate(0deg); }
+            100% { transform: translateY(100vh) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🥐 Crumb 🥐</h1>
+        <p class="tagline">Fresh From Our Oven to Your Table</p>
+        <div class="croissant">
+            <div class="croissant-body">
+                <div class="croissant-layer layer-1"></div>
+                <div class="croissant-layer layer-2"></div>
+                <div class="croissant-layer layer-3"></div>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <a href="#menu">Menu</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="container">
+        <section id="menu">
+            <div class="baked-goods">
+                <div class="bakery-card">
+                    <div class="bakery-icon" style="background: linear-gradient(135deg, #f4c790, #d4a574);">🥖</div>
+                    <h3>Sourdough Loaf</h3>
+                    <p>Classic artisan sourdough with a crispy crust and tender crumb. Naturally fermented for 24 hours.</p>
+                </div>
+
+                <div class="bakery-card">
+                    <div class="bakery-icon" style="background: linear-gradient(135deg, #ffe4e1, #ffc9c9);">🍰</div>
+                    <h3>Strawberry Cake</h3>
+                    <p>Light and fluffy vanilla cake layered with fresh strawberries and cream. Simply divine!</p>
+                </div>
+
+                <div class="bakery-card">
+                    <div class="bakery-icon" style="background: linear-gradient(135deg, #c89968, #8b6f47);">🥨</div>
+                    <h3>Butter Pretzel</h3>
+                    <p>Soft pretzels brushed with melted butter and sprinkled with sea salt. Warm and irresistible!</p>
+                </div>
+
+                <div class="bakery-card">
+                    <div class="bakery-icon" style="background: linear-gradient(135deg, #fff8dc, #ffd700);">🧈</div>
+                    <h3>Butter Croissant</h3>
+                    <p>Flaky, buttery layers of perfection. Made with premium French butter and lots of love.</p>
+                </div>
+
+                <div class="bakery-card">
+                    <div class="bakery-icon" style="background: linear-gradient(135deg, #e6d5c3, #c4a57b);">🍪</div>
+                    <h3>Chocolate Chip</h3>
+                    <p>Chewy cookies loaded with premium chocolate chips. The perfect sweet treat any time!</p>
+                </div>
+
+                <div class="bakery-card">
+                    <div class="bakery-icon" style="background: linear-gradient(135deg, #dcc6e0, #c8a2d0);">🫐</div>
+                    <h3>Blueberry Muffin</h3>
+                    <p>Bursting with juicy blueberries and topped with a golden crumble. Morning perfection!</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="about">
+            <h2>About Crumb</h2>
+            <p>At Crumb, we believe in the magic of baking from scratch. Every morning, we wake before dawn to knead, proof, and bake the finest artisan breads and pastries. Using traditional techniques, premium ingredients, and a whole lot of passion, we create baked goods that bring comfort and joy to your day. Visit us and experience the warmth of a real neighborhood bakery!</p>
+        </section>
+    </div>
+
+    <footer id="contact">
+        <p>📍 456 Baker's Lane, Flour Town | ☎️ (555) BAKE-NOW | 🕐 Open Daily 6am - 6pm</p>
+        <p style="margin-top: 1rem;">© 2025 Crumb Bakery. Baked with 💛</p>
+    </footer>
+
+    <script>
+        // Create floating crumbs
+        function createCrumb() {
+            const crumb = document.createElement('div');
+            crumb.className = 'crumbs';
+            crumb.style.left = Math.random() * 100 + '%';
+            crumb.style.top = Math.random() * 100 + '%';
+            crumb.style.background = ['#d4a574', '#c89968', '#a8896b', '#f4c790', '#e6d5c3'][Math.floor(Math.random() * 5)];
+            crumb.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            document.body.appendChild(crumb);
+            
+            setTimeout(() => crumb.remove(), 5000);
+        }
+
+        for (let i = 0; i < 15; i++) {
+            setTimeout(createCrumb, i * 200);
+        }
+
+        setInterval(createCrumb, 1500);
+
+        // Create falling wheat stalks
+        function createWheat() {
+            const wheat = document.createElement('div');
+            wheat.className = 'wheat';
+            wheat.textContent = '🌾';
+            wheat.style.left = Math.random() * 100 + '%';
+            wheat.style.animationDuration = (Math.random() * 4 + 6) + 's';
+            wheat.style.animationDelay = Math.random() * 2 + 's';
+            document.body.appendChild(wheat);
+            
+            setTimeout(() => wheat.remove(), 10000);
+        }
+
+        for (let i = 0; i < 5; i++) {
+            setTimeout(createWheat, i * 1000);
+        }
+
+        setInterval(createWheat, 3000);
+    </script>
+</body>
+</html>

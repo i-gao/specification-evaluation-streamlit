@@ -1,0 +1,9 @@
+Create a clean webpage layout with a white header containing a small blue square logo on the far left and a horizontal navigation menu with black uppercase text aligned to the right: "AUTO," "CONTRACTORS," "FOOD & DRINK," "HEALTH," "HOME & GARDEN," and "MORE." Below the header, place a full-width teal bar containing a horizontally centered white search input with rounded corners and subtle shadow, divided into two placeholder areas for "Auto shops, dentists, salons..." and "City, State or Zip" separated by a vertical line and a green accent highlight on the right edge.
+
+Under the search bar, display breadcrumb navigation in teal and black text on a light gray background: "HEALTH & MEDICINE / CHIROPRACTOR." 
+
+Below, create a wide white content card with a dark teal header bar labeled "BUSINESS" in small uppercase white text. On the left side of the card, place a medium blue square image placeholder (src "rick.jpg"). To the right, show black textual business info with bold headings and teal accent links, arranged vertically and spaced. 
+
+Beneath that card, implement two white rectangular cards side by side on a light gray background. The left card is wider, containing a teal heading, smaller blue subheading link, and black paragraph text with standard font. The right card is narrower with a teal heading "Hours" and a bolded day list in black with hours aligned on the right side.
+
+At the bottom, a full-width teal footer includes white copyright text on the left and right-aligned white text navigation links with spacing: "About Us," "Privacy Policy," "Editorial Policy," "Advertise," "Contact Us." Use clear fonts for readability throughout.

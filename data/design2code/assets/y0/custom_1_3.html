@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crumb - Artisan Bakery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1612;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(26, 22, 18, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #d4a574, #f4e4c1, #c9a66b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 3s ease-in-out infinite;
+            text-shadow: 0 0 30px rgba(212, 165, 116, 0.5);
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.4); }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #f4e4c1;
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+            font-weight: 500;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(45deg, #d4a574, #f4e4c1);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            padding: 0 5%;
+            background: radial-gradient(circle at 30% 50%, rgba(212, 165, 116, 0.15), transparent 50%),
+                        radial-gradient(circle at 70% 50%, rgba(244, 228, 193, 0.12), transparent 50%);
+        }
+
+        .hero-content h1 {
+            font-size: 5.5rem;
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease-out;
+            background: linear-gradient(135deg, #d4a574 0%, #f4e4c1 50%, #c9a66b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -2px;
+            text-shadow: 0 0 40px rgba(212, 165, 116, 0.3);
+        }
+
+        .hero-content .tagline {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease-out 0.2s backwards;
+            color: #f4e4c1;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .hero-content .subtext {
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.8;
+            animation: fadeInUp 1s ease-out 0.4s backwards;
+            color: #d4a574;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1.2rem 3rem;
+            background: linear-gradient(135deg, #d4a574, #f4e4c1);
+            color: #1a1612;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            animation: fadeInUp 1s ease-out 0.6s backwards;
+            box-shadow: 0 15px 35px rgba(212, 165, 116, 0.4);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 20px 50px rgba(212, 165, 116, 0.6);
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .element {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.2;
+            animation: float 25s infinite ease-in-out;
+        }
+
+        .element:nth-child(1) {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #d4a574, #b8956a);
+            top: 15%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .element:nth-child(2) {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, #f4e4c1, #e8d4a8);
+            top: 55%;
+            right: 8%;
+            animation-delay: 8s;
+        }
+
+        .element:nth-child(3) {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, #c9a66b, #a68a5a);
+            bottom: 15%;
+            left: 45%;
+            animation-delay: 16s;
+        }
+
+        .element:nth-child(4) {
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, #8b7355, #6d5a45);
+            top: 35%;
+            right: 25%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(60px, -60px) scale(1.1); }
+            50% { transform: translate(-40px, 40px) scale(0.9); }
+            75% { transform: translate(40px, 60px) scale(1.05); }
+        }
+
+        section {
+            padding: 6rem 5%;
+        }
+
+        h2 {
+            font-size: 3.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #d4a574, #f4e4c1, #c9a66b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.3rem;
+            color: #f4e4c1;
+            opacity: 0.9;
+            margin-bottom: 4rem;
+            font-weight: 300;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .item-card {
+            background: linear-gradient(145deg, rgba(212, 165, 116, 0.08), rgba(244, 228, 193, 0.08));
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(212, 165, 116, 0.2);
+            border-radius: 25px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .item-card:hover::before {
+            opacity: 1;
+        }
+
+        .item-card:hover {
+            transform: translateY(-15px) scale(1.03);
+            border-color: rgba(212, 165, 116, 0.5);
+            box-shadow: 0 25px 50px rgba(212, 165, 116, 0.3),
+                        0 0 50px rgba(244, 228, 193, 0.2);
+        }
+
+        .item-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            display: block;
+            filter: drop-shadow(0 5px 15px rgba(212, 165, 116, 0.4));
+            transition: transform 0.4s;
+        }
+
+        .item-card:hover .item-icon {
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        .item-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #f4e4c1;
+            letter-spacing: 0.5px;
+        }
+
+        .item-card p {
+            opacity: 0.85;
+            line-height: 1.7;
+            font-size: 1.05rem;
+            color: #d4a574;
+        }
+
+        .item-price {
+            margin-top: 1.5rem;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #c9a66b;
+        }
+
+        #menu {
+            background: radial-gradient(circle at 50% 0%, rgba(212, 165, 116, 0.05), transparent 60%);
+        }
+
+        .about {
+            background: linear-gradient(135deg, rgba(212, 165, 116, 0.08), rgba(244, 228, 193, 0.08));
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem;
+            border-radius: 30px;
+            border: 2px solid rgba(212, 165, 116, 0.2);
+        }
+
+        .about p {
+            font-size: 1.3rem;
+            line-height: 2;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+            color: #e0e0e0;
+        }
+
+        .about strong {
+            color: #f4e4c1;
+            font-weight: 600;
+        }
+
+        .contact {
+            background: linear-gradient(135deg, rgba(212, 165, 116, 0.12), rgba(244, 228, 193, 0.12));
+            border-radius: 30px;
+            padding: 4rem;
+            max-width: 700px;
+            margin: 0 auto;
+            border: 2px solid rgba(212, 165, 116, 0.2);
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            font-size: 1.2rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            transition: all 0.3s;
+        }
+
+        .contact-item:hover {
+            background: rgba(212, 165, 116, 0.1);
+            transform: translateX(10px);
+        }
+
+        .contact-item span {
+            font-size: 2rem;
+            filter: drop-shadow(0 2px 8px rgba(212, 165, 116, 0.4));
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(26, 22, 18, 0.8);
+            border-top: 1px solid rgba(212, 165, 116, 0.2);
+            color: #f4e4c1;
+        }
+
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 3rem;
+            }
+
+            .hero-content .tagline {
+                font-size: 1.3rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            h2 {
+                font-size: 2.5rem;
+            }
+
+            .items-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">🥖 Crumb</div>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#menu">Menu</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="floating-elements">
+            <div class="element"></div>
+            <div class="element"></div>
+            <div class="element"></div>
+            <div class="element"></div>
+        </div>
+        <div class="hero-content">
+            <h1>Baked Fresh Every Morning</h1>
+            <p class="tagline">Artisan Breads & Pastries</p>
+            <p class="subtext">Crafted with love, tradition, and the finest ingredients</p>
+            <a href="#menu" class="cta-button">Explore Our Menu</a>
+        </div>
+    </section>
+
+    <section id="menu">
+        <h2>From Our Ovens</h2>
+        <p class="section-subtitle">Every bite tells a story of craftsmanship</p>
+        <div class="items-grid">
+            <div class="item-card">
+                <span class="item-icon">🥐</span>
+                <h3>Butter Croissant</h3>
+                <p>Flaky, golden layers of buttery perfection made with European butter and 24-hour lamination</p>
+                <div class="item-price">$4.25</div>
+            </div>
+            <div class="item-card">
+                <span class="item-icon">🍞</span>
+                <h3>Sourdough Boule</h3>
+                <p>Rustic artisan loaf with a crispy crust and tangy, chewy interior from our 100-year-old starter</p>
+                <div class="item-price">$8.50</div>
+            </div>
+            <div class="item-card">
+                <span class="item-icon">🧁</span>
+                <h3>Vanilla Bean Cupcake</h3>
+                <p>Moist vanilla cake infused with Madagascar vanilla, topped with silky buttercream</p>
+                <div class="item-price">$4.75</div>
+            </div>
+            <div class="item-card">
+                <span class="item-icon">🥖</span>
+                <h3>French Baguette</h3>
+                <p>Authentic French baguette with a crackly crust and airy crumb, baked to golden perfection</p>
+                <div class="item-price">$5.00</div>
+            </div>
+            <div class="item-card">
+                <span class="item-icon">🥧</span>
+                <h3>Apple Cinnamon Tart</h3>
+                <p>Caramelized apples nestled in buttery pastry with warm cinnamon and a hint of vanilla</p>
+                <div class="item-price">$6.50</div>
+            </div>
+            <div class="item-card">
+                <span class="item-icon">🍪</span>
+                <h3>Chocolate Chunk Cookie</h3>
+                <p>Chewy cookies loaded with dark chocolate chunks, sea salt, and a touch of brown butter</p>
+                <div class="item-price">$3.50</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="about">
+            <h2>Our Story</h2>
+            <p>At Crumb, we believe that <strong>bread is life</strong>, and every pastry should be a moment of pure joy. Our story began with a passion for the art of baking and a commitment to doing things the right way.</p>
+            <p>Since 2018, we've been waking up before dawn to craft <strong>small-batch artisan breads and pastries</strong> using time-honored techniques and locally-sourced ingredients.</p>
+            <p>We never rush the process. Our doughs rise slowly, our croissants are hand-laminated, and our sourdough starter has been lovingly maintained for generations. The result? <strong>Baked goods that taste like they should</strong>—rich, complex, and utterly delicious.</p>
+        </div>
+    </section>
+
+    <section id="contact">
+        <h2>Visit Our Bakery</h2>
+        <p class="section-subtitle">The aroma of fresh bread awaits</p>
+        <div class="contact">
+            <div class="contact-info">
+                <div class="contact-item">
+                    <span>📍</span>
+                    <div>456 Baker's Lane, Flour District</div>
+                </div>
+                <div class="contact-item">
+                    <span>📞</span>
+                    <div>(555) 987-6543</div>
+                </div>
+                <div class="contact-item">
+                    <span>🕐</span>
+                    <div>Tue-Sun: 7am - 6pm (Closed Mondays)</div>
+                </div>
+                <div class="contact-item">
+                    <span>✉️</span>
+                    <div>hello@crumbbakery.com</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Crumb Bakery. Baked with ❤️ and tradition.</p>
+    </footer>
+
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                target.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        const cards = document.querySelectorAll('.item-card');
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.style.animation = 'fadeInUp 0.8s ease-out';
+                    }, index * 100);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        cards.forEach(card => observer.observe(card));
+    </script>
+</body>
+</html>

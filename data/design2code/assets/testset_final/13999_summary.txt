@@ -1,0 +1,7 @@
+Create a clean, two-column blog layout with a white background. At top left, place a large dark brown bold serif logo "LexiYoga." To the right in the header, place a subtle hamburger menu icon and three navigation links labeled "YOGA VIDEOS," "YOGA POSES," and "YOGA REVIEWS" in uppercase with gray text inside a rounded white container with a subtle drop shadow. 
+
+Below, the main content area on the left (wide column) contains a blog post with a large heading in bold dark brown font on a light pink highlighted background. The post text uses a small, light brown font with some inline links in subtle pink. Blockquotes appear in a pale border with large stylized opening and closing quotes in brown. There's a medium rectangular bright blue placeholder image on the left side embedded in the post content.
+
+On the right, create a narrower sidebar with a light gray background and subtle vertical padding. At the top of the sidebar place four horizontal pink dashes as a decorative element. Below that, include a pink italicized quote in smaller font, followed by a vertical list of informational links with labels in dark brown and links in pink. Then add a "Mailing List" subscription box with a beige label background and bold dark brown heading, a label for an email input field, and a subscribe button.
+
+At the bottom of the page, add a small footer with center-aligned dark gray text giving copyright details and site credits. Below that, place a small horizontal menu with links in subtle pink.
