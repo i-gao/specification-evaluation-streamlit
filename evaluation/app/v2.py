@@ -279,7 +279,7 @@ def header():
                     "Task Instructions",
                     on_click=task_instructions_dialog,
                     type="primary",
-                    disabled=st.session_state.waiting_for_spinner
+                    disabled=st.session_state.waiting_for_spinner,
                 )
 
         # if not DEBUG_MODE and st.session_state.current_screen == "chat_screen":
@@ -509,9 +509,6 @@ def chat_screen():
             print("Ending interaction")
             st.session_state.current_screen = "evaluation_screen"
             end_interaction("user_end")
-
-    if st.button("Refresh page (in case of bugs)"):
-        st.rerun()
 
     if isinstance(st.session_state.spec, CustomSpecification):
         _custom_chat_screen()
