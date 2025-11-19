@@ -18,6 +18,7 @@ pandas
 scikit-learn
 json-repair>=0.40
 llm-sandbox
+docker
 google-cloud-storage
 google-auth
 
