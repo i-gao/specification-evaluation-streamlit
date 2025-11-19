@@ -1,0 +1,772 @@
+email_id,subject,from,to,date,message
+0,WELL HEAD,tom.acton@enron.com,aimee.lannou@enron.com,"Wed, 12 Apr 2000 23:55:00 -0700 (PDT)"," dfarmer.nsf
+
+Here is the list of meter that I moved from the 1st on from the 215 to the 
+gathering.  4056,   6480,  6534,  6614,  6855.  These will be nomed to the 
+gathering contract for next month also.  When Jackie renoms from the first 
+you'll have to  release from the EDI  held."
+1,FYI - Union Carbide,lee.papayoti@enron.com,aimee.lannou@enron.com,"Tue, 23 Jan 2001 05:29:00 -0800 (PST)"," dfarmer.nsf
+
+Union Carbide will reduce their takes at Texas City from 6000/d to 4000/d on 
+deal ticket 550968 - I've already changed the ticket - it's priced at Gas 
+Daily
+
+The 10,000/d term sale remains unchanged"
+2,Mid-Tex deals,o'neal.winfree@enron.com,aimee.lannou@enron.com,"Tue, 8 Feb 2000 01:45:00 -0800 (PST)"," dfarmer.nsf
+
+Hey gang,
+
+I have created the new deals reflecting the Mid-Texas meters for the 
+following deals beginning in January 2000:
+
+ETOCO:   from HPL meter 393  to Mid-Texas meter 9738 
+old sitara deal   = 133435
+new sitara deal = 163874
+
+Richardson:  from HPL meter 7283 to Mid-Texas meter 9807
+old sitara deal   = 141691
+new sitara deal = 164003
+
+Mueller:  from HPL meter 7260 to Mid-Texas meter 9769
+old sitara deal   =  156247 Feb. 2000 through June 2000
+old sitara deal   =  143885 Jan. 2000 only
+old sitara deal   =  143887 Jan. 2000 only
+new sitara deal  = 164172 
+
+
+Please take a look at the deals and let me know if I have doubled volumes, or 
+if there is anything else I need to do to make things work better...
+
+O'Neal 3-9686"
+3,,george.grant@enron.com,aimee.lannou@enron.com,"Tue, 8 Feb 2000 07:28:00 -0800 (PST)"," dfarmer.nsf
+
+Gary,
+
+Could you please remove  SCADA/MIPS from the following HPL meters. These 
+meters are where Mid-Texas interconnects with
+PG & E's system, and there should not be any measurement taking place on HPL. 
+These meters were set up originally when we thought
+that every meter on Mid-Texas should automatically have a corresponding meter 
+on HPL. This assumption is now incorecct.
+
+980388
+980389
+980390
+980391
+980392
+980393
+987271
+987260
+987283
+
+
+Thanks
+George"
+4,Calpine Daily Gas Nominations,rickya@calpine.com,aimee.lannou@enron.com,"Fri, 9 Mar 2001 11:23:00 -0800 (PST)"," Farmer, Daren J..pst
+
+Aimee, our scheduled maintenance starts Saturday night at midnight and will
+continue most of the month, per our scheduled maintenance letter sent in
+January. The plant should burn around 85,000 on Saturday. Beginning Sunday
+until the end of the maintenance period, the estimate will be 65,000 to
+68,000. I will be out of the office Monday and will update the volumes on
+Tuesday. If you have question call Aron Childers at 713-830-8811. Thanks.
+
+
+
+RICKY A. ARCHER
+Fuel Supply
+700 Louisiana, Suite 2700
+Houston, Texas 77002
+713-830-8659 direct
+713-830-8722 fax"
+5,Re: Meter 1428,lee.papayoti@enron.com,aimee.lannou@enron.com,"Tue, 5 Dec 2000 03:18:00 -0800 (PST)"," dfarmer.nsf
+
+We should check with gas control as to why gas is flowing at all and/or 
+whether this is a valid reading ....
+
+Gary/James - let us know
+
+Thanks
+
+Lee
+
+
+
+
+Aimee Lannou   12/05/2000 11:09 AM
+
+To: Daren J Farmer/HOU/ECT@ECT
+cc: Lee L Papayoti/HOU/ECT@ECT 
+Subject: Meter 1428
+
+Daren - Meter 1428, Beaumont Methanol is shut-in for December.  There has 
+been flow of 69 and 65 on days 2 and 3.  Should a swing ticket be put at the 
+meter?  The last swing deal was 451907 for 11/00.  Thanks.
+
+Aimee
+ 
+
+"
+6,Write Off of Meter 74 Volumes,fred.boas@enron.com,aimee.lannou@enron.com,"Tue, 24 Oct 2000 02:04:00 -0700 (PDT)"," dfarmer.nsf
+
+Aimee:
+
+The volumes that we determined to be written off at this meter need to go 
+into MOPS.  Please get a copy of a formal letter that Clem has prepared for 
+other write-off's and send to Daren Farmer for approval .  Get Daren to put 
+the proper deal tickets in MOPS and then let me know how to path this gas.  I 
+will then set up accounting arrangements and get these volumes in the 
+System.  the months in question are November and December of 1999, February 
+2000, and June 2000.
+
+Do you think that we can get this accomplished by October 31, 2000?  If not, 
+please let me know a date when you think that we can get this resolved.
+
+Thanks,
+
+Fred"
+7,Re: Meter 9707,robert.cotten@enron.com,aimee.lannou@enron.com,"Tue, 3 Oct 2000 06:21:00 -0700 (PDT)"," dfarmer.nsf
+
+I left Vance a voice mail message yesterday but he was out sick.  He called 
+me back and said there shouldn't be any flow at meter 9707 and there wasn't a 
+deal in place with United Oil & Minerals.
+
+Bob
+---------------------- Forwarded by Robert Cotten/HOU/ECT on 10/03/2000 01:15 
+PM ---------------------------
+   
+	Enron North America Corp.
+	
+	From:  Robert Cotten                           10/03/2000 11:39 AM
+	
+
+To: Vance L Taylor/HOU/ECT@ECT
+cc: Daren J Farmer/HOU/ECT@ECT, Aimee Lannou/HOU/ECT@ECT 
+Subject: Re: Meter 9707
+
+Vance,
+
+Did you find out anything about the purchase from United Oil & Minerals at 
+meter 9707?
+
+Bob
+
+---------------------- Forwarded by Robert Cotten/HOU/ECT on 10/03/2000 11:34 
+AM ---------------------------
+Aimee Lannou   10/03/2000 11:26 AM
+
+To: Daren J Farmer/HOU/ECT@ECT
+cc: Robert Cotten/HOU/ECT@ECT 
+Subject: Re: Meter 9707  
+
+FYI - there is flow for 10/2 as well.
+
+AL
+
+
+
+
+Daren J Farmer
+10/02/2000 02:23 PM
+To: Aimee Lannou/HOU/ECT@ECT
+cc: Robert Cotten/HOU/ECT@ECT 
+Subject: Re: Meter 9707  
+
+I rolled this deal for day one in October only.  
+
+Bob - Please check with Vance on this deal.  Has it terminated or should it 
+roll for October.  I don't think that Vance nom'd anything.
+
+D
+
+
+Aimee Lannou   10/02/2000 10:49 AM
+
+To: Daren J Farmer/HOU/ECT@ECT, Robert Cotten/HOU/ECT@ECT
+cc:  
+Subject: Meter 9707
+
+Daren - Meter 9707 has flow for Oct. 1 (1.459mmbtu).  Deal # 125786 was used 
+for Sept. 2000.  Could you please extend the deal or have a new one 
+created?    Thanks.
+
+AL
+
+
+
+
+
+
+
+
+"
+8,CILCO STORAGE,kenny.soignet@enron.com,aimee.lannou@enron.com,"Tue, 21 Mar 2000 00:58:00 -0800 (PST)"," dfarmer.nsf
+
+The Cilco volumes are different than the confirmed volumes to Cilco.  Please 
+review the attached the spreadsheets from Lisa Kinsey, the central desk 
+scheduler responsible for the Cilco account.  The biggest variance is in 
+January 2000.  Cilco withdrew 200,000 mmbtu's more than we booked @ bammel.  
+Please let me know the best way to correct the problem.  I suspect the 
+variance is showing up as a transport imbalance.  Also, the nomination for 
+the current month is 7,327 mmbtu instead of 7,000 mmbtu per day.  7,000 is 
+the volume delivered to Cilco after transport fuel.
+ 
+---------------------
+
+
+Lisa Kinsey
+03/21/2000 08:12 AM
+To: Kenny J Soignet/HOU/ECT@ECT
+cc:  
+Subject: CILCO STORAGE
+
+Kenny,
+Attached is the worksheet that I have been using to verify Cilco's storage 
+balance with Vonda Seckler from Cilco.  Let me know if you need anything 
+else.  
+
+
+
+Lisa Kinsey
+ext 37628
+"
+9,Meter 8743 Dec 99,thu.nguyen@enron.com,aimee.lannou@enron.com,"Wed, 12 Jan 2000 03:08:00 -0800 (PST)"," dfarmer.nsf
+
+Here are the days I have discrepancies with PG&E.  Please let me know which 
+numbers are good.  Thanks
+
+Thu
+3-7159
+
+ 
+ Day PG&E HPL
+ 12-05 145833 120000
+ 12-10 60000 35000
+ 12-11 70000 80000
+ 12-17 3125 3100
+ 12-21 50000 70000
+ 12-22 0 20000
+ 12-25 0 30000
+ 12-26 0 30000
+ 12-27 31375 63000"
+10,Countdown to 75th Anniversary Celebration,lillian.carroll@enron.com,aimee.lannou@enron.com,"Tue, 5 Sep 2000 09:48:00 -0700 (PDT)"," dfarmer.nsf
+
+TO:  Employees attending 75th Anniversary Celebration
+
+With the countdown underway for Houston Pipe Line=01,s 75th anniversary=20
+celebration in Galveston on September 9, here is information that I think y=
+ou=01,
+ll find helpful in finalizing your plans.  I=01,m delighted that almost 500=
+=20
+employees and their guests will be attending our anniversary celebration in=
+=20
+Galveston!
+
+HOTEL ARRANGEMENTS
+Due to such tremendous response from employees, we have run out of rooms in=
+=20
+the Moody Gardens Hotel, Seven Hope Blvd.  Some of you will be staying at a=
+n=20
+equally fine hotel, the Hilton Resort, 5400 Seawall Blvd. The Hilton is a=
+=20
+sister hotel to the San Luis and amenities include a heated swimming pool,=
+=20
+Jacuzzi, tennis court and fitness room. Hilton Guests can also enjoy specia=
+l=20
+San Luis facilities by showing their room cards. =20
+
+CHECKING IN AND OUT
+Each HPL employee will receive a Party-Pak that includes your *Garden=20
+Dollars, drink tickets, name tags and several special gifts.  Pick up your=
+=20
+party pack and hotel confirmation number for both the Hilton and Moody=20
+Gardens hotels in the lobby of the Moody Gardens Hotel any time after 10 a.=
+m.=20
+Saturday morning. =20
+
+The official check in time at both hotels is 4 p.m. on Saturday, September=
+=20
+9.  However, the hotels will make rooms available to HPL guests before=20
+mid-afternoon if possible.   Both hotels have also made arrangements to che=
+ck=20
+your bags in advance if your room is not ready.  Please check with the desk=
+=20
+when you arrive at your hotel.  Check out time is noon on Sunday, September=
+=20
+10.
+
+Hotel parking is available outdoors or underground at the valet parking=20
+entrance sign at the back of the hotel.
+
+*Garden Dollars are like currency at Moody Garden attractions, restaurants,=
+=20
+lounges, gift shop and spa.  Use them any time on Saturday or Sunday or kee=
+p=20
+them and use them on a subsequent trip to Galveston within the next year.=
+=20
+
+IF YOUR PLANS CHANGE
+If your personal plans change between now and the celebration on September =
+9,=20
+please email meetingstop@aol.com to let us know that you are canceling your=
+=20
+hotel room and dinner reservations.  We appreciate your courtesy!
+
+COCKTAILS & DINNER
+Cocktails are at 6:30 p.m. and dinner at 7:30 on Saturday, September 9 in t=
+he=20
+Moody Gardens Ballroom.  Be sure that you and your guest wear your name=20
+badges that are included in your party pack because you must be appropriate=
+ly=20
+identified as a Houston Pipe Line employee or guest for cocktails and dinne=
+r.=20
+
+WHAT TO WEAR
+Suitable attire includes jackets for the men and corresponding dressy ladie=
+s=01,=20
+clothes.=20
+"
+11,Cross Training,pat.clynes@enron.com,aimee.lannou@enron.com,"Mon, 28 Feb 2000 04:08:00 -0800 (PST)"," dfarmer.nsf
+
+In an attempt to continue cross training on our desk,  Jackie and Susan will 
+be switching duties.
+Jackie will start training on Susan's desk and Susan on Jackie's and the 
+transition will last most
+of March and they will finalize it with April business.  It is important that 
+we start communicating the
+changes to our customers and make it as smooth as possible on them.  Thanks,  
+Pat"
+12,Change in SCADA Server to NAHOU-SCADA2,david.stadnick@enron.com,aimee.lannou@enron.com,"Mon, 13 Nov 2000 09:31:00 -0800 (PST)"," dfarmer.nsf
+
+The name of the SCADA server has been changed from ECTHOU_SCADA1 to 
+NAHOU-SCADA2.
+
+If you have a personal Excel spreadsheet that obtains data from the SCADA 
+server using NetDDE, you will have to edit the spreadsheet.  Change the old 
+name to the new name.
+
+If you have any questions or need assistance, please call 34200.
+
+-Dave Stadnick"
+13,Re: Transport and Logistics Customer Happy Hour,pat.clynes@enron.com,aimee.lannou@enron.com,"Tue, 5 Sep 2000 09:46:00 -0700 (PDT)"," dfarmer.nsf
+
+The ENA party at Jillian's just crashed our Transport / Logistics happy hour.
+The new date is Thursday October 5th.  Please pass this new date on to your 
+customers.  Pat
+
+
+   
+	
+	
+	From:  Pat Clynes                           08/16/2000 09:58 AM
+	
+
+To: Aimee Lannou/HOU/ECT@ECT, Carlos J Rodriguez/HOU/ECT@ECT, Jackie 
+Young/HOU/ECT@ECT, Robert E Lloyd/HOU/ECT@ECT, Stella L Morris/HOU/ECT@ECT, 
+Tom Acton/Corp/Enron@ENRON, Sabrae Zajac/HOU/ECT@ECT, Mark 
+McCoy/Corp/Enron@Enron, Clem Cernosek/HOU/ECT@ECT, Robert Cotten/HOU/ECT@ECT, 
+Eddie Janzen/NA/Enron@Enron, Mary Poorman/NA/Enron@Enron, Susan 
+Hadix/NA/Enron@Enron
+cc: Bob M Hall/NA/Enron@Enron, Edward D Gottlob/HOU/ECT@ECT, Lauri A 
+Allen/HOU/ECT@ECT, Gary A Hanks/HOU/ECT@ECT, James McKay/HOU/ECT@ECT, Earl 
+Tisdale/HOU/ECT@ECT, Steve Jackson/HOU/ECT@ECT, Leslie Reeves/HOU/ECT@ECT, 
+Elsa Villarreal/HOU/ECT@ECT, Danny Conner/NA/Enron@Enron, Daren J 
+Farmer/HOU/ECT@ECT, Stacey Neuweiler/HOU/ECT@ECT, Michael Eiben/HOU/ECT@ECT, 
+Romeo D'Souza/HOU/ECT@ECT, Mary M Smith/HOU/ECT@ECT,
+
+Subject: Transport and Logistics Customer Happy Hour
+
+Please mark your calendar for the Transportation and Logistics Customer Happy 
+Hour on Thursday Sept. 21st.
+It will be at Ninfa's starting at 4:00 pm.  Thanks,  Pat
+
+"
+14,Re: HL&P 6/00,edward.gottlob@enron.com,aimee.lannou@enron.com,"Tue, 20 Jun 2000 02:09:00 -0700 (PDT)"," dfarmer.nsf
+
+Aimee, 
+Are you confirming these volumes with HL&P?  We have been doing some special 
+deals at Green's Bayou and the HL&P dealmaker has been calling to find out 
+what the volumes are.  I do not think he communicates with his scheduler, is 
+that the case?  Anyway, we need to agree with HL&P on what volumes flowed on 
+these special days and get them into the system so they can be billed 
+correctly.
+
+
+
+   Aimee Lannou                06/19/2000 02:18 PM
+
+To: Edward D Gottlob/HOU/ECT@ECT, Pat Clynes/Corp/Enron@ENRON
+cc:  
+Subject: HL&P 6/00
+
+Ed - when you have a chance, I would like to go over this with you.
+
+Aimee
+
+
+
+
+"
+15,Meter #1591 Lamay Gaslift,pat.clynes@enron.com,aimee.lannou@enron.com,"Mon, 24 Apr 2000 05:43:00 -0700 (PDT)"," dfarmer.nsf
+
+Aimee,
+Please check meter #1591 Lamay gas lift.  It doesn't appear to have very much 
+flow and the
+BAV is showing the nom volume.  This could be adversely affecting the risk 
+numbers.  Pat"
+16,Mobil Beaumont,lee.papayoti@enron.com,aimee.lannou@enron.com,"Tue, 20 Mar 2001 15:43:00 -0800 (PST)"," Farmer, Daren J..pst
+
+Brian Nichols of ExxonMobil confirmed that they will accept 30,000/d of MidCon's gas on HPL starting tomorrow.
+
+They want to leave 10,000/d flowing on MidCon.
+
+I guess this goes on through April 5??"
+17,Vacation,carlos.rodriguez@enron.com,aimee.lannou@enron.com,"Thu, 29 Jun 2000 01:27:00 -0700 (PDT)"," dfarmer.nsf
+
+I will be out on vacation the week of July 3, back at the office on July 
+10th. My main contact will be Stella Morris at ext. 3319. My desk will be 
+split as follows:
+
+Stella - NNG-Blackmarlin (onshore), Black Marlin (offshore), Amoco third 
+party, Centana (on & off system, storage), Eastrans
+
+Aimee - Carthage, Tufco updates, Bridge Back
+
+Mark McCoy - Katy Lonestar (on & offsystem)
+
+Tom Acton - Send nominations MOPS to POPS
+
+Please pass this to other members of your groups, thanks.
+
+Carlos"
+18,New Meter number,pat.clynes@enron.com,aimee.lannou@enron.com,"Tue, 12 Sep 2000 01:52:00 -0700 (PDT)"," dfarmer.nsf
+
+Tetco Enerfin is going to be assigned meter #0439.  Activity will be 
+scheduled under this meter for October 1st.
+Jackie Young is assigned this meter.   Thanks, Pat "
+19,REVISED NOMINATION - TREVINO PLANT,beverly.beaty@enron.com,aimee.lannou@enron.com,"Fri, 4 Aug 2000 04:38:00 -0700 (PDT)"," dfarmer.nsf
+
+I just received this e-mail.....
+
+Bev
+---------------------- Forwarded by Beverly Beaty/HOU/ECT on 08/04/2000 11:37 
+AM ---------------------------
+   
+	Enron Capital & Trade Resources Corp.
+	
+	From:  ""Evelyn Daniel"" <Evelyn.Daniel@dvn.com>                           
+08/04/2000 09:58 AM
+	
+
+To: <beverly.beaty@enron.com>, <carlos.j.rodriguez@enron.com>
+cc:  
+Subject: REVISED NOMINATION - TREVINO PLANT
+
+
+Beverly:
+
+Please see attached revised nomination for the above plant.
+
+I know Carlos is out today.  He said Stella was handling this, but I don't 
+know her e-mail address.  I did call her and leave a voice mail.
+
+Thanks for your help.
+
+Evelyn Daniel
+Devon Energy
+(405) 552-4585
+(405) 552-4664
+
+ - BEVERLY BEATY-CARLOS RODRIGUEZ SPREADSHEET.xls
+"
+20,Re: Meter 1517,gary.lamphier@enron.com,aimee.lannou@enron.com,"Wed, 10 Jan 2001 00:55:00 -0800 (PST)"," dfarmer.nsf
+
+Phillips said we shorted them gas on December 1st so they pulled it on 
+January 1.  Can we verify that we did not deliver 5,00 on Dec. 1?  If that is 
+the case and this was a firm sale, we owe him some gas at Dec Index less 
+(.045).  Which is bad!  Let me know what happened in Dec before I can put 
+this deal out in Jan.
+
+
+
+
+Daren J Farmer
+01/09/2001 02:25 PM
+To: Gary W Lamphier/HOU/ECT@ECT
+cc:  
+Subject: Meter 1517
+
+Gary, 
+
+Have you negotiated a price on this?
+
+D
+---------------------- Forwarded by Daren J Farmer/HOU/ECT on 01/09/2001 
+02:25 PM ---------------------------
+Aimee Lannou   01/02/2001 02:14 PM
+
+To: Daren J Farmer/HOU/ECT@ECT
+cc:  
+Subject: Meter 1517
+
+Daren - meter 1517 has a nom of 0/day for Jan.  It flowed about 5.400 on day 
+1. This is a valid flow.  Could you please extend the deal from Dec. (deal # 
+506192) or create a new one?  Thanks.
+
+AL
+
+
+
+"
+21,Bad Estimates on 28th,pat.clynes@enron.com,aimee.lannou@enron.com,"Mon, 30 Oct 2000 01:09:00 -0800 (PST)"," dfarmer.nsf
+
+We are getting bad numbers in POPS for Sat. Oct. 28th.  They are the same as
+Oct. 27th (27th is correct).   Please watch imbalances very closely.  Double 
+check
+all numbers.   Thanks,  Pat "
+22,Calpine Daily Gas Nomination,rickya@calpine.com,aimee.lannou@enron.com,"Wed, 21 Feb 2001 00:06:00 -0800 (PST)"," dfarmer.nsf
+
+ <<CALPINE DAILY GAS NOMINATION 1.doc>>
+
+RICKY A. ARCHER
+Fuel Supply
+700 Louisiana, Suite 2700
+Houston, Texas 77002
+713-830-8659 direct
+713-830-8722 fax
+
+
+ - CALPINE DAILY GAS NOMINATION 1.doc"
+23,Out Thurs & Friday,pat.clynes@enron.com,aimee.lannou@enron.com,"Wed, 9 Feb 2000 03:01:00 -0800 (PST)"," dfarmer.nsf
+
+I will be out of the office on Thursday and Friday.  My pager may not reach 
+me but I will be checking my voice mail.
+Please call George Grant in my absence at ext. 36224.   Thanks,   Pat
+
+
+Get with me today if you need anything by the end of the week."
+24,February Nominations at Shell Deer Park,mary.poorman@enron.com,aimee.lannou@enron.com,"Thu, 25 Jan 2001 02:47:00 -0800 (PST)"," dfarmer.nsf
+
+---------------------- Forwarded by Mary Poorman/NA/Enron on 01/25/2001 10:47 
+AM ---------------------------
+
+
+""Shankster JL (Luther)"" <JLShankster@equiva.com> on 01/25/2001 10:33:52 AM
+To: ""'Lamphier, Gary'"" <glamphi@enron.com>
+cc: kyle.r.lilly@enron.com, mary.poorman@enron.com, ""Carter, John""  
+<JCCarter@equiva.com>, ""Ricks, Ruth"" <RARicks@equiva.com> 
+
+Subject: February Nominations at Shell Deer Park
+
+
+Gary,
+
+February 2001 nominations for gas delivery to Shell Deer Park are as
+follows:
+
+Firm Baseload - 75,000 MMBtu/d
+Spot Swing supply - 0 (zero)
+
+Delivery of the above contract quantities is expected to be as follows:
+
+  HPL-HP   HPL-E   HPL-S
+ Firm 15,000 MMBtu/d 25,000 MMBtu/d 35,000 MMBtu/d
+
+Turnaround activity started in January is expected to continue for the
+duration of February
+
+Please let me know if you have any questions
+
+J. Luther Shankster
+
+Energy & Utilities Planning
+> Phone: 713/277-9307
+> Fax: 713/277-9941
+> E-Mail: jlshankster@equiva.com
+> Home Page: http://rsweb
+> 
+"
+25,Calpine Daily and Monthly Nominations,rickya@calpine.com,aimee.lannou@enron.com,"Thu, 22 Feb 2001 23:27:00 -0800 (PST)"," dfarmer.nsf
+
+ <<CALPINE DAILY GAS NOMINATION 1.doc>>
+
+ <<CALPINE MONTHLY GAS NOMINATION___.doc>>
+
+RICKY A. ARCHER
+Fuel Supply
+700 Louisiana, Suite 2700
+Houston, Texas 77002
+713-830-8659 direct
+713-830-8722 fax
+
+
+ - CALPINE DAILY GAS NOMINATION 1.doc
+ - CALPINE MONTHLY GAS NOMINATION___.doc"
+26,Calpine Daily Gas nomination,rickya@calpine.com,aimee.lannou@enron.com,"Thu, 25 Jan 2001 23:27:00 -0800 (PST)"," dfarmer.nsf
+
+ <<CALPINE DAILY GAS NOMINATION 1.doc>>  <<CALPINE MONTHLY GAS
+NOMINATION___.doc>>
+
+
+
+
+
+RICKY A. ARCHER
+Fuel Supply
+700 Louisiana, Suite 2700
+Houston, Texas 77002
+713-830-8659 direct
+713-830-8722 fax
+
+
+ - CALPINE DAILY GAS NOMINATION 1.doc
+ - CALPINE MONTHLY GAS NOMINATION___.doc"
+27,Re:,julie.meyers@enron.com,aimee.lannou@enron.com,"Mon, 5 Feb 2001 06:40:00 -0800 (PST)"," dfarmer.nsf
+
+Sorry I forgot the attachment.
+
+
+
+
+
+
+Aimee Lannou   02/05/2001 02:22 PM
+
+To: Julie Meyers/HOU/ECT@ECT
+cc:  
+Subject: 
+
+Do you have the Feb. buyback and swing deal spreadsheet?
+
+
+Aimee
+
+"
+28,Calpine daily gas Nomination,rickya@calpine.com,aimee.lannou@enron.com,"Thu, 22 Mar 2001 12:11:00 -0800 (PST)"," Farmer, Daren J..pst
+
+We are still under the scheduled outage period and will bring the next unit
+down @ midnight Saturday 03/24/01.
+The following is our estimated burn until then. Thanks
+
+ <<CALPINE DAILY GAS NOMINATION 1.doc>>
+
+RICKY A. ARCHER
+Fuel Supply
+700 Louisiana, Suite 2700
+Houston, Texas 77002
+713-830-8659 direct
+713-830-8722 fax
+
+
+ - CALPINE DAILY GAS NOMINATION 1.doc "
+29,Transport and Logistics Customer Happy Hour,pat.clynes@enron.com,aimee.lannou@enron.com,"Wed, 16 Aug 2000 02:58:00 -0700 (PDT)"," dfarmer.nsf
+
+Please mark your calendar for the Transportation and Logistics Customer Happy 
+Hour on Thursday Sept. 21st.
+It will be at Ninfa's starting at 4:00 pm.  Thanks,  Pat"
+30,New Meter number,jackie.young@enron.com,aimee.lannou@enron.com,"Thu, 28 Sep 2000 02:09:00 -0700 (PDT)"," dfarmer.nsf
+
+Please be advised, as discussed in the morning meeting this morning, that 
+Tetco Enerfin's new meter 98-0439 will not be operable until October 2, 
+2000.  This meter is assisgned to me.
+
+Thanks
+-Jackie-
+3-9497
+---------------------- Forwarded by Jackie Young/HOU/ECT on 09/28/2000 09:05 
+AM ---------------------------
+   
+	Enron North America Corp.
+	
+	From:  Pat Clynes @ ENRON                           09/12/2000 08:52 AM
+	
+
+To: Aimee Lannou/HOU/ECT@ECT, Carlos J Rodriguez/HOU/ECT@ECT, Jackie 
+Young/HOU/ECT@ECT, Robert E Lloyd/HOU/ECT@ECT, Tom Acton/Corp/Enron@ENRON, 
+Sabrae Zajac/HOU/ECT@ECT, Mark McCoy/Corp/Enron@Enron, Clem 
+Cernosek/HOU/ECT@ECT, Robert Cotten/HOU/ECT@ECT, Eddie Janzen/NA/Enron@Enron, 
+Mary Poorman/NA/Enron@Enron, Susan Hadix/NA/Enron@Enron
+cc: Gary A Hanks/HOU/ECT@ECT, Earl Tisdale/HOU/ECT@ECT, James 
+McKay/HOU/ECT@ECT, Lauri A Allen/HOU/ECT@ECT, Daren J Farmer/HOU/ECT@ECT, 
+Edward D Gottlob/HOU/ECT@ECT, Liz Bellamy/NA/Enron@Enron 
+Subject: New Meter number
+
+Tetco Enerfin is going to be assigned meter #0439.  Activity will be 
+scheduled under this meter for October 1st.
+Jackie Young is assigned this meter.   Thanks, Pat 
+"
+31,FW: Calpine Daily Gas Nomination,rickya@calpine.com,aimee.lannou@enron.com,"Mon, 1 Jan 2001 23:34:00 -0800 (PST)"," dfarmer.nsf
+
+>  -----Original Message-----
+> From:  Ricky Archer
+> Sent: Tuesday, January 02, 2001 9:27 AM
+> To: 'aimee.lannou@enron.com'
+> Cc: 'dfarmer@enron.com'; 'mmccoy@enron.com'; 'rcotten@enron.com'
+> Subject: Calpine Daily Gas Nomination
+>
+>  <<CALPINE DAILY GAS NOMINATION 1.doc>>
+>
+>
+>
+> RICKY A. ARCHER
+> Fuel Supply
+> 700 Louisiana, Suite 2700
+> Houston, Texas 77002
+> 713-830-8659 direct
+> 713-830-8722 fax
+>
+
+ - CALPINE DAILY GAS NOMINATION 1.doc"
+32,SITARA POSITION,thomas.engel@enron.com,aimee.lannou@enron.com,"Fri, 10 Mar 2000 03:13:00 -0800 (PST)"," dfarmer.nsf
+
+PLEASE USE THE POSITION MANAGER HOME BUTTON.
+
+When using the SITARA Position Manager,  and you drill down to view details 
+or change the dates, the Position Manager keeps
+all your views running in the background.  This feature allows you to use the 
+BACK and FORWARD buttons to keep your views running.
+On the downside, if you keep these views running but do not really intend to 
+go BACK to look at them, the system and your PC are working harder
+to keep all the old views active and updated.  
+
+The HOME button sends you back to your default view - the first view you had 
+up when you hit apply.  By clicking this button, your
+Position Manager will clear out the old views the next time you drill in.   
+This is the only way to clear out the old views that you no longer need.
+
+ If you do not use the HOME key, and keep drilling in and changing the dates, 
+the Position Manager is still keeping all the your views for 
+the day running in the backgound.     
+
+What we have found is by the end of the day, a user that does not clear out 
+the old views can have well over 30 views open, which is like having
+30 Position Managers up on your PC.  When that user closes down, the position 
+gets locked up for a while as it tries to clear out all the old views.
+
+We will be making some changes soon to that should resolve this issue as far 
+as the SITARA machine is concerned; however, your PC may still be 
+slow with excessive unneccessary views open.   We could make a change to 
+limit the number of active views you can have open, but at this time
+I am not sure that is necessary; regardless, in the mean time, please 
+remember to use your HOME button.
+
+
+
+
+Other helpful hints - 
+
+Did you know you can shrink you tool bar?  Tools options - uncheck show tool 
+bar text labels - 
+
+
+
+Did you know you can split your position screen to have pipes on top and 
+zones and meters below? Tools Options - show drill down second panel - 
+
+
+
+If you have an OMICRON POSITION porfolio - your MIN/MAX button shows you 
+ACTUAL - and MIN/MAX for your day swing deals.
+Same works for NOM FLEX portfolio.
+
+"

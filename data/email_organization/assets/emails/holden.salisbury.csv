@@ -1,0 +1,1043 @@
+email_id,subject,from,to,date,message
+0,RE: DPR on your PMA's,heather.dunton@enron.com,holden.salisbury@enron.com,"Tue, 7 Aug 2001 10:00:38 -0700 (PDT)"," cara semperger 6-26-02.PST
+
+The CARP IT people : hmmmm I don't know if they exist  - I got a kick out of that one!
+
+Yes I do have a call into IT - they are working on a solution for CARP.
+In the meantime when dealing with a Monthly Demand Charge - make sure only one strip contains the Demand Charge.
+The reason we had the problem with April is because the system automatically created the 3 strips due to the time change.
+So to avoid any problems until this has been fixed - if you have a deal with multiple strips - and have a Monthly Demand Charge / MW,
+make sure only one strip has the Demand Charge Price entered.
+
+I will keep you updated on this issue.
+Let me know if you have any additional questions.
+
+-Heather
+
+ -----Original Message-----
+From: 	Thompson, Virginia  
+Sent:	Tuesday, August 07, 2001 9:53 AM
+To:	Salisbury, Holden
+Cc:	Dunton, Heather
+Subject:	RE: DPR on your PMA's
+
+They should be entered with the price in only one strip, however, once they fix CARP, we may not need to worry about this.......I'll let you know.  Heather has a call in to the CARP IT people.
+
+ -----Original Message-----
+From: 	Salisbury, Holden  
+Sent:	Monday, August 06, 2001 1:48 PM
+To:	Thompson, Virginia
+Cc:	Semperger, Cara
+Subject:	RE: DPR on your PMA's
+
+So how should these deals be Enpowered in the future?  Cara has wisely warned me not to Enpower multiple strips to avoid this double counting.
+
+ -----Original Message-----
+From: 	Thompson, Virginia  
+Sent:	Friday, August 03, 2001 5:29 PM
+To:	Fischer, Mark; Alonso, Tom; Salisbury, Holden
+Cc:	O'Neil, Murray P.; Dunton, Heather
+Subject:	DPR on your PMA's
+
+Mark, Tom, and Holden,
+
+In reference to the DPR impacts of $ 132,000 (WAPA) and $133,000 (SRP) that you were expecting, here is an explanation of why you will not be seeing that in your PMA's:
+
+The 2 deals listed below were put in as a MW month, each with 3 strips in the deal separating out April 1, April 2, and the rest of the month.  The reason for the 3 strips was to catch the April 1 time change from PST to PDT.  
+
+deal #  539126: 3 strips @ 2216 = 199,500 charge for the month in CARP (true value is - $66,500).
+deal #  538832: 3 strips @ 2180 = 196,200 charge for the month in CARP (true value is - $65,400) .
+
+
+Typically, I provide you with a report that tells you what $ amount to look for coming thru in your PMA's, according to the changes that I am making on the back end.  You then see the change in DPR come thru on a PMA report that Risk provides for you.  
+
+When these deals hit Settlements, we recognized that the CARP was calculating both deals at 3 times their monthly value (and since we are purchasing, that is a negative three times against your books).  When the above + DPR impacts didn't come thru in your PMA's, we started looking at the deals to figure out why they didn't.
+
+
+Here is a discription of the Risk - Settlements process:
+Risk values a deal on the day of liquidation.  Any intra-month changes, even if they happen after the day of flow, get trued up by Risk and changed in the DPR.  Anything that gets changed after the end of the month, Settlements recognizes as a DPR variance and reports this to Risk and you see it affect your DPR as reported in the PMA report.
+
+So the question was: When it came to recognizing a variance in Settlements, why weren't we seeing a + amount back to your books for 2 of the strips that I zero'd out? 
+
+Houston Settlements looked into it and were seeing that these deals were originally valued at ($66,500) and ($65,400), even though CARP was showing that they were calculating at ($199,500) and ($196,200) ....
+
+Heather Dunton and I did alot of searching for the answer and we found that:  When Risk flashed these deals in April, they flashed them according to a single MW month charge.  Regardless of how many strips there are, the deal is set up as a MW month and should, therefore, calculate as one single charge for the month. 
+
+We found that CARP is reading these incorrectly and causing the confusion, (as I was seeing that the deals were calculating 3 times because that is how CARP and UNIFY were reading the deal). 
+
+ The IT people in Houston are now working on fixing that glitch.
+
+When it comes to DPR, your book originally recognized an impact of (66,500) and (65,400), which is correct.  Since your April DPR was correct, you will not see an adjustment in your PMA's.  
+
+I recognize that this is not gratification for the + DPR impact that you were expecting and I apologize for the confusion and mis-information that I gave you in my report.  This has, however, helped us to hi-light a technical error that will save us alot of work in the future. 
+
+Thanks for your patience while we figured this out.
+Let me know if you have any questions.
+
+ Thanks,
+
+ Virginia
+
+
+
+
+"
+1,FirstEnergy Services Corp.,l..denton@enron.com,holden.salisbury@enron.com,"Wed, 5 Sep 2001 14:12:27 -0700 (PDT)"," dbaughm (Non-Privileged).pst
+
+
+Subject:	Name Overlay 9-5-2001
+
+The following record has been overlayed due to a legal name change:
+
+		FROM				TO
+CPID 90097	FirstEnergy Services Corp. 	FirstEnergy Solutions Corp.
+
+ERMS Shortname change will be co-ordinated with ERMS-IT on Friday, September 7, 2001.
+"
+2,Request Submitted: Access Request holden.salisbury@enron.com,heather.dunton@enron.com,holden.salisbury@enron.com,"Thu, 5 Apr 2001 17:29:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+I submitted a request for you - I will let you know when it is processed.
+---------------------- Forwarded by Heather Dunton/PDX/ECT on 04/05/2001 10:36 AM ---------------------------
+   
+
+	Enron Capital & Trade Resources Corp.  From:  ARSystem <ARSystem@mailman.enron.com>                           04/05/2001 10:17 AM	
+		
+
+
+To:	""heather.dunton@enron.com"" <heather.dunton@enron.com>
+cc:	 
+Subject:	Request Submitted: Access Request holden.salisbury@enron.com
+
+
+Thank you for your request. You will be notified by email when your request has been processed. You can check the progress of your request by clicking http://itcapps.corp.enron.com/srrs/auth/emailLink.asp?ID=000000000027747&Page=MyReq.
+
+
+
+
+"
+3,"Mobile Energy Services Company, L.L.C.",l..denton@enron.com,holden.salisbury@enron.com,"Mon, 20 Aug 2001 08:25:33 -0700 (PDT)"," dbaughm (Non-Privileged).pst
+
+We have received the executed EEI Master Power Purchase and Sale Agreement dated 8/13/01 from the referenced CP.  A copy will be scanned into Livelink."
+4,VIRGINIA ELECTRIC AND POWER COMPANY,l..denton@enron.com,holden.salisbury@enron.com,"Mon, 30 Jul 2001 11:03:10 -0700 (PDT)"," dbaughm (Non-Privileged).pst
+
+We have received the executed EEI Master Power Purchase and Sale Agreement dated 7/25/2001 from the referenced CP.  Copies will be given to legal and credit."
+5,TRANSSTATUS 20982 CONFIRMED,oasissvcs@apsc.com,holden.salisbury@enron.com,"Mon, 14 May 2001 14:45:07 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+Reservation status has changed. Details of the reservation are listed below:
+ASSIGNMENT_REF = 20982
+SELLER_CODE = AZPS
+SELLER_DUNS = 958982563
+CUSTOMER_CODE = EPMI
+CUSTOMER_DUNS = 848921276
+AFFILIATE_FLAG = 0
+PATH_NAME = W/AZPS/SRP-AZPS/P. Verde 500 - Pinn. Pk. 230//
+POINT_OF_RECEIPT = PALOVERDE500
+POINT_OF_DELIVERY = PNPKAPS230
+SOURCE = UNK
+SINK = UNK
+CAPACITY = 25
+SERVICE_INCREMENT = STMONTHLY
+TS_CLASS = FIRM
+TS_TYPE = POINT_TO_POINT
+TS_PERIOD = FULL_PERIOD
+TS_WINDOW = FIXED
+TS_SUBCLASS = WHEEL
+NERC_CURTAILMENT_PRIORITY = Nerc Priority 1
+OTHER_CURTAILMENT_PRIORITY = Default
+START_TIME = 10/01/2001
+STOP_TIME = 10/31/2001
+CEILING_PRICE = 1,430.00
+OFFER_PRICE = 1,430.00
+BID_PRICE = 1,430.00
+PRICE_UNITS = $/mW-M
+PRECONFIRMED = YES
+ANC_SVC_LINK =
+ANC_SVC_REQ =
+POSTING_REF = 0
+SALE_REF =
+REQUEST_REF =
+DEAL_REF =
+NEGOTIATED_PRICE_FLAG =
+STATUS = CONFIRMED
+STATUS_NOTIFICATION = HOLDEN.SALISBURY@ENRON.COM
+STATUS_COMMENTS =
+TIME_QUEUED = 04/09/2001
+
+TIME_OF_LAST_UPDATE = 05/14/2001
+PRIMARY_PROVIDER_COMMENTS =
+SELLER_COMMENTS =
+CUSTOMER_COMMENTS =
+SELLER_NAME = AZPS
+SELLER_PHONE = 602.250.1128
+SELLER_FAX = 602.250.1155
+SELLER_EMAIL = oasisadm@apsc.com
+CUSTOMER_NAME = Enron Capital and Trade
+CUSTOMER_PHONE = (800)349-5527
+CUSTOMER_FAX = (713)646-8272
+CUSTOMER_EMAIL = jzurita@enron.com
+REASSIGNED_REF = 0
+REASSIGNED_CAPACITY = 0
+
+"
+6,Air Products Manufacturing Corporation,l..denton@enron.com,holden.salisbury@enron.com,"Thu, 23 Aug 2001 15:00:41 -0700 (PDT)"," dbaughm (Non-Privileged).pst
+
+We have received an executed EEI Master Power Purchase and Sale Agreement dated 8/7/2001 from the referenced CP, which will be scanned into Livelink.
+
+PLEASE REPLY IF YOU NO LONGER NEED TO RECEIVE THIS EMAIL."
+7,Power Contracts,l..denton@enron.com,holden.salisbury@enron.com,"Tue, 25 Sep 2001 16:31:46 -0700 (PDT)"," DBAUGHM (Non-Privileged).pst
+
+We have received the following power contracts
+
+Hanson Permanente Cement, Inc., Master Electric Energy Services and Sales Agreement dated 8/31/01
+City of Mesa Arizona, EEI Master Power Purchase and Sale Agreement dated 9/5/01
+International Rectifier Corporation, EEI Master Power Purchase and Sale Agreement dated 9/20/2001
+
+Copies will be scanned into Livelink."
+8,FW: ISO News,tom.alonso@enron.com,holden.salisbury@enron.com,"Tue, 8 May 2001 05:44:49 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+
+
+ -----Original Message-----
+From: 	Comnes, Alan  
+Sent:	Monday, May 07, 2001 3:51 PM
+To:	Alonso, Tom; Alvarez, Ray; Badeer, Robert; Belden, Tim; Crandall, Sean; Driscoll, Michael M.; Fisher, Mark; Guzman, Mark; Heizenrader, Timothy; Mallory, Chris; Mara, Susan; Motley, Matt; Platter, Phillip; Richter, Jeff; Scholtes, Diana; Swain, Steve; Swerzbin, Mike; Williams III, Bill
+Cc:	Hall, Steve C.
+Subject:	ISO News
+
+I am told ISO hosts media calls on occasion during emergencies where they talk about system conditions with the media.  I have asked CAISO to be notified of such calls.  If you are interested in knowing about such calls or listening in, please let me know.
+
+If you would like an email sent to you anytime a Stage 1/2/3 is called, sign up on www.incident.com.  This site was recommended to me by the CAISO media rep.
+
+Alan Comnes"
+9,RE: Reviewers,amy.fitzpatrick@enron.com,holden.salisbury@enron.com,"Thu, 10 May 2001 16:22:17 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+Thanks!
+
+ -----Original Message-----
+From: 	Salisbury, Holden  
+Sent:	Thursday, May 10, 2001 4:21 PM
+To:	Fitzpatrick, Amy
+Subject:	Reviewers
+
+Here is my list.
+
+Tom Alonzo
+Mark Fischer
+Bill Williams III
+Heather Dunton
+Jeff Richter
+Jeremy Morris
+Lisa Gang
+
+Thank You"
+10,Commonwealth Energy Corporation,l..denton@enron.com,holden.salisbury@enron.com,"Wed, 5 Sep 2001 14:18:15 -0700 (PDT)"," dbaughm (Non-Privileged).pst
+
+We received the executed EEI Master Power Purchase and Sale Agreement dated 8/14/2001 from the referenced CP.  A copy will be scanned into Livellink."
+11,TRANSSTATUS 21397 CONFIRMED,oasissvcs@apsc.com,holden.salisbury@enron.com,"Mon, 11 Jun 2001 16:10:01 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+Reservation status has changed. Details of the reservation are listed below:
+ASSIGNMENT_REF = 21397
+SELLER_CODE = AZPS
+SELLER_DUNS = 958982563
+CUSTOMER_CODE = EPMI
+CUSTOMER_DUNS = 848921276
+AFFILIATE_FLAG = 0
+PATH_NAME = W/AZPS/WALC-AZPS/Mead 230 - Westwing 500//
+POINT_OF_RECEIPT = MEAD230
+POINT_OF_DELIVERY = WESTWING500
+SOURCE = PRESCHED
+SINK = PRESCHED
+CAPACITY = 11
+CAPACITY_REQUESTED = 11
+SERVICE_INCREMENT = STMONTHLY
+TS_CLASS = FIRM
+TS_TYPE = POINT_TO_POINT
+TS_PERIOD = FULL_PERIOD
+TS_WINDOW = FIXED
+TS_SUBCLASS = WHEEL
+NERC_CURTAILMENT_PRIORITY = Nerc Priority 1
+OTHER_CURTAILMENT_PRIORITY = Default
+START_TIME = 07/01/2001
+STOP_TIME = 08/31/2001
+CEILING_PRICE = 2,270.00
+OFFER_PRICE = 2,270.00
+BID_PRICE = 2,270.00
+PRICE_UNITS = $/mW-M
+PRECONFIRMED = YES
+ANC_SVC_LINK =
+ANC_SVC_REQ =
+POSTING_REF = 0
+SALE_REF =
+REQUEST_REF =
+DEAL_REF =
+NEGOTIATED_PRICE_FLAG =
+STATUS = CONFIRMED
+STATUS_NOTIFICATION = HOLDEN.SALISBURY@ENRON.COM
+STATUS_COMMENTS =
+TIME_QUEUED = 05/08/2001
+
+TIME_OF_LAST_UPDATE = 06/11/2001
+PRIMARY_PROVIDER_COMMENTS =
+SELLER_COMMENTS =
+CUSTOMER_COMMENTS =
+SELLER_NAME = AZPS
+SELLER_PHONE = 602.250.1128
+SELLER_FAX = 602.250.1155
+SELLER_EMAIL = oasisadm@apsc.com
+CUSTOMER_NAME = Enron Power Marketing, Inc.
+CUSTOMER_PHONE = (713)853-3801
+CUSTOMER_FAX = (713)646-8272
+CUSTOMER_EMAIL = bill.rust@enron.com
+REASSIGNED_REF = 0
+REASSIGNED_CAPACITY = 0
+
+"
+12,"PPL Montana, LLC",l..denton@enron.com,holden.salisbury@enron.com,"Fri, 31 Aug 2001 08:00:19 -0700 (PDT)"," dbaughm (Non-Privileged).pst
+
+We received the executed EEI Master Power Purchase and Sale Agreement dated 9/1/01 from the referenced CP.  A copy will be scanned into Livelink."
+13,ExxonMobil Global Services Company,l..denton@enron.com,holden.salisbury@enron.com,"Tue, 14 Aug 2001 12:25:12 -0700 (PDT)"," dbaughm (Non-Privileged).pst
+
+We received the executed EEI Master Power Purchase and Sale Agreement from the referenced CP dated 8/13/2001.  A copy will be scanned into Livelink."
+14,Enron Volunteer Activity Survey,communityrelations@enron.com,holden.salisbury@enron.com,"Tue, 8 May 2001 13:49:51 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+By answering the following questions, you can help us structure volunteer projects for your Business Unit that targets your interests and skills. In turn, Enron can better serve the communities where we live and work.  This information is for internal use only and will remain confidential.
+
+Thank you for taking the time to complete this survey.
+
+Please click on the link below.
+
+Experiencing technical problems?  If this link does not automatically launch the questionnaire:
+1.  Launch by copying the link below into your browser, or
+2.  If you continue to have technical difficulties, please send an email message to communityrelations@enron.com
+3.  Please do not forward this link to anyone else, as it is unique for each respondent.
+
+http://etcsurvey.corp.enron.com/wi/p0499029/i.asp?r=212&s=FGYDUPYR&l=9"
+15,Mid-Year 2001 Performance Feedback,perfmgmt@enron.com,holden.salisbury@enron.com,"Mon, 14 May 2001 15:57:44 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+SALISBURY, HOLDEN,
+ 
+You have been selected to participate in the Mid Year 2001 Performance Management process.  Your feedback plays an important role in the process, and your participation is critical to the success of Enron's Performance Management goals.
+ 
+To complete a request for feedback, access PEP at http://pep.enron.com and select Complete Feedback from the Main Menu.  You may begin providing feedback immediately and are requested to have all feedback forms completed by Friday, May 25, 2001. 
+ 
+If you have any questions regarding PEP or your responsibility in the process, please contact the PEP Help Desk at:
+Houston:  1.713.853.4777, Option 4 or email: perfmgmt@enron.com
+London:  44.207.783.4040, Option 4 or email: pep.enquiries@enron.com 
+ 
+Thank you for your participation in this important process. 
+ 
+The following is a CUMULATIVE list of employee feedback requests with a status of ""OPEN.""  Once you have submitted or declined an employee's request for feedback, their name will no longer appear on this list.  NOTE: YOU WILL RECEIVE THIS MESSAGE EACH TIME YOU ARE SELECTED AS A REVIEWER. 
+ 
+Employee Name:
+ALONSO, THOMAS"
+16,Carolina Power & Light Company and Florida Power Corporation,l..denton@enron.com,holden.salisbury@enron.com,"Thu, 2 Aug 2001 14:57:49 -0700 (PDT)"," dbaughm (Non-Privileged).pst
+
+We have received executed EEI Master Power Purchase and Sale Agreements from the referenced CPs dated 5/2/01 and 6/15/01, respectively.  Copies will be given to legal and credit."
+17,The Power of Who - expertfinder,enron.expertfinder@enron.com,holden.salisbury@enron.com,"Tue, 17 Apr 2001 22:46:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+The Enron Corporate Policy Committee introduces Expertfinder.
+
+Expertfinder allows you to locate people within the Enron community by organization structure, skills, reporting relationships, languages, school attended, and prior work experience. 
+
+Expertfinder is a secured HR application that is available upon completion of your Certificate of Compliance.   Expertfinder can be accessed on the Enron Intranet by typing the following URL at the Internet Explorer command line and Log In using the HRGIS Id provided below:  
+
+https://hrglobal.enron.com
+
+Your HRGIS Id:   90123834
+Your Password:  Date of Birth (Format YYYYMMDD)  
+*Current users of the Global Launch Zone will maintain the same password.
+
+If you don't remember your password, click on Forgot ID/Password below the Log In button.  Should you have any questions regarding access or data issues in Expertfinder contact the HRGIM Line (HR Global Information Management) at 713-853-5666.  
+
+Expertfinder is only as good as the data provided.  Does your personal data need updating?  Go to eHRonline.enron.com or home.enron.co.uk/hrol_caller.htm (Enron Europe Limited only) to update your data today.  Or, contact your HR Generalist for business unit related updates.  
+
+"
+18,West/Southwest Power.,garrett@jobmenu.com,holden.salisbury@enron.com,"Wed, 3 Oct 2001 14:13:12 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+Hello Holden,	
+
+	My name is Garrett Stephenson and I am a executive recruiter in the Houston area. I currently have a few opportunities available in ERCOT and WSCC trading and was wondering if you would be interested in looking at these opportunities or if you knew someone that would.   Please let me know a good phone number and time to contact you.   I am representing a great company who is offering great benefits, base, and 17% of the book back to the traders.
+
+Thanks.
+
+
+
+Garrett Stephenson
+Kane & Associates
+Phone : 713-977-3600
+Mobile: 281-507-5627
+"
+19,PV CUT LLH for 04/16,cara.semperger@enron.com,holden.salisbury@enron.com,"Mon, 16 Apr 2001 22:12:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+Steve at Pac says he spoke with Jeremy about the cut on Sunday.
+
+
+---------------------- Forwarded by Cara Semperger/PDX/ECT on 04/16/2001 03:20 PM ---------------------------
+
+
+Monika Causholli
+04/16/2001 04:49 AM
+To:	Cara Semperger/PDX/ECT@ECT
+cc:	Stacy Runswick/PDX/ECT@ECT 
+Subject:	PV CUT LLH for 04/16
+
+We had a very strange cut today starting HE 1-6. Tag # 016370L where the gen is EPE- E-CISO-PACE   happened to be a cancelled tag and none of the counterparties including us did not know anything. After spending hours on the phone with CISO and PAC John @ PACE found that this tag had been replaced by tag 16381N   but none knew anything about it. This tag was for 78 MW and it was done by a PACE prescheduler.  We were trying to find a new sink in the meantime so before this new tag was found the following went RT
+
+HE 01 78 MW to APS  (APS took the power)
+HE 02 sank with LADWP @ $0. I agreed with John at PACE that we are going to charge PAC for HE 1-2 LDs
+Then for HE 3-6  the power was sent to PACE for the original deal price at PV.
+
+John at PACE was going to leave good notes to his prescheduler about this cut. I did not do anything HA to manage the cut (in enpower, Lotus notes ) as JOhn at PACE did not consider this a HA cut but a DA cut that nobody knew about. We left it up to the preschedulers to agree on this cut.
+
+if you have questions ask me,
+Monika
+"
+20,Cal ISO/CDWR's Purchases for Calif. Utilities - Web site,mark.fischer@enron.com,holden.salisbury@enron.com,"Thu, 26 Apr 2001 14:12:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+
+---------------------- Forwarded by Mark Fischer/PDX/ECT on 04/26/2001 07:19 AM ---------------------------
+
+
+""Victoria Watkins"" <vwatkins@pira.com> on 04/26/2001 06:14:12 AM
+To:	""Tim Heizenrader"" <theizen@enron.com>, <Mark.Fischer@enron.com>
+cc:	 
+
+Subject:	Cal ISO/CDWR's Purchases for Calif. Utilities - Web site
+
+
+Tim and Mark:
+
+In case you haven't seen this. Here's a good web site for information on the
+ISO's/CDWR's purchases for the Calif. utilities (sales volume and average
+prices). The site is maintained by the ISO's Energy Oversight Board (EOB).
+www.eob.ca.gov/calendar
+
+The EOB has begun to prepare a Daily Price Report which presents information
+on the ISO's real time purchases.  It can be viewed at
+www.eob.ca.gov/calendar.  Click on a highlighted date (starting with 4/23)
+then click on the icon next to the Daily Price Report listing on the
+calendar.
+
+Victoria
+
+Victoria Watkins
+PIRA Energy Group
+(212) 686-6808, ext. 315
+
+ "
+21,PIRA,kathy.axford@enron.com,holden.salisbury@enron.com,"Thu, 10 May 2001 10:54:20 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+The PIRA Daily Report is updated every morning to the ""T"" drive/InetPub/wwwroot/Publications/pubs
+
+If you can't access this site let me know and I will e-mail you the report."
+22,"FW: One Fish, Two Fish, Yellow Fish, Enron",stacy.runswick@enron.com,holden.salisbury@enron.com,"Thu, 6 Dec 2001 12:17:38 -0800 (PST)"," 
+
+
+
+-----Original Message-----
+From: dlpatterson@reliant.com [mailto:dlpatterson@reliant.com]
+Sent: Thursday, December 06, 2001 8:07 AM
+To: Runswick, Stacy
+Subject: One Fish, Two Fish, Yellow Fish, Enron
+
+
+Enron, according to Dr. Seuss...
+
+They exercised and sold, exercised and sold.
+And told all the employees to hold.
+While they made billions, they continued to say
+Our company will be the greatest someday.
+
+But lo and behold it would not come to pass.
+It was all a fraud and scam most would call crass.
+""How could it be true?"" we all asked.
+""All we do is buy and sell gas"".
+
+But to make their personal billions
+They had to keep in the dark their minions.
+So they lied and cheated, stole and cajoled
+Analysts, investors, workers and sold and sold.
+
+But they found out the scam
+And put the company in quite a stew.
+They told Ken and Andy ""we have lost confidence"".
+Little did they know, that confidence is what cons do.
+
+The old man in charge said ""we all trust Andy, he's fine,
+He made me my fortune and never charged a dime!""
+Andy got paid to manage illegal partnerships you see,
+And for that he collected thirty m! illion as his fee.
+
+But the pressure was on, and Ken had to act.
+He told Andy, ""You must go on leave""
+Is he still on the payroll we asked?
+We get no answer. Seems Andy will be there to the last.
+
+Ken restated his books, and oh the looks that
+Were on the faces of all but the crooks.
+The books had been cooked! Not one year, not two, not even three,
+They had been cooked a total of four.
+And many suspect even more!..
+
+He went into the elevator, that old gas trader.
+He hit floor fifty, where his offices reside.
+With two armed guards standing at his side.
+
+And so he rose to the top of 1400 Smith
+And went into the boardroom forthwith.
+There were the ghosts of Fastow, and Skilling.
+Where with their cronies they devised great scams.
+How to deceive, cheat, and steal millions of clams.
+
+And with one more scam to do
+He picked up the phone and called his friend Chuck.
+""Chuck"", he said, "" I'm in quite a jam, can! you please
+help me I got caught in my scam"".
+So old Chuck bit a nd came to Kens side,
+First with some money and took Ken as his bride.
+
+But that old scoundrel had played too many scams
+This one he could not hide as Chucks lawyers and guides
+Went over Ken's books and found such a surprise.
+
+There were no trades, there were no counterparties.
+There were no assets, there was no Christmas party.
+And so Chuck went to Ken and said ""Your company
+Is a sham. It was all lies. I cannot merge with you.
+Your firm is a rotting carcass festering with flies!
+
+And so Ken thought. He thought and he thought.
+He will file Chapter eleven and fire a lot.
+Four thousand to be exact.
+We thought he has lost gazillions,
+but prior filing he managed to bonus
+his friends fifty eight Million.
+
+And so we are told, the company will be back.
+A shell of itself but not quite the same.
+The shell is appropriate as we all know,
+The core business of Ken is a shell game."
+23,FW: Loss Tag Reminder,cara.semperger@enron.com,holden.salisbury@enron.com,"Mon, 18 Jun 2001 18:36:39 -0700 (PDT)"," 
+
+
+
+ -----Original Message-----
+From: =09""LYNN RICHARDSON"" <LERICHRD@wapa.gov>@ENRON [mailto:IMCEANOTES-+22=
+LYNN+20RICHARDSON+22+20+3CLERICHRD+40wapa+2Egov+3E+40ENRON@ENRON.com]=20
+Sent:=09Monday, June 18, 2001 3:25 PM
+To:=09Bruce.McIver@BCHydro.bc.ca; Lisa.Will@BCHydro.bc.ca; Navjote.Jagpal@B=
+CHydro.bc.ca; ddelzer@bepc.com; thylden@bepc.com; david_toole@cargill.com; =
+jeffrey_cravens@cargill.com; mark_myers@cargill.com; hgreen@csu.org; skoch@=
+csu.org; philtice@deseretgt.com; fwright@digisys.net; Cherie.L.Steigerwald@=
+dynegy.com; Clemons, Amy; Semperger, Cara; Robinson, Donald; Runswick, Stac=
+y; shultsjw@er.oge.com; rfrancis@idacorpenergy.com; jshadie@idahopower.com;=
+ kgillis@idahopower.com; panderson@idahopower.com; tmilam@idahopower.com; T=
+Taylor@idahopower.com; biggst@lac.losalamos.nm.us; Chambellan@lac.losalamos=
+.nm.us; gregg.oetting@mirant.com; ted.bauman@mirant.com; paul.smallwood@nce=
+power.com; cLangston@NMPPENERGY.org; cstanley@NMPPENERGY.org; dbreithaupt@N=
+MPPENERGY.org; jwoita@NMPPENERGY.org; kgaden@NMPPENERGY.org; lhartgrave@NMP=
+PENERGY.org; dpettinger@oppd.com; transprov@oppd.com; aivars.saukants@pacif=
+icorp.com; david.cory@pacificorp.com; dick.dowdy@pacificorp.com; lori.wisbe=
+ck@pacificorp.com; Theresa.Andres@pacificorp.com; jthomas@pnm.com; dean.luc=
+iuk@powerex.com; malcolm.stewart@powerex.com; marzena.piotrowicz@powerex.co=
+m; michelle.hiley@powerex.com; 24hourdesk@powersrc.com; dmpetritz@pplmt.com=
+; jswilliamson@pplmt.com; btomsky@rmgci.com; kamurdoc@srpnet.com; provo.sly=
+nsky@state.ut.us; bhorton@tnsk.com; csamson@tnsk.com; slong@tnsk.com; ariel=
+la_weis@transalta.com; clint_korchinski@transalta.com; jade_ward@transalta.=
+com; john_esiaw@transalta.com; Karen_Pelley@transalta.com; keith_I_taylor@t=
+ransalta.com; marzena_plotrowica@transalta.com; meghana_bhat@transalta.com;=
+ Murray_Hnatyshyn@transalta.com; wayne_young@transalta.com; mikthe@tristate=
+gt.org; shasch@tristategt.org; terry@uamps.com; cevans@utilicorp.com; cherr=
+y.smith@williams.com; cyndy.mielke@williams.com; james.donaldson@willliams.=
+com; cliff.barker@xemkt.com
+Subject:=09Loss Tag Reminder
+
+Transmission Customers:
+
+The Western Area Colorado Missouri control area (WACM) has just implemented=
+ a new scheduling package and thought this would be a good time to offer a =
+reminder about how loss energy tags for delivery to WACM are to be complete=
+d.
+
+1.  Please ensure that ""WACM"" is the last PSE on the tag.  This is importan=
+t as it provides proper credit to the Transmission Customer for losses deli=
+vered.
+2.  In the 'Comments' field, please put the words ""WACM Losses"".  If the ta=
+gs are for a real-time transaction from the previous week, please indicate =
+the date; i.e., ""WACM Losses for MM/DD/YY"".
+3.  Prescheduled transactions require a concurrent tagging of loss energy t=
+o WACM.
+4.  Real-time transactions require a return of loss energy to be accomplish=
+ed same day, next week, same profile.
+5.  It is allowable to combine losses due in any day/week/month/season on a=
+ single tag if that is easier for you to do so.  WACM calculates the amount=
+ of loss energy due from a Transmission Customer per day based on preschedu=
+led transaction losses due on Day 0, plus real-time transaction losses due =
+from day -7.
+
+We are working with WACM Operations staff to see if, with the new schedulin=
+g software implemented, we will be able to accept real-time transaction los=
+s energy concurrent with the real-time transaction.  If we are able to effe=
+ct that change, it will be posted on OASIS and we will get an e-mail off to=
+ you immediately.
+
+In the meantime, if you have any questions, please give me a call or send a=
+n e-mail.
+
+Lynn Richardson
+Public Utilities Specialist
+RMR
+(970) 461-7440"
+24,Intel Corporation and Davis Wire Corporation,l..denton@enron.com,holden.salisbury@enron.com,"Tue, 11 Sep 2001 06:57:00 -0700 (PDT)"," dbaughm (Non-Privileged).pst
+
+We received the executed EEI Master Power Purchase and Sale Agreements from the referenced CPs dated as follows:
+
+Intel          8/30/01
+Davis Wire 9/7/01
+
+Copies will be scanned into Livellink."
+25,Executed Power Contracts,l..denton@enron.com,holden.salisbury@enron.com,"Tue, 14 Aug 2001 10:00:44 -0700 (PDT)"," dbaughm (Non-Privileged).pst
+
+We have received the following EEI Master Power Purchase and Sale Agreements:
+
+Utah Associated Municipal Power System (8/10/2001)
+TransCanada Power Marketing Ltd. (7/30/2001)
+Electrical District Number Two, Pinal County (7/23/2001)
+
+Copies will be scanned into Livelink."
+26,FW: Transmission Demand Charge,heather.dunton@enron.com,holden.salisbury@enron.com,"Fri, 3 Aug 2001 14:02:06 -0700 (PDT)"," cara semperger 6-26-02.PST
+
+Below confirms that the transmission deals in April did calculate the correct
+Demand Charge even though it created 3 strips.
+
+-Heather
+
+ -----Original Message-----
+From: 	Kraltchev, Nikolay  
+Sent:	Friday, August 03, 2001 1:45 PM
+To:	Dunton, Heather
+Cc:	Smith, Will
+Subject:	RE: Transmission Demand Charge
+
+Heather,
+
+This particular Transmission deal is basically 1 strip of a 1 month long deal.
+It has been broken into 3 strips because of the daylight savings in April.
+The demand Charge Frequency is MW per Month -- That means that Demand Charge Price (1,330) will be applied only once for the entire time of flow (4/1 to 4/30)
+The Demand Charge Volume is 50.
+
+The Demand Charge Price (1,330) will be applied to the Demand Charge Volume (50).
+So the final Demand Charge will be:
+	1330 * 50 = 66,500
+
+ 
+
+Thanks!
+Nikolay
+713-345-7265
+
+ -----Original Message-----
+From: 	Smith, Will  
+Sent:	Friday, August 03, 2001 12:01 PM
+To:	Kraltchev, Nikolay
+Cc:	Luu, Duong
+Subject:	FW: Transmission Demand Charge
+
+Nik,
+
+Please investigate how the PCS calculates demand charges for Transmission deals.  Let me know what you find.
+
+thanks,
+Will
+
+ -----Original Message-----
+From: 	Dunton, Heather  
+Sent:	Friday, August 03, 2001 9:51 AM
+To:	Smith, Will
+Subject:	Transmission Demand Charge
+
+Will I don't know if you are the person to ask - but I thought I would start with you.
+I have a Transmission deal 539126 which was entered w/ a Demand Charge.
+Frequency: MW Month
+Demand Charge: 1330
+
+The deal was for April 1-30.
+Since the Strip was for April under PPT Enpower created 3 strips 
+1) 4/1/01 - 4/1/01 HE1-2  50mw  Demand Charge: 1330
+2) 4/1/01 - 4/1/01 HE4-24  50mw  Demand Charge: 1330
+3) 4/2/01 - 4/30/01 HE1-24  50mw  Demand Charge: 1330
+
+
+Everyone was worried that this would take the 3 strips and calculate the demand charge for each strip.
+It appears this did just calculate one strip: so 1330 * 50 = 66,500
+It was assumed this deal was going to calculate (1330 * 50) * 3strips = 199,500
+
+
+Will what are your thoughts on how the monthly demand charge would calculate.
+Do you think it will just take the mw value of one of the strips and calculate the monthly demand charge?
+
+Thanks for your help on this,
+Heather
+
+<Embedded Picture (Device Independent Bitmap)>"
+27,Employee Services Survey,resources@enron.com,holden.salisbury@enron.com,"Fri, 13 Apr 2001 02:45:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+The purpose of this survey is to gather information regarding Enron's current employee and community services programs.  Your feedback is extremely important. This survey may take at least 5 minutes.
+
+Experiencing technical problems?  If this link does not automatically launch the questionnaire:
+1.  Launch by copying the link below into your browser, or
+2.  If you continue to have technical difficulties, please send an email message to human resources@enron.com. (Please leave the space between human and resources).
+3.  Please do not forward this link to anyone else, as it is unique for each respondent.
+
+http://etcsurvey.corp.enron.com/wi/p0537666/i.asp?r=11091&s=PKMFLZOT&l=9"
+28,Name Change,l..denton@enron.com,holden.salisbury@enron.com,"Mon, 27 Aug 2001 15:13:45 -0700 (PDT)"," dbaughm (Non-Privileged).pst
+
+The following Name Overlay was done today:
+
+Cominco Ltd    to    Teck Cominco Metals Ltd.
+"
+29,"CONFIRMING: Happy Hour this Friday, 11.9.01",grace.rodriguez@enron.com,holden.salisbury@enron.com,"Wed, 7 Nov 2001 21:52:51 -0800 (PST)"," 
+
+Howdy all!
+
+Just a reminder that you are invited to the Associate/Analyst Happy Hour we will be hosting at the Heathman Hotel on Friday, November 9th (4:30pm-6:30pm). Please let me know whether or not you are planning to attend.
+
+I look forward to hearing from you (and seeing you on Friday)! :o)
+
+Enjoy the rest of your week!
+
+-Grace
+x8321
+
+ -----Original Message-----
+From: 	Kearney, Julie  
+Sent:	Friday, October 26, 2001 2:52 PM
+To:	Mallory, Chris; Driscoll, Michael M.; Salisbury, Holden; Williams III, Bill; Oh, Jeffrey; Eriksson, Fredrik; Chen, Andy; Solberg, Geir; Cavanaugh, Darren; Oh, Jeffrey; Oh, John; Bishop, Serena; Rance, Susan; Coffing, Timothy; Warner, Nicholas; Elafandi, Mo; Mumm, Chris; Bruce, James; Calvert, Gray; Guillaume, David; Slinger, Ryan; Stokley, Chris; Frost, David; Nelson, Kourtney
+Cc:	Rodriguez, Grace; Jarnagin, Josie
+Subject:	Happy Hour!
+
+The Fall Associate and Analyst Recruiting Super Saturdays are scheduled for Saturday, Nov 10 and Saturday, Nov 17.  The candidates arrive on Friday, are given a tour of the Floor and then presentations will be held thereafter.   The November 10 Event will be Analyst-level candidates.  The November 17 Event will be Associate-level candidates.
+
+Now, here's the real info!    :  )
+
+On both Fridays (Nov 9 & Nov 16) we will be sponsoring a get together (Happy Hour) at the Heathman for all the Associates & Analysts .  This means FREE drinks and food from 4:30 PM ---> 6:30 PM.  This will give you an opportunity to meet the candidates, check them out and if necessary ""sell"" them on Enron.
+
+We will be sending out more reminders and confirmations, but block out your calendars for these two Fridays.  Let me know if you have any questions!  
+
+Julie K"
+30,FW: spoke too soon,tom.alonso@enron.com,holden.salisbury@enron.com,"Thu, 24 May 2001 13:50:23 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+
+
+ -----Original Message-----
+From: 	Lex Crane <LCrane@prebon.com>@ENRON [mailto:IMCEANOTES-Lex+20Crane+20+3CLCrane+40prebon+2Ecom+3E+40ENRON@ENRON.com] 
+Sent:	Thursday, May 24, 2001 10:34 AM
+To:	Alonso, Tom
+Subject:	FW: spoke too soon
+
+
+
+----------
+From:  James Smith
+Sent:  Thursday, May 24, 2001 10:14 AM
+To:  Anthony Farinacci; Lex Crane; Mike Loria
+Subject:  FW: spoke too soon
+
+
+
+----------
+From:  Donald Tencellent Jr.
+Sent:  Thursday, May 24, 2001 5:51 AM
+To:  James Smith
+Subject:  FW: spoke too soon
+
+
+
+----------
+From: 	Nagle, Rita[SMTP:rita.nagle@gs.com]
+<mailto:[SMTP:rita.nagle@gs.com]>
+Sent: 	Thursday, May 24, 2001 8:47 AM
+To: 	Donald Tencellent Jr.
+Subject: 	FW: spoke too soon
+
+
+
+-----Original Message-----
+From: himex [mailto:expedition@everestbasecamp.com]
+<mailto:[mailto:expedition@everestbasecamp.com]>
+Sent: Thursday, May 24, 2001 5:03 AM
+To: patrickw@Youthstream.com; <mailto:patrickw@Youthstream.com;>
+gamacorp@aol.com; <mailto:gamacorp@aol.com;>  owenandsuz@yahoo.com;
+<mailto:owenandsuz@yahoo.com;>
+richard.ruzika@gs.com; <mailto:richard.ruzika@gs.com;>  rita.nagle@gs.com;
+<mailto:rita.nagle@gs.com;>  njones@thecarlylegroup.com;
+<mailto:njones@thecarlylegroup.com;>
+jeff.reznick@gs.com; <mailto:jeff.reznick@gs.com;>  dmandel@sjga.com
+<mailto:dmandel@sjga.com>
+Subject: spoke too soon
+
+
+Unfortunately i am too late to halt my last email. Perspective comes quickly
+at 8000 meters and today, thinking back on the ascent and all the rock
+climbing moves on that ridge that might have left me dead given my
+perpetually clumsy condition (wrsened by AMS), I am happy to be alive. The
+weather is beautiful but the mountain has bitten back and many are dead and
+dying, including friends of mine from my own team who summitted too late for
+the north side. By the time i am allowed to send this, the media will have
+already begun reporting on this tragedy. I was slowed by my vomiting and had
+i continued, i likely would have been trudging up with this group.
+
+In my last email there is black humor concerning one of my friends: ensuring
+his safety so suz and i could take a vacation. He is stuck on the ridge now,
+dying, and will likely be dead by morning. One of our strongest guides is
+with him and he, too, will probably die. This guy is super strong but the
+altitude has snatched him. We're in shock here and can do nothing but stare
+into telescopes and pray that they continue the bleak fight. I have been
+assigned NOK duty and have made two very tough phone calls to young wives. A
+member of the Aussie expedition died suddenly at Camp 2 this morning, 3
+Russians are stuck with our men on the ridge, and a spaniard is flirting
+with death right now after a bout with cerebral edema, despite Chris
+Warner's valiant effort to get him down from the ridge last night. When i
+think of this mountain now, i think only of death.
+
+Russ is quite experienced in hig-altitude rescues but this is the first time
+he has unleashed the team for our own. It is a totaly professional
+logistical operation (locating and moving oxygen and regulataors back up
+into the jet stream), relying heavily on the sherps who are just incredibly
+strong. Many stories of heroism over last 24 hours and many to come. The
+guide and the client spent the night on the ridge (8650 meters), incoherent
+and immobile, freezing, but they were saved when Asmus turned around from a
+desperate stumble home, climbed the second step (brutal) for the second time
+in 10 hours, and delivered oxygen to the desperate pair just before dark.
+Asmus tried to roust them and then had to dash for lower altitudes, reaching
+top camp (8300 meters...still incredibly dangerous) at 11:30 pm. It was a
+relatively warm night (just below)and both client and guide were seen moving
+space blankets this morning through the telescope. Alive. But they could not
+stand. One could not see. No comms. Bivouacs above 8000 meters are epics and
+you are sure to read about this.
+
+Coordinating therescue from the Col, Russ then rousted all available bodies
+and they started up the ridge for the second time in as many days, Purba and
+Lopsang leading the way back into the death zone, humping oxygen. The
+American expedition came upont the bodies this morning and have given up
+their summit attempt (remember, they failed last week and also failed in '99
+so this is a huge sacrifice) to make the rescue. It looked bleak this
+morning but after some injections our teammates began to move, carried by
+the strong Americans. As i type, they have been moving at a snail's pace and
+the Americans will soon have to leave them to save themselves.We hope our
+sherps are there by then and can take over for what is turning out to be an
+absolutely epic and incredibly dangerous rescue. Remember, that ridge is 14
+inches across for stretches, dropping 10,000 feet on either side. When i
+gazed down 2 nights ago, it was truly like staring out of the window of a
+plane, so steep was the drop. The sherps are going to have to be supermen.
+
+From the ridge and high camp, chris and asmus (they've been wasting there
+for over 36 hours now) have been gathering oxygen for the 2000 meter descent
+to ABC. They are sucking some themselves to ensure we don't have a
+double-rescue. I'm feeling better and i may be going up to the col to help
+with the rescue, assuming we get these guys off the ridge alive. Too high
+for a helo on this side so we'll have to platoon them down asap. Other
+members who summitted earlier are still up too high, too slow descending
+from 'safe' camps, and i may help them down as well. So i will not be back
+by mem day--we have to get these people down.
+
+The drama unfolded yesterday as i stared through a spotting scope, sulking
+and making occasional trips to the waste moraine. The client was slower and
+slower and then he just stopped on the summit snow field. I thought: uh oh.
+Russ had warned them hours before to turn but summit fever had taken hold
+and the guide was pursuaded by the client. Soon russ was on the radio
+screaming at the guide to drag the client down, but the hour grew late and
+suddenly a successful summit evolved into a death trap, both men immobile
+and nearly incoherent, the guide kicking and draggin the client, to no
+avail. Asmus was with them and performed valiantly, as i mentioned, but no
+one was in a position to help. At that height, every second counts and the
+other teams rushed past on their way to safety. When you rush into a burning
+building you can't linger, especially if your physical performance is
+literally cut in half.
+
+I am praying for these two--and the russians--and  it's hard to think f
+anything else as they progress home, mumbling, step by step. I have messages
+from their wives but they are unable to [process spoken language at this
+point. Even if they get down, i wonder what the results will be. It's really
+sad. I am sure they are also severely dehydrated--i'll explain the process
+when i get home but siffice to say you literally can't boil water fast
+enough to keepup with needs of body at altitude. My heartbeat at top camp
+was 180 when i was 'resting' in my sleeping bag before the attempt. My
+tongue split down the middle even though i was trying to keep the fluids
+coming at a rate of a liter an hour, doing nothing.
+
+I feel lucky today. Very lucky. When i think of my own descent, alone,
+throwing up along the way yesterday, i realize just how razor-thin this
+whole thing is. There were times on the ridge where i was hanging by my
+jumar on a supposedly new rope, ony to reach the anchor point to find a
+ten-year-old knot, totally fried by the uv rays. Other times i stepped in
+snow footprints and slipped, sliding down on my stomach until the rope
+jerked taut. Too many ways to die here.The aussie who gave me his water in
+the bowl may have prevented another casualty. Who's to say? Problem here is
+that, unlike the events we're used to when we sprint to the finish line (we
+used to say in crew that the perfect race was when you passsed out at the
+finish), you have to reserve a certain amount to get the hell down the
+mountain. And it's so hard to do that. Is a quarter tank enough? Half? Or do
+you need even more because, in truth, you are dying from the moment you
+leave camp 3 (not even top camp).
+
+I will pass this info only when the word is out--sorry--but will keep you
+updated from there once i talk ro russ. It's hard watching friends die but
+we're helpless down here."
+31,Welcome to PIRA Online,johng@pira.com,holden.salisbury@enron.com,"Thu, 3 May 2001 20:22:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+Please respond to 
+Dear Holden,
+ 
+You have been provided with access to PIRA  Online, PIRA's Internet-based energy library, as part of the Retainer Service  that your company has with PIRA Energy Group. 
+To access the online service, please  go to our website at www.pira.com .  Once you  enter the site, click on the ""Login"" prompt on the left bar to enter the Client  section of our website. At the Login  page, you will be prompted for a User ID and Password.  Please enter the following codes (NOTE:  they are case-sensitive):
+User Name:  hsalisbury
+Password:  hs8284
+Once you have entered the Client  section, you have three choices for accessing your information.  In the center of the page we list PIRA's  latest 10 reports for all fuels; on the left is an option to go directly to the  most recent issue of the main reports for Global Oil, North American Gas,  Electricity, and European Gas; and at the top of the page you may select  ""Latest"" to retrieve PIRA reports issued over the last 30 days by fuel, or ""All  Reports"" to retrieve all PIRA reports (archived and recent) by  fuel.
+Please call me if you have any  questions or if you are having a problem logging on.
+John  Graziano
+Client  Relations
+PIRA Energy  Group
+3 Park Avenue, 26th  Floor
+New York, NY  10016
+(212) 686-6808,  ext. 341support@pira.com "
+32,RE: Total Transfer Capabilities,mneeley@caiso.com,holden.salisbury@enron.com,"Wed, 2 May 2001 22:18:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+I will forward this to the appropriate party and get you added to the
+distribution list. Thank you for letting us know.
+
+Myrna Neeley
+Administrative Assistant
+Outage Coordination & Transmission Maintenance
+California Independent System Operator
+Voice: 916-351-2171
+ Fax: 916-351-2367
+E-mail  mneeley@caiso.com
+
+
+
+-----Original Message-----
+From: Holden.Salisbury@enron.com [mailto:Holden.Salisbury@enron.com]
+Sent: Wednesday, May 02, 2001 3:02 PM
+To: mneeley@caiso.com
+Subject: Total Transfer Capabilities
+
+
+Hello,
+
+I would like to be included on the distribution list to recieve this email.
+My email address is mailto: holden.salisbury@enron.com.  My phone number is
+503/464-3910.  Please let me know if you need any more information.
+
+Thank You,
+Holden
+
+
+---------------------- Forwarded by Holden Salisbury/PDX/ECT on 05/02/2001
+03:08 PM ---------------------------
+
+
+Mark Fischer
+05/02/2001 02:31 PM
+
+To:   Holden Salisbury/PDX/ECT@ECT
+cc:
+
+Subject:  Total Transfer Capabilities
+
+
+---------------------- Forwarded by Mark Fischer/PDX/ECT on 05/02/2001
+02:39 PM ---------------------------
+
+
+""Neeley, Myrna"" <MNeeley@caiso.com> on 05/01/2001 03:53:06 PM
+
+To:   Cheri Pryor <CPryor@caiso.com>, Market Status
+      <MarketStatus@caiso.com>, Pacific Northwest Security Coordinator
+      <wsccnwsc@bpa.gov>, PX Realtime <pxrt@calpx.com>, ""Rocky Mountain,
+      Desert Southwest Security Coordinator"" <rmrsecur@warmr.net>, WSCC
+      Emergency Contacts <summer@wscc.com>
+cc:
+
+Subject:  Total Transfer Capabilities
+
+
+Attached are the Total Transfer Capabilities (TTC's) for May 3, 2001.
+
+ <<TTC 5-3-01.PDF>>
+
+
+The attached Outage information is reliable at time of posting.  The
+attached Outage information is subject to change without notice.
+
+
+Myrna Neeley
+Administrative Assistant
+Outage Coordination & Transmission Maintenance
+California Independent System Operator
+Voice: 916-351-2171
+ Fax: 916-351-2367
+E-mail  mneeley@caiso.com
+
+
+
+(See attached file: TTC 5-3-01.PDF)
+
+"
+33,FW: City of Redding,jeff.richter@enron.com,holden.salisbury@enron.com,"Mon, 10 Dec 2001 11:28:23 -0800 (PST)"," holden salisbury 6-26-02.PST
+
+ 
+-----Original Message-----
+From: Marvin Briggs [mailto:dayahead@snowcrest.net]
+Sent: Monday, December 10, 2001 9:43 AM
+To: Richter, Jeff
+Subject: City of Redding
+
+
+Jeff- 
+ 
+Here is a link to our website with he job posting on it.
+ 
+<http://ci.redding.ca.us/personel/pwrprsch.htm>
+ 
+You can also download an application from this site as well.  Sorry to hear what's going on up that ways...especially this time of year.
+ 
+Anyhow, you also asked for my home phone number- its 530-226-8046
+Give me a holler there or at work 530-245-7018 if you have any additional questions.
+ 
+ 
+~Marv Briggs"
+34,"PNM Loss Charges, Schedule 9",virginia.thompson@enron.com,holden.salisbury@enron.com,"Fri, 17 Aug 2001 17:00:41 -0700 (PDT)"," 
+
+Dear Traders,
+
+ I spoke with Don at Public Service Company of New Mexico again today regarding the Schedule 9 Loss Compensation Service charges.  He re-confirmed that the market price that is part of the Schedule 9 equation (Loss Compensation Service = # MW wheeled x market price x 3%) is a market price that he obtains from his marketers.  I re-confirmed that his 'marketers' are his traders, though I do not know whether these are Long Term, Cash, or Real-Time Traders.
+
+ He is going to talk to his traders to find out where this price came from.  I brought up the point that there has been a price cap of $91.87 in the west and asked that he bring that point forward in his discussions.  
+
+ He should respond to me on Monday 8-20-01, on which day the bill is due.
+
+ I will keep you posted on my findings.
+
+  Virginia"
+35,Re: Westpower Fundamentals,tim.heizenrader@enron.com,holden.salisbury@enron.com,"Wed, 2 May 2001 13:47:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+It should be working now.
+
+
+
+
+
+Holden Salisbury
+05/01/2001 02:47 PM
+To:	Tim Heizenrader/PDX/ECT@ECT
+cc:	 
+
+Subject:	Westpower Fundamentals
+
+Could I please get access to the Implied Heat Rates and Technical Analysis functions in the website.
+
+Thank You,
+Holden
+
+"

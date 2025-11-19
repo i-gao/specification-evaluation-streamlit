@@ -1,0 +1,1540 @@
+email_id,subject,from,to,date,message
+0,Plant Status PI Screens,mitch.robinson@enron.com,cyril.price@enron.com,"Wed, 2 Aug 2000 10:55:00 -0700 (PDT)"," jhernan3.nsf
+
+Hourly traders and operators that need to see the overhead PI screens can now 
+view them via the web regardless of where they are sitting.  They can be 
+accessed through Internet Explorer from the new East Power Home Page, under 
+the GENCO section.  Please contact Rick Broussard or Ramesh Swaminathan if 
+you have trouble getting access.
+
+They'll look a little different, but the information content is the same.
+
+Mitch"
+1,FE's NEW trans subsidiary,kayne.coulter@enron.com,cyril.price@enron.com,"Tue, 5 Sep 2000 06:21:00 -0700 (PDT)"," jhernan3.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 09/05/2000 01:24 
+PM ---------------------------
+   
+	
+	
+	From:  Mitch Robinson @ ENRON                           09/05/2000 01:04 PM
+	
+
+To: Kayne Coulter/HOU/ECT@ECT
+cc:  
+Subject: FE's NEW trans subsidiary
+
+fyi.
+---------------------- Forwarded by Mitch Robinson/Corp/Enron on 09/05/2000 
+01:06 PM ---------------------------
+
+
+Patrick Hanse@ECT
+09/05/2000 12:58 PM
+To: Oscar Dalton/HOU/ECT@ECT, Mitch Robinson/Corp/Enron@Enron, Corry 
+Bentley/HOU/ECT@ECT, James E Terrell/HOU/ECT@ECT, Alonzo 
+Williams/HOU/ECT@ECT, Larry Valderrama/HOU/ECT@ECT, Robert 
+Benson/Corp/Enron@ENRON
+cc: Edward D Baughman/HOU/ECT@ECT, John Zufferli/HOU/ECT@ECT, Kevin M 
+Presto/HOU/ECT@ECT 
+
+Subject: FE's NEW trans subsidiary
+
+FE transmission has  changed it's name to American Transmission Systems, Inc. 
+(ATSI) as a Transmission Provider.  See details in the letter below.  FE will 
+continue to be a Control Area. FOR TAG purposes beginning Nov. 1st, the TP 
+for all FE OASIS references will need to be ATSI.
+---------------------- Forwarded by Patrick Hanse/HOU/ECT on 09/05/2000 12:31 
+PM ---------------------------
+
+
+JohnO@ecar.org@ecar.org on 09/05/2000 08:25:51 AM
+Sent by: CarolC@ecar.org
+To: tahern@buckeyepower.com, andreej@dteenergy.com, drbarker@cinergy.com, 
+ssbayer@nipsco.com, rbednarz@spp.org, cbedwell@vectren.com, 
+cbradley@bigrivers.com, bob.crosier@lgeenergy.com, mike.falvo@iemo.com, 
+dgoodson@hepn.com, rgursky@spp.org, phanse@enron.com, fredh@soc-dlco.lm.com, 
+dbidzior@cmsenergy.com, pbjohnson@aep.com, ljk@maininc.org, 
+rmkovacs@firstenergycorp.com, fredk@wvpa.com, JeffM@ecar.org, 
+jnickel@mpower.org, Robert.O'Connell@Williams.com, JohnO@ecar.org, 
+screadinger@pplweb.com, kevin.sherd@dplinc.com, bsquibb@ovec.com, 
+mtaylor@ipalco.com, juhrin@alleghenypower.com, jason@ekpc.com
+cc:  
+Subject: More about ATSI
+
+
+TO THE ECAR ATC PANEL AND LIAISONS:
+
+I am sending this to you for your information.
+
+Carol J. Cooper
+E C A R
+Direct Line: 330/580-8000
+Phone:  330-456-2488
+Fax:  330-456-3648
+e-mail: carolc@ecar.org
+
+
+
+
+-----Original Message-----
+From: rmkovacs@firstenergycorp.com [mailto:rmkovacs@firstenergycorp.com]
+Sent: Friday, September 01, 2000 10:52 AM
+To: johno@ecar.org
+Subject: More about ATSI
+
+
+John,
+
+At the ATC Panel meeting in South Bend, I provided some information about
+FirstEnergy's new  transmission subsidiary, American Transmission Systems,
+Inc. (ATSI).  I have some updated information.
+
+ATSI went commercial today, September 1. ATSI is a wholly owned subsidiary
+of FirstEnergy Corp. and owns and operates all of FirstEnergy's transmission
+facilities at voltages of 69 kV and above. ATSI is the transmission provider
+and performs the control area operator function for the FE control area. You
+may want to visit ATSI's OASIS home page, which can be accessed the same way
+as its predecessor FE OASIS home page. The organization charts, tariff,
+provider information, etc., have been updated to ATSI. ATSI's public web
+site is located at ""http://www.atsi-transmission.com.""
+
+A change has been made in the timing for the recognition of ""ATSI"" as the
+transmission provider mnemonic . NERC has informed us that upon reflection
+it would be easier for them to accommodate the mnemonic change from ""FE"" to
+""ATSI"" at midnight on November 1 rather than 8:00 a.m. EST. So currently the
+changeover is set for 0001 hours, EST (midnight) on November 1.
+
+The control area designation remains ""FE.""  As you know, path POR/PODs are
+based on the control areas. Thus, beginning November 1, the path name for
+transfers to AEP, for example, will change from ""E/FE/FE-AEP//"" to
+""E/ATSI/FE-AEP//."" Note that the abbreviated path names, as used in the ECAR
+ATC Coordination System, will not change (e.g., ""FE-AEP""). Beginning
+November 1, the Transmission Provider (TP) column on E-tags must show ""ATSI""
+not ""FE"" or they will be refused by ATSI's automatic tagging validation
+software.
+
+I hope this clarifies, rather than confuses. Please share this information
+with the ATC Panel contacts.
+
+Thank you,
+Dick
+
+
+
+"
+2,MOVE REQUEST - ASAP,kayne.coulter@enron.com,cyril.price@enron.com,"Thu, 7 Dec 2000 04:52:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 12/07/2000 12:55 
+PM ---------------------------
+
+
+Tamara Jae Black
+12/07/2000 11:56 AM
+To: Move-Team/EPSC/HOU/ECT@ECT, Dolores Sustaita/EPSC/HOU/ECT@ECT, David A 
+Cummings/HOU/ECT@ECT, Telephone Mods/Corp/Enron@ENRON, Lorie 
+Belsha/HOU/ECT@ECT
+cc: Christy Chapman/HOU/ECT@ECT, Lloyd Will/HOU/ECT@ECT, Thresa A 
+Allen/HOU/ECT@ECT, Kayne Coulter/HOU/ECT@ECT, Corry Bentley/HOU/ECT@ECT, Doug 
+Gilbert-Smith/Corp/Enron@ENRON, Mitch Robinson/Corp/Enron@Enron, Felicia 
+Doan/HOU/ECT@ECT 
+Subject: MOVE REQUEST - ASAP
+
+
+	
+
+Please see the following move request for DECEMBER 15th....please make sure 
+everyone in your group knows that this will be a very large move and their 
+help and support will be needed.  Please contact me with any and all 
+questions should they arise.
+
+Thanks for your help with this request.
+
+
+
+
+
+
+T.Jae Black
+x35800
+"
+3,ASC,kayne.coulter@enron.com,cyril.price@enron.com,"Wed, 28 Feb 2001 22:27:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 03/01/2001 06:26 
+AM ---------------------------
+
+
+Michael Jacobson@ENRON
+02/27/2001 04:48 PM
+To: Kayne Coulter/HOU/ECT@ECT
+cc:  
+Subject: ASC
+
+Kayne,
+
+If you could pass along to the Hourly group that the correct CP for Ameren 
+transmission is Ameren Service Company - ASC, I would appreciate it.
+
+Thanks,
+Michael
+x35098
+
+"
+4,Holidays,kayne.coulter@enron.com,cyril.price@enron.com,"Fri, 22 Dec 2000 00:15:00 -0800 (PST)"," dbaughm.nsf
+
+Everyone have a merry Christmas It has been a great year.  Our P&L stands at 
+$4.2 million.  Our budget was $10 million at the start of the year, then it 
+was changed to $5million when they took the 5% away from us.  After the slow 
+summer and when doubt settled in on our ability to achieve our goal it was 
+knocked down to $3 million.  However, when we proved that we were fighters 
+and not quitters and soared right through the $3 million, the crawfish came 
+along and knocked it up to $4 million and then up to $5 million.  Regardless 
+of all the crawfish boils we have been invited to this year, the bottom line 
+is that you never quit and I can say that I am DAMN proud of our group.  We 
+have been given 4 different managers for this year.  We started with the 
+infamous Jason Haile. He left in February because he had his doubts about us 
+achieving our goal.  Then Mr. Mark Dana Davis took the interim until he was 
+able to bring in Jeff King.   Jeff was with us from April until July and did 
+a great job, he represented us well and knew how to bring out our strengths.  
+In August we inherited Mitch Robinson.  We had to pack our bags and move into 
+Mr. Robinson's neighborhood.  Mitch taught us the operation side of the 
+utilities and we showed him that trading real time is not as easy as it 
+looks.  Mitch also fought for us,  I was in several different meetings in 
+which I saw him fight for us,  I know we had our differences but at the end 
+of the day he really stood up for us.  He came to a conclusion that his 
+skills and interest are dealing with assets.  Now going into the New Year we 
+have been given a new challenge.  I would like to say that I strongly believe 
+that we are and can stay at the top of the industry as the best.  In order to 
+stay at the top we have to believe and become the best that we can be.  You 
+never stay the same, you either get better or you slide down the hill.  
+Everyone of us has an opportunity.  There are always going to be days that we 
+feel like what in the HELL am I doing here.  However if you stay positive and 
+take care of your responsibilities we will stay on top.  Patience, 
+Perseverance, and Organization are our keys to success.  To keep from 
+rambling I will close with this great philosophy.  Every one of us has 
+talents and desires and they are all different.  We are still a team and 
+always will be a team and to be a successful team we have to have  the utmost 
+respect for one another and you have to take it upon yourself to not give any 
+of your teammates a reason to not respect you. My only expectations are for 
+you to give 100% and know your role.  If you do not know your role come see 
+me.
+
+Thanks and God Bless
+Big Daddy "
+5,"Transfer an incoming call to "" Voice Mail """,kayne.coulter@enron.com,cyril.price@enron.com,"Tue, 29 Aug 2000 08:11:00 -0700 (PDT)"," jhernan3.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 08/29/2000 03:14 
+PM ---------------------------
+
+
+Steve Olinde@ENRON
+08/29/2000 02:58 PM
+To: Brent Hebert/HOU/ECT@ect, Keith Comeaux/Corp/Enron@Enron, Chris 
+Lenartowicz/Corp/Enron@ENRON, George Diaz/Corp/Enron@ENRON, Justin 
+Laverell/Corp/Enron@ENRON, Kayne Coulter/HOU/ECT@ECT, Lloyd Will/HOU/ECT@ECT, 
+Mitch Robinson/Corp/Enron@Enron, Richard Broussard/Corp/Enron@Enron, 
+Christopher Watts/NA/Enron@Enron
+cc:  
+Subject: Transfer an incoming call to "" Voice Mail ""
+
+The procedure to connect an incoming call to "" Voice Mail ""
+
+1)  If you pick up a call on someone's line, and the person calling request 
+to be connected to Voice Mail:
+
+      A)   Press the "" T ""  transfer  button.
+      B)   Press * 99
+
+     The caller is now connected to Voice mail.
+
+
+2)  If a person calls on a line other than the employees  line and is 
+requesting to be connected to their Voice Mail :
+
+     A)   Press the "" T "" transfer button.
+     B)   Dial 57001 and the employees extension number.
+     C)   Press the release button.
+
+     The caller is now connected to Voice Mail.
+"
+6,MAIN Winter 2000-2001 Transmission Assesment,christopher.watts@enron.com,cyril.price@enron.com,"Wed, 29 Nov 2000 09:57:00 -0800 (PST)"," dbaughm.nsf
+
+Please see attached PDF file containing the MAIN Winter 2000-2001 
+Transmission Assesment.  Note also the attached summary of import, exports, 
+and bases between various interfaces.  Note:  The PJM/ECAR, ECAR/TVA, 
+TVA/ENT, Ent/SOCO interfaces have seen the sharpest decreases in 
+import/export capability from last year to this year.
+
+
+To: Ricardo Perez/NA/Enron@Enron, Grace Kim/NA/Enron@Enron, Rika 
+Imai/NA/Enron@Enron, Eric Saibi/Corp/Enron@ENRON, Peter 
+Makkai/NA/Enron@Enron, Christopher Watts/NA/Enron@Enron, George 
+Hopley/HOU/ECT@ect, Paul D Thomas/NA/Enron@Enron, Gautam Gupta/HOU/ECT@ECT, 
+Narsimha Misra/NA/Enron@Enron
+cc: Kevin M Presto/HOU/ECT@ECT, Rogers Herndon/HOU/ECT@ect, Mark Dana 
+Davis/HOU/ECT@ECT, Fletcher J Sturm/HOU/ECT@ECT, Patrick Hanse/HOU/ECT@ECT, 
+Mitch Robinson/Corp/Enron@Enron 
+
+Subject: MAIN Winter 2000/2001 TASG Report
+
+Attached is the link to the main transmission study.
+
+It contains some great bubble drawings as well as some key transmission 
+information on major flowgates. 
+
+Note it looks like TVA's transfer capability for the winter has been 
+significantly been reduced versus the 99/00 study.
+
+Please review this document for significant items that affect your markets 
+and prepare an applicable brief for your traders.
+
+thanks.
+---------------------- Forwarded by Lloyd Will/HOU/ECT on 11/20/2000 12:20 PM 
+---------------------------
+
+
+""Teri L. Harrop"" <tlh@maininc.org> on 11/16/2000 12:48:26 PM
+To: bodplus@maininc.org, ecplus@maininc.org, ocplus@maininc.org, 
+marketinterfaceplus@maininc.org
+cc: kpm@maininc.org 
+Subject: MAIN Winter 2000/2001 TASG Report
+
+
+The MAIN Winter 2000/2001 TASG report is available in electronic PDF
+format via the following link:
+
+http://www.maininc.org/files/tasg00w.pdf
+
+
+-----------------------------------------------------------------
+Kerry Marinan                           Email: kpm@maininc.org
+Senior Engineer                         Phone # (630)261-2606
+Office hours: 11/1->11/30 0800->1800+    Fax #   (630)691-4222
+-----------------------------------------------------------------
+"
+7,Weekly Monitoring Report,kayne.coulter@enron.com,cyril.price@enron.com,"Wed, 6 Dec 2000 02:12:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 12/06/2000 10:15 
+AM ---------------------------
+   
+	
+	
+	From:  Mitch Robinson @ ENRON                           12/06/2000 09:57 AM
+	
+
+To: Kayne Coulter/HOU/ECT@ECT
+cc:  
+Subject: Weekly Monitoring Report
+
+
+---------------------- Forwarded by Mitch Robinson/Corp/Enron on 12/06/2000 
+09:57 AM ---------------------------
+
+
+George Hopley@ECT
+12/06/2000 09:56 AM
+To: Paul J Broderick/HOU/ECT@ECT, Peter Makkai/NA/Enron@Enron, Eric 
+Saibi/Corp/Enron@ENRON, Juan Padron/NA/Enron@Enron, Clint 
+Dean/Corp/Enron@Enron, Grace Kim/NA/Enron@Enron, Doug 
+Gilbert-Smith/Corp/Enron@ENRON, Joe Quenet/NA/Enron@Enron, Chris 
+Dorland/HOU/ECT@ECT, Jeffrey Miller/NA/Enron@Enron, Robert 
+Benson/Corp/Enron@ENRON, Mike Carson/Corp/Enron@Enron, Laura 
+Podurgiel/HOU/ECT@ECT, Larry Valderrama/HOU/ECT@ECT, Matt Lorenz/HOU/ECT@ECT, 
+Larry Jester/Corp/Enron@ENRON, Robert Stalford/NA/Enron@Enron, Tom 
+May/Corp/Enron@Enron, Gautam Gupta/HOU/ECT@ECT, Narsimha 
+Misra/NA/Enron@Enron, Lloyd Will/HOU/ECT@ECT, Rika Imai/NA/Enron@Enron, Mitch 
+Robinson/Corp/Enron@Enron, Ricardo Perez/NA/Enron@Enron, Christopher 
+Watts/NA/Enron@Enron
+cc:  
+
+Subject: Weekly Monitoring Report
+
+
+---------------------- Forwarded by George Hopley/HOU/ECT on 12/06/2000 09:52 
+AM ---------------------------
+
+
+HGP Inc <hgpbus@home.com> on 12/06/2000 09:19:57 AM
+To: Kevin.M.Presto@enron.com, George.Hopley@enron.com, 
+Mark.Dana.Davis@enron.com, FSturm@enron.com, Rogers.Herndon@enron.com
+cc:  
+Subject: Weekly Monitoring Report
+
+
+Attached are the two files providing the Weekly Monitoring Report.  One
+file includes the summary page and the other file has the detail for
+each unit monitored.
+
+The monitoring report for the eight Western units has been sent to Tim
+Belden.
+
+If you have any questions, please call.
+
+Dan
+ - East Summary 001206.doc
+ - East001206.doc
+
+
+
+
+"
+8,SOCO Tariff Revisions,kayne.coulter@enron.com,cyril.price@enron.com,"Thu, 4 Jan 2001 01:02:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 01/04/2001 09:05 
+AM ---------------------------
+   
+	Enron North America Corp.
+	
+	From:  Bill Rust                           01/03/2001 02:01 PM
+	
+
+To: Kayne Coulter/HOU/ECT@ECT
+cc:  
+Subject: SOCO Tariff Revisions
+
+Kayne,
+
+FYI, SOCO has asked FERC to accept revisions to its OATT. These revisions 
+include new source and sink language identical to the Entergy attachment M. 
+To summarize the source and sink revisions:
+
+1) All transactions sinking in SOCO must show a valid load bus.
+2) All transactions sourcing in SOCO must show a valid generator bus.
+3) Sinks off of the SOCO system must be a valid load control area (No 
+generation only CA)
+4) Sources off of the SOCO system must be a valid generation control area (No 
+load only CA)
+
+It will take FERC a month or so to approve but we expect it to be approved an 
+be applied retroactively to December 14, 2000.
+
+If you have any questions or would like to see the filing, let me or Christi 
+Nicolay know.
+
+Thanks,
+Bill Rust
+"
+9,Scheduler's Regions - Sept. 20,kayne.coulter@enron.com,cyril.price@enron.com,"Thu, 21 Sep 2000 01:01:00 -0700 (PDT)"," jhernan3.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 09/21/2000 08:04 
+AM ---------------------------
+   
+	
+	
+	From:  Corry Bentley                           09/20/2000 10:01 AM
+	
+
+To: Kayne Coulter/HOU/ECT@ECT
+cc:  
+Subject: Scheduler's Regions - Sept. 20
+
+The schedulers are responsible for the following regions:
+
+
+Lisa Burnett  PJM    
+
+Jason Choate  COMED & NYPP
+
+Gerald Gilbert  NEPOOL
+
+Matt Lorenz  MAPP
+
+Gretchen Lotz   SERC (TVA, JEA)
+
+Jim Terrell        SPP  & ERCOT  (Entergy, Ercot)
+
+Maria Valdes  ECAR  (Cinergy, AEP)
+
+
+Please update your crew.
+Thanks,
+Corry
+"
+10,Re: Updated IPD DIRECT template,christopher.watts@enron.com,cyril.price@enron.com,"Tue, 20 Feb 2001 16:15:00 -0800 (PST)"," dbaughm.nsf
+
+THIS TEMPLATE IS STORED IN THE M:ELECTRIC\24 HOUR\CIN INDEX\IPG EMAIL 
+REPORTS\2001\FEB 01\ REVISED TEMPLATE 2-20-01.
+
+
+
+
+
+
+""Ellen Clardy"" <ellen.clardy@ipgdirect.com> on 02/20/2001 12:06:56 PM
+Please respond to <ellen.clardy@ipgdirect.com>
+To: <Dean.Laurent@enron.com>, <Mitch.Robinson@enron.com>, 
+<Doug.Miller@enron.com>, <Miguel.Garcia@enron.com>, <Larry.Jester@enron.com>, 
+""Christopher Watts"" <Christopher.Watts@enron.com>, ""Don Baughman"" 
+<don.baughman@enron.com>, ""John Kinser"" <John.Kinser@enron.com>, ""Kayne 
+Coulter"" <Kayne.Coulter@enron.com>
+cc: ""Suzanna Strangmeier"" <Suzanna.Strangmeier@ipgdirect.com>, ""Bobette 
+Riner"" <bobette.riner@ipgdirect.com> 
+
+Subject: Updated template
+
+
+We have begun beta testing our 3 new indexes: TVA, ComEd, and ERCOT. If you
+could please share the attached template with everyone on the hourly desk at
+night, we would really appreciate it! It is very similar to the one before,
+but it includes the new indexes. As always, any indicative prices are very
+welcomed!
+
+If you have any questions, feel free to contact us. Thank you so much for
+your time.
+
+
+Ellen Clardy, Ph.D.
+Power Market Analyst
+TradersNews
+713/647-6603
+ellen.clardy@ipgdirect.com
+
+
+ - 6ndxtemplate.xls
+
+"
+11,God Bless Texas,kayne.coulter@enron.com,cyril.price@enron.com,"Mon, 26 Feb 2001 02:37:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 02/26/2001 10:36 
+AM ---------------------------
+
+
+Gary and Donna Holtz <dgholtz@yahoo.com> on 02/25/2001 10:06:32 AM
+To: dgholtz@yahoo.com
+cc:  
+Subject: God Bless Texas
+
+
+
+
+>  GOD BLESS TEXAS
+>
+>  It seems a man in Topeka, Kansas, decided to write
+> a  book about
+>  churches  around the country.   He started by
+> flying to San Francisco,
+>  and started  working east from there. He went to a
+> very large church
+>  and began taking photographs, etc. He spots a
+> golden telephone on a
+>  wall and is intrigued with a sign which reads
+> ""$10,000 a minute.""
+>  Seeking out the pastor he asks about the phone and
+> the sign.  The
+>  pastor answers that this golden phone is, in fact,
+> a direct line to
+>  Heaven and if he pays the price he can talk
+> directly to God. He thanks
+>  the pastor and continues on his way.  As he
+> continues to visit churches
+>  in Seattle, Boise, Minneapolis, Chicago, Milwaukee,
+> New York,
+>  Atlanta, and on around the United States, he finds
+> more phones,
+>  with the same sign, and the same answer from each
+> pastor.  Finally,
+>  he arrives in Texas.  Upon entering a church in
+> Austin, lo and behold,
+>  he sees the usual golden telephone. But THIS time,
+> the sign reads
+>  ""Calls: 25 cents."" Fascinated, he requests to talk
+> to the pastor.
+>  ""Reverend, I have been in cities all across the
+> country and in each
+>  church I found this golden telephone, and have been
+> told it is a
+>  direct line to Heaven and that I could talk to God,
+> but, in the other
+>  churches the cost was $10,000 a minute.  Your sign
+> reads 25 cents
+>  a call.  Why?""   The pastor, smiling benignly,
+> replies,
+> ""Son, you're in Texas now, it's a local call.""
+>
+>
+
+
+__________________________________________________
+Do You Yahoo!?
+Get email at your own domain with Yahoo! Mail.
+http://personal.mail.yahoo.com/
+"
+12,Great Job.,kayne.coulter@enron.com,cyril.price@enron.com,"Thu, 7 Dec 2000 01:40:00 -0800 (PST)"," dbaughm.nsf
+
+According to my fancy ciphering we made $310,037.50 for the month of 
+November.  This figure does not include Buck o 5's New York p&l.  We made 
+&127508.45 moving power incrementally and $62497.05 in NEPOOL and PJM.  Mitch 
+made $120,032.00 in his December position that was closed out in the month of 
+November.  Great job by everyone.  
+
+On another note Russell Ballato has been accepted into the new ENRON trading 
+program that will start in January.  No further details as of yet.  Everyone 
+should congratulate and support his efforts.  Way to go Russell  and remember 
+the peasants.  We expect you to check in with us on a daily basis.  We expect 
+a monthly happy hour at your expense.
+
+Also with the Holidays coming up and the reorganization it is very important 
+that we communicate with the utmost importance.  We are all responsible for 
+what happens on this desk.  I will be out of town from the 23rd of December 
+until the 1st of January.  I will have my mobile with me 713-859-1713, any 
+questions please call.  Once again great job in November and let's take 
+December by the horns.
+
+Thanks
+Kayne"
+13,SPP TRANSMISSION,kayne.coulter@enron.com,cyril.price@enron.com,"Fri, 8 Sep 2000 03:11:00 -0700 (PDT)"," jhernan3.nsf
+
+Laurel has informed me that SPP will charge us $100 scheduling fee on any 
+Oasis request that is accepted that we do not use.
+
+Kayne"
+14,EnPower presentation,kayne.coulter@enron.com,cyril.price@enron.com,"Thu, 7 Dec 2000 03:39:00 -0800 (PST)"," dbaughm.nsf
+
+Any of you guys that would like to make this meeting are more than welcomed 
+and it is highly encouraged.
+
+Thanks
+Kayne
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 12/07/2000 11:41 
+AM ---------------------------
+   
+	
+	
+	From:  Christopher Watts @ ENRON                           12/07/2000 11:29 AM
+	
+
+To: Kayne Coulter/HOU/ECT@ECT, Keith Comeaux/Corp/Enron@Enron, Alton 
+Jackson/Corp/Enron@Enron
+cc: Christopher Watts/NA/Enron@Enron, Felicia Doan/HOU/ECT@ECT 
+Subject: EnPower presentation
+
+Duong Luu has agreed to give his EnPower presentation on Tuesday, December 12 
+in EB 3125 from 1 to 2pm.  Felicia is making arrangements for a digital 
+projector.  
+
+I left general insturctions with Duong to give an overview of EnPower from a 
+trading perspective.  A specific agenda and/or questions have not been given 
+to Duong but would help him better prepare the presentation.  Please forward 
+any questions regarding EnPower or topics needing coverage to me so I can 
+compile them and give them to Duong.
+"
+15,Transmission Rate,kayne.coulter@enron.com,cyril.price@enron.com,"Tue, 2 Jan 2001 07:47:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 01/02/2001 03:49 
+PM ---------------------------
+
+
+Michael Jacobson@ENRON
+01/02/2001 12:51 PM
+To: Kayne Coulter/HOU/ECT@ECT
+cc: Thresa A Allen/HOU/ECT@ECT 
+Subject: Transmission Rate
+
+Kayne,
+
+Here is the path for the Transmission Rate Table I update at the first of 
+each month - let me know if you have any problems.
+
+M:\Electric\East Volume Mgmt\Transmission\Trans Rate Table2
+
+Thanks,
+Michael
+x35098
+"
+16,Ercot Losses,keller.mayeaux@enron.com,cyril.price@enron.com,"Sat, 23 Sep 2000 00:24:00 -0700 (PDT)"," jhernan3.nsf
+
+Use the new loss matrices located in Ercot Iso home page.I or someone will 
+have to go back and look at the losses from Sept.1 till Sept.20 becouse I 
+think we were using summers losses.FALL IS SIGNIFICANTLY LOWER EFFECTIVE SEPT 
+1."
+17,AUTHORIZED POWER MARKETING PERSONNEL OF MANITOBA H,kayne.coulter@enron.com,cyril.price@enron.com,"Wed, 14 Mar 2001 06:12:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 03/14/2001 02:11 
+PM ---------------------------
+   
+	Enron North America Corp.
+	
+	From:  Kevin M Presto                           03/14/2001 11:51 AM
+	
+
+To: Fletcher J Sturm/HOU/ECT@ECT, Kayne Coulter/HOU/ECT@ECT, Matt 
+Lorenz/HOU/ECT@ECT, Terri Clynes/HOU/ECT@ECT, Doug Sewell/Enron@EnronXGate, 
+Edward D Baughman/Enron@EnronXGate, Jason Choate/Corp/Enron@ENRON, Corry 
+Bentley/HOU/ECT@ECT, Jeff King/Corp/Enron@Enron
+cc:  
+Subject: AUTHORIZED POWER MARKETING PERSONNEL OF MANITOBA H
+
+
+---------------------- Forwarded by Kevin M Presto/HOU/ECT on 03/14/2001 
+11:41 AM ---------------------------
+
+
+Greg Wolfe
+03/14/2001 11:27 AM
+To: Kevin M Presto/HOU/ECT@ECT
+cc:  
+Subject: AUTHORIZED POWER MARKETING PERSONNEL OF MANITOBA H
+
+You probably already have this - not sure why it came to me. Don't know who 
+this should go to.
+---------------------- Forwarded by Greg Wolfe/HOU/ECT on 03/14/2001 09:34 AM 
+---------------------------
+   
+	Enron Capital & Trade Resources Corp.
+	
+	From:  rwspack@hydro.mb.ca                           03/14/2001 09:05 AM
+	
+
+To: greg.wolfe@enron.com
+cc:  
+Subject: AUTHORIZED POWER MARKETING PERSONNEL OF MANITOBA H
+
+
+March 14, 2001
+
+To:  Trading Counterparties of Manitoba Hydro
+
+SUBJECT:  AUTHORIZED POWER MARKETING PERSONNEL OF MANITOBA HYDRO
+
+For the past three years, Minnesota Power-MPEX has been providing real time 
+power trading services for Manitoba Hydro.  The original goals of the 
+arrangement between Manitoba Hydro and MPEX have been reached and Manitoba 
+Hydro personnel will re-assume all power trading responsibilities effective 
+March 18, 2001 at 00:00:00.
+Attached is an updated list of Manitoba Hydro's authorized power marketers 
+and power traders. This list will remain in effect until further notice.
+If you have any questions, please do not hesitate to call me at (204) 
+474-3806.  To update our files, we would also appreciate receiving a copy of 
+your most recent list of authorized power marketing contacts.
+
+Sincerely,
+David Cormie
+Manager, Energy Supply & Sales
+
+The following Manitoba Hydro employees are authorized to negotiate and 
+transact electric energy purchases and sales for Manitoba Hydro.
+
+Manager, Export Power Marketing,
+(Long Term Transactions > 6 months):
+Lloyd Kuczek lkuczek@hydro.mb.ca     Bus: (204) 474-4503
+                                       Cell: (204) 792-4727
+                                 Fax: (204) 453-5359
+Manager, Energy Supply and Sales,
+(Short Term Transactions < 6 months):
+David Cormie adcormie@hydro.mb.ca Bus: (204) 474-3806
+                                       Cell: (204) 792-0619
+                                        Fax: (204) 474-4752
+
+Power Trading Office:
+                pto@hydro.mb.ca  Fax: (204) 474-4752
+Power Trading Supervisor:
+Denise Mortimer dmortimer@hydro.mb.ca Bus: (204) 474-4346
+                                       Cell: (204) 793-5348
+Day Ahead Traders:
+Rudy Spack      rwspack@hydro.mb.ca Bus: (204) 474-4681
+                                       Cell: (204) 792-0617
+
+Glen Mathews gmathews@hydro.mb.ca Bus: (204) 474-4317
+                                       Cell: (204) 792-4292
+
+Real Time Traders:   Bus: (204) 474-4616
+     Bus: (204) 474-4534
+                                       Cell: (204) 799-7364
+Kelly Bertholet kwbertholet@hydro.mb.ca
+Ryan Hehn rbhehn@hydro.mb.ca
+Cheryl Kumhyr cdkumhyr@hydro.mb.ca
+Ron Warcimaga rlwarcimaga@hydro.mb.ca
+Garry Yonda     gayonda@hydro.mb.ca
+
+System Control Centre:
+(Emergency Conditions)                 Fax: (204) 487-5419
+
+System Operating Shift Superintendent      (204) 487-5501
+System Operating Shift Supervisor      (204) 487-5503
+Generation System Operator       (204) 487-5502
+
+
+Mailing Address:
+820 Taylor Avenue
+P.O. Box 815
+Winnipeg, Manitoba R3C 2P4
+
+
+
+
+
+"
+18,TradersNewsPower website logon update,christopher.watts@enron.com,cyril.price@enron.com,"Fri, 17 Nov 2000 02:55:00 -0800 (PST)"," jhernan3.nsf
+
+Note that the previous logon information for TradersNewsPower website 
+expired.  The new logon information is as follows:
+
+User ID: EnronHr2
+Password: power1"
+19,My phone number,kayne.coulter@enron.com,cyril.price@enron.com,"Mon, 15 Jan 2001 23:56:00 -0800 (PST)"," jhernan3.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 01/16/2001 08:03 
+AM ---------------------------
+Smith L Day   01/09/2001 05:27 PM
+
+To: Kayne Coulter/HOU/ECT@ECT
+cc:  
+Subject: My phone number
+
+Kayne:
+
+Corry said that the real time group may not have my phone information yet 
+because the new phone cards don't have it.
+
+Here it is:
+
+Pager:  877-306-9429
+Home:  281-937-9594
+Cell:  832-452-7192
+
+
+Smith
+"
+20,Help Desk Number,kayne.coulter@enron.com,cyril.price@enron.com,"Mon, 12 Mar 2001 00:15:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 03/12/2001 08:15 
+AM ---------------------------
+
+
+Lloyd Will
+03/12/2001 07:23 AM
+To: Brent Hebert, Erik Serio/Corp/Enron@Enron, chris.lenartowicz@enron.com, 
+Justin Laverell/Corp/Enron@ENRON, George Diaz/Corp/Enron@ENRON, Keith 
+Comeaux/Corp/Enron@Enron, Smith L Day/HOU/ECT@ECT, Kayne Coulter/HOU/ECT@ECT, 
+Corry Bentley/HOU/ECT@ECT
+cc:  
+Subject: Help Desk Number
+
+FYI
+---------------------- Forwarded by Lloyd Will/HOU/ECT on 03/12/2001 07:22 AM 
+---------------------------
+
+
+""Taylor, Chad"" <CTaylor@ercot.com> on 03/09/2001 08:47:34 AM
+To: 1 Everyone <everyone@ercot.com>
+cc:  
+Subject: Help Desk Number
+
+
+
+All,
+The Help Desk number  has changed.? The new number is 3900.? Please 
+discontinue use of the  3922 number.? If you are not in Taylor the number 
+will be  512-248-3900.
+?
+If you have any  questions, please feel free to call.
+
+Chad Taylor 
+ERCOT
+Help Desk Analyst 
+Microsoft Certified Professional 
+(512)248-3923 
+ctaylor@ercot.com
+?
+
+
+"
+21,EnPower Contacts,kayne.coulter@enron.com,cyril.price@enron.com,"Tue, 12 Dec 2000 09:23:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 12/12/2000 05:24 
+PM ---------------------------
+From: Duong Luu on 12/12/2000 04:16 PM
+To: Kayne Coulter/HOU/ECT@ECT
+cc:  
+Subject: EnPower Contacts
+
+fyi
+
+----- Forwarded by Duong Luu/HOU/ECT on 12/12/2000 04:16 PM -----
+
+	Will Smith
+	12/12/2000 03:35 PM
+		 
+		 To: Christopher Watts/NA/Enron@Enron, Benjamin Rogers/HOU/ECT@ECT, Alton 
+Jackson/Corp/Enron@Enron, Keith Comeaux/Corp/Enron@Enron
+		 cc: Duong Luu/HOU/ECT@ECT
+		 Subject: EnPower Contacts
+
+Gentlemen,
+
+My name is Will Smith and I work with Duong Luu in EnPower IT as acting 
+manager.  Duong asked that I send you a list of EnPower contact information...
+
+EnPower On Call
+Pager: 713-327-4523
+Mobile: 713-553-3758
+
+Myself:
+Pager: 713-284-9050
+Mobile: 713-417-4679
+
+Duong Luu:
+Pager: 713-284-3615
+Mobile: 713-857-7965
+
+Regards,
+Will
+
+"
+22,Market Notice Report for NRC (12/11 05:57),christopher.watts@enron.com,cyril.price@enron.com,"Sun, 10 Dec 2000 23:46:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Christopher Watts/NA/Enron on 12/11/2000 
+07:43 AM ---------------------------
+
+
+MarketNotice@friedwire.com on 12/11/2000 07:02:15 AM
+To: christopher.watts@enron.com
+cc:  
+
+Subject: Market Notice Report for NRC (12/11 05:57)
+
+
+
+BEAVER VALLEY 2 (Region 1) at 50 percent power. Unit operating mode:
+Power Operation - UNUSUAL EVENT DECLARED - TS REQUIRED SHUTDOWN BECAUSE
+RCS LEAKAGE EXCEEDS LIMITS (SEE #37585).
+
+FITZPATRICK 1 (Region 1) at 50 percent power. Unit operating mode: Power
+Operation - REDUCED POWER FOR FEED PUMP MAINTENANCE.
+
+GINNA 1 (Region 1) at 100 percent power.
+
+SALEM 1 (Region 1) at 64 percent power. Unit operating mode: Power
+Operation - INCREASING POWER FOLLOWING REACTOR TRIP - SEE EVENT #37579.
+
+SUSQUEHANNA 1 (Region 1) at 97 percent power. Unit operating mode: Power
+Operation - INCREASING POWER.
+
+VOGTLE 1 (Region 2) at 87 percent power. Unit operating mode: Power
+Operation - INCREASING POWER FOLLOWING REACTOR TRIP - SEE EVENT # 37583.
+
+BYRON 2 (Region 3) at 100 percent power.
+
+MONTICELLO 1 (Region 3) at 100 percent power.
+
+PERRY 1 (Region 3) at 95 percent power. Unit operating mode: Power
+Operation - COASTDOWN TO REFUELING OUTAGE.
+
+QUAD CITIES 1 (Region 3) at 100 percent power.
+
+ARKANSAS NUCLEAR 2 (Region 4) at 18 percent power. Unit operating mode:
+Power Operation - HOLDING FOR TURBINE WORK.
+
+COOPER 1 (Region 4) at 100 percent power.
+
+PALO VERDE 1 (Region 4) at 99 percent power.
+
+****************************************************************
+
+For more information logon to the FriedWire Traffic Report at:
+www.friedwire.com/TrafficReport/login/fwlogin.jsp
+
+To cancel your subscription to Market Notices from this market source,
+reply to this message with the following text in the subject:
+UNSUBSCRIBE=20332202
+"
+23,Re: NERC time standards,christopher.watts@enron.com,cyril.price@enron.com,"Thu, 16 Nov 2000 08:54:00 -0800 (PST)"," jhernan3.nsf
+
+This list of NERC standards is prime material for the test. 
+---------------------- Forwarded by Christopher Watts/NA/Enron on 11/16/2000 
+04:44 PM ---------------------------
+
+
+Gary Justice@ECT
+11/16/2000 04:39 PM
+To: Christopher Watts/NA/Enron@Enron
+cc:  
+
+Subject: Re: NERC time standards  
+
+here it is 
+
+
+
+GJ
+"
+24,Re: Update network and offering values for the CE-ALTE and CE-WEC,kayne.coulter@enron.com,cyril.price@enron.com,"Tue, 24 Oct 2000 03:19:00 -0700 (PDT)"," jhernan3.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 10/24/2000 10:22 
+AM ---------------------------
+
+
+Patrick Hanse
+10/24/2000 10:06 AM
+To: Terri Clynes/HOU/ECT@ECT, Doug Sewell/HOU/ECT@ECT, Matt 
+Lorenz/HOU/ECT@ECT, Dave Mangskau/Corp/Enron@ENRON, Fletcher J 
+Sturm/HOU/ECT@ECT, Jeff King/Corp/Enron@Enron, Larry Jester/Corp/Enron@ENRON, 
+Kayne Coulter/HOU/ECT@ECT
+cc:  
+Subject: Re: Update network and offering values for the CE-ALTE and CE-WEC 
+paths
+
+FYI
+Official notice by CE to MAIN that NO Firm ATC exists from CE or Enron L.C. 
+to either WEC or ALT E. for time period Nov. 2000 - Nov. 2001 due to 
+restrictions on the Eau Clair-Arpin  flowgate. 
+---------------------- Forwarded by Patrick Hanse/HOU/ECT on 10/24/2000 09:51 
+AM ---------------------------
+
+
+rnm <rnm@maininc.org> on 10/24/2000 09:14:15 AM
+To: christopher.nekolny@exeloncorp.com, atc_interestgroup@maininc.org, 
+atcsc@maininc.org, cmm@maininc.org
+cc: Interconnections@ucm.com 
+Subject: Re: Update network and offering values for the CE-ALTE and CE-WEC 
+paths
+
+
+
+
+At 04:53 PM 10/23/00 -0500, christopher.nekolny@exeloncorp.com wrote:
+>Ray,
+>
+>The following paths should have their firm network and offering values
+>changed on the ComEd page to 0 MW for the time period of
+>11/1/2000-11/1/2001.
+>CE-ALTE
+>CE-WEC
+>RKRD-ALTE
+>RKRD-WEC
+>ENLC-ALTE
+>ENLC-WEC
+>
+>The reason for this change is that while the MAIN Eau Claire-Arpin flowgate
+>(that used to calculate MAIN ATC values) has positive capability, the MAPP
+>Eau Claire-Arpin flowgate is posted negative for this time period. Since the
+>MAPP Eau Claire-Arpin flowgate is not on the contract path for CE-ALTE,
+>CE-WEC, RKRD-ALTE, RKRD-WEC, ENLC-ALTE or ENLC-WEC transactions this is a
+>valid third party limit for these directions.
+>
+>Please ensure that the requested directions have a greater than 5 %
+>distribution factor on the flowgate during the appropriate seasons prior to
+>changing the posted value. For example, it is possible that the Rocky Road
+>directions will not have a 5 % distribution factor on the flowgate and
+>therefore the posted values would not have to be altered. If you have any
+>questions please let me know.
+>
+>Christopher Nekolny
+>
+>
+>***************************************************************************
+******
+>This E-mail and any of its attachments may contain Exelon Corp. proprietary
+>information, which is privileged, confidential, or subject to copyright
+>belonging to the Exelon Corp. family of Companies.  This E-mail is intended
+>solely for the use of the individual or entity to which it is addressed.  If
+>you are not the intended recipient of this E-mail, you are hereby notified
+>that any dissemination, distribution, copying, or action taken in relation
+>to the contents of and attachments to this E-mail is strictly prohibited
+>and may be unlawful.  If you have received this E-mail in error, please
+>notify the sender immediately and permanently delete the original and
+>any copy of this E-mail and any printout.  Thank You.
+>***************************************************************************
+******
+>
+>
+>
+
+
+"
+25,Network Down Time,kayne.coulter@enron.com,cyril.price@enron.com,"Tue, 3 Oct 2000 03:29:00 -0700 (PDT)"," jhernan3.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 10/03/2000 10:33 
+AM ---------------------------
+   
+	
+	
+	From:  Clint Dean @ ENRON                           10/03/2000 10:15 AM
+	
+
+To: Kayne Coulter/HOU/ECT@ECT
+cc:  
+Subject: Network Down Time
+
+Please forward this to whoever is covering ERCOT Saturday. Thanks.
+---------------------- Forwarded by Clint Dean/Corp/Enron on 10/03/2000 10:08 
+AM ---------------------------
+
+
+""Quintanilla, Luis"" <lquintanilla@ercot.com> on 10/03/2000 09:55:48 AM
+To: 1 Entire email container <sendtoall@ercot.com>
+cc:  
+
+Subject: Network Down Time
+
+
+
+Everyone,
+
+The ERCOT Taylor internal LAN will be down on Saturday October 7 from 8 am
+to 12 pm. This will prevent access to FTP, mail, oasis, samis and any other
+access to the ERCOT Taylor lan. Please plan accordingly. If you have any
+questions please call me.
+
+
+Luis Quintanilla
+System Administration Lead
+ERCOT
+512-248-3157
+lquintanilla@ercot.com
+
+
+
+"
+26,LOL!,kayne.coulter@enron.com,cyril.price@enron.com,"Mon, 5 Feb 2001 00:56:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 02/05/2001 08:58 
+AM ---------------------------
+
+
+Gary and Donna Holtz <dgholtz@yahoo.com> on 02/05/2001 08:43:58 AM
+To: Grandma Grandpa <mbholtz@aol.com>
+cc:  
+Subject: LOL!
+
+
+
+Note: forwarded message attached.
+
+
+__________________________________________________
+Get personalized email addresses from Yahoo! Mail - only $35 
+a year!  http://personal.mail.yahoo.com/
+X-Apparently-To: dgholtz@yahoo.com via web206
+Received: from web204  (HELO web204.mail.yahoo.com) (128.11.68.104)  by 
+mta117.mail.yahoo.com with SMTP; 03 Feb 2001 06:52:14 -0800 (PST)
+Received: (qmail 26134 invoked by uid 60001); 3 Feb 2001 14:52:13 -0000
+Message-ID: <20010203145213.26133.qmail@web204.mail.yahoo.com>
+Received: from [209.255.164.184] by web204.mail.yahoo.com; Sat, 03 Feb 2001 
+06:52:13 PST
+Date: Sat, 3 Feb 2001 06:52:13 -0800 (PST)
+From: Gary and Donna Holtz <dgholtz@yahoo.com>
+Subject: LOL!
+To: dgholtz@yahoo.com
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Length: 1583
+
+
+
+A man boards an airplane and takes his seat. As he
+settles in, he glances up and sees a very beautiful
+woman boarding the plane.
+
+He soon realizes she is heading straight towards
+his seat. Lo and behold, she takes the seat right
+beside his. Eager to strike up a conversation, he
+blurts out ""Business trip or vacation?""
+
+She turns, smiles and says, ""Business. I'm going to
+the annual ""Nymphomaniac Convention in Chicago.""
+
+He swallows hard. Here is the most gorgeous woman he
+has ever seen sitting next to him and she's going to a
+meeting for nymphomaniacs. Struggling to maintain his
+composure, he calmly asks, ""What's your business role
+at this convention?""
+
+""Lecturer"", she says. ""I use my experience to
+debunk some of the popular myths about sexuality.""
+
+""Really"", he says, ""what myths are those?""
+
+""Well"", she explains, ""one popular myth is that
+African American men are the most well endowed when,
+in fact, it's the Native American Indian who is most
+likely to possess that trait.
+
+Another popular myth is that French men are the best
+lovers, when actually it is the men of Jewish descent.
+However, we have found that the best potential lover
+in all categories is the Southern Redneck.""
+
+Suddenly the woman becomes a little uncomfortable and
+blushes.
+
+""I'm sorry"", she says. ""I shouldn't be discussing
+this with you.
+
+I don't even know your name!""
+
+""Tonto"", the man says, ""Tonto Goldstein. But my
+friends call me Bubba.""
+
+
+__________________________________________________
+Get personalized email addresses from Yahoo! Mail - only $35 
+a year!  http://personal.mail.yahoo.com/
+"
+27,Static scheduling charge,greg.trefz@enron.com,cyril.price@enron.com,"Tue, 3 Oct 2000 08:58:00 -0700 (PDT)"," jhernan3.nsf
+
+Everyone,
+ Please note the following static scheduling charges from each of the 
+following control areas.
+
+  HLP  $49
+  COA $40
+  Brazos $25
+  TNMP $55
+
+ These charges are just like the ones we incur when doing business with HLP.  
+Each time you have a schedule with these CA's we will get the charged the  
+above rates.
+
+Greg"
+28,New York ISO update,kayne.coulter@enron.com,cyril.price@enron.com,"Fri, 20 Oct 2000 01:27:00 -0700 (PDT)"," jhernan3.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 10/20/2000 08:30 
+AM ---------------------------
+
+
+Paul D Thomas@ENRON
+10/20/2000 08:18 AM
+To: Kayne Coulter/HOU/ECT@ECT
+cc:  
+Subject: New York ISO update
+
+Kayne,
+So you can let your guys know the New York ISO update pricing has a new file 
+name.
+
+The file is located in M:/power2/Analyst/Northeast/nyisoupdateTEST.xls
+
+Let me know if you have any questions.
+
+Paul
+3-0403
+"
+29,Market Notice Report for PJM ISO (12/08 10:16),christopher.watts@enron.com,cyril.price@enron.com,"Fri, 8 Dec 2000 04:29:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Christopher Watts/NA/Enron on 12/08/2000 
+12:25 PM ---------------------------
+
+
+MarketNotice@friedwire.com on 12/08/2000 11:20:10 AM
+To: christopher.watts@enron.com
+cc:  
+
+Subject: Market Notice Report for PJM ISO (12/08 10:16)
+
+
+
+Transmission constraint at Monitor ERIEW 345 KV ERIEW NO1 TX XFORMER
+caused by Contingency LINE 345 KV ERIES-ERIEW ESEW resulting in
+Redispatch.
+
+****************************************************************
+
+For more information logon to the FriedWire Traffic Report at:
+www.friedwire.com/TrafficReport/login/fwlogin.jsp
+
+To cancel your subscription to Market Notices from this market source,
+reply to this message with the following text in the subject:
+UNSUBSCRIBE=20137926
+"
+30,ERCOT access,kayne.coulter@enron.com,cyril.price@enron.com,"Wed, 30 Aug 2000 09:16:00 -0700 (PDT)"," jhernan3.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 08/30/2000 04:19 
+PM ---------------------------
+   
+	
+	
+	From:  Clint Dean @ ENRON                           08/30/2000 04:09 PM
+	
+
+To: Kayne Coulter/HOU/ECT@ECT
+cc:  
+Subject: ERCOT access
+
+Access to ERCOT hourly is now under a new user name and password.
+user name:  gtrefz
+password:   v57p
+"
+31,Market Notice Report for EES (12/08 11:33),christopher.watts@enron.com,cyril.price@enron.com,"Fri, 8 Dec 2000 04:39:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Christopher Watts/NA/Enron on 12/08/2000 
+12:36 PM ---------------------------
+
+
+MarketNotice@friedwire.com on 12/08/2000 12:37:40 PM
+To: christopher.watts@enron.com
+cc:  
+
+Subject: Market Notice Report for EES (12/08 11:33)
+
+
+
+Transmission Line Relief (Level 1) at Webre-Richard (FROM -> TO) Notify
+SECURITY COORDINATORS of potential OPERATING SECURITY LIMIT violations
+
+****************************************************************
+
+For more information logon to the FriedWire Traffic Report at:
+www.friedwire.com/TrafficReport/login/fwlogin.jsp
+
+To cancel your subscription to Market Notices from this market source,
+reply to this message with the following text in the subject:
+UNSUBSCRIBE=20154995
+"
+32,ERCOT Portal Release 2,kayne.coulter@enron.com,cyril.price@enron.com,"Thu, 30 Nov 2000 04:57:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 11/30/2000 01:00 
+PM ---------------------------
+
+
+Lloyd Will
+11/30/2000 09:28 AM
+To: Brent Hebert/HOU/ECT@ect, Erik Serio/Corp/Enron@Enron, Chris 
+Lenartowicz/Corp/Enron@ENRON, Justin Laverell/Corp/Enron@ENRON, George 
+Diaz/Corp/Enron@ENRON, Keith Comeaux/Corp/Enron@Enron, Steve 
+Olinde/Corp/Enron@Enron, Kayne Coulter/HOU/ECT@ECT, George Hopley/HOU/ECT@ect
+cc:  
+Subject: ERCOT Portal Release 2
+
+Please distribute to anyone who might want access.
+
+The attached instructions explain the process.
+
+Thanks. 
+---------------------- Forwarded by Lloyd Will/HOU/ECT on 11/30/2000 09:25 AM 
+---------------------------
+
+
+Doug Gilbert-Smith@ENRON
+11/29/2000 03:26 PM
+To: Lloyd Will/HOU/ECT@ECT, Alex Wong/Corp/Enron@Enron
+cc: Mike Curry/HOU/ECT@ECT 
+Subject: ERCOT Portal Release 2
+
+fyi
+---------------------- Forwarded by Doug Gilbert-Smith/Corp/Enron on 
+11/29/2000 03:26 PM ---------------------------
+
+
+""Coon, Patrick"" <pcoon@ercot-iso.com> on 11/03/2000 05:34:29 PM
+To: 1 Entire email container <sendtoall@ercot.com>
+cc: ""Salh, Baljit"" <bsalh@ercot-iso.com>, ""Haston, Loy (SolutionWorks)"" 
+<lhaston@SolutionWorks.Com>, ""Grant, Allison"" <agrant@ercot-iso.com> 
+
+Subject: ERCOT Portal Release 2
+
+
+
+> The 'Web Enablement' team has finished work on
+> the second release of the portal, and it is now
+> accessible. The following information is also
+> available on www.texaschoiceprogram.com.
+> What is the ERCOT portal?
+> The ERCOT portal will consolidate information
+> from a variety of sources into a customizable &
+> comprehensive view of business activity relative
+> to each market participant. Functions available
+> via the portal will include viewing status of
+> transactions, access to the market operations
+> systems, bid submission, and more. Security
+> features will determine the data and functions
+> available to each market participant.
+>
+>
+> What is the portal release 2 for the ERCOT
+> portal?
+> The portal release 2 is a pre-release version of
+> the portal that will include static web pages
+> that have no functional behavior. The purpose of
+> this release is to provide exposure to the
+> portal user interface look and feel, and not to
+> demonstrate specific portal functionality. This
+> is not intended to be a final product release.
+> The functional component of the portal is
+> currently under development, and will not be
+> fully tested in a manner that is suitable for
+> public release by 10/31. (This includes client
+> side validation, file upload, error pages,
+> confirmation pages, etc.) Future portal releases
+> will have these features enabled.  Unlike the
+> earlier proof of concept release, no usability
+> tests will be conducted on the release 2 portal
+> version. Because the portal will contain static
+> view-only user interfaces, there is no back end
+> systems integration between the portal and
+> Siebel, LODESTAR, etc.
+> How can you access the portal release 2 version
+> of the portal?
+> The address for the portal release 2 version of
+> the portal is:
+>
+> https://portal.texaschoiceprogram.com
+>
+> To access the portal follow these instructions:
+>
+> Note: Before you can access the portal, you must
+> access and install a digital certificate.
+>
+> Launch and review the attached document titled,
+> 'Accessing the Portal'. It provides you with
+> instructions on how to access and install a
+> digital certificate and how to log in to the
+> portal.
+>
+> Important: To access the portal, you must need
+> Internet Explorer 5.01 with Service Pack 1 on
+> your computer.
+>
+>  <<Accessing the Portal.doc>>
+>
+
+ - Accessing the Portal.doc
+
+
+
+
+"
+33,No trades with PG&E,kayne.coulter@enron.com,cyril.price@enron.com,"Thu, 4 Jan 2001 03:31:00 -0800 (PST)"," dbaughm.nsf
+
+No trades with PG&E until further notice.
+
+Kayne"
+34,Oasis change,kayne.coulter@enron.com,cyril.price@enron.com,"Wed, 28 Feb 2001 22:28:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 03/01/2001 06:27 
+AM ---------------------------
+
+
+Keith Comeaux
+02/27/2001 03:27 PM
+To: kayne.coulter@enron.com, erik.serio@enron.com, 
+chris.lenartowicz@enron.com, george.diaz@enron.com, 
+justin.laverell@enron.com, Lloyd Will/HOU/ECT@ECT
+cc:  
+Subject: Oasis change
+
+Just got this information on a OASIS change.
+Keith
+
+"
+35,Selling to ENRON,kayne.coulter@enron.com,cyril.price@enron.com,"Tue, 9 Jan 2001 08:45:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 01/09/2001 04:48 
+PM ---------------------------
+
+
+mbjohns@duke-energy.com on 01/09/2001 03:59:14 PM
+To: kayne.coulter@enron.com, dbjohnso@duke-energy.com, 
+mbnewman@duke-energy.com, obtadloc@duke-energy.com, alfesper@duke-energy.com, 
+wfcatoe@duke-energy.com, kebrown@duke-energy.com, lbcrisp@duke-energy.com, 
+rrpadget@duke-energy.com, plsams@duke-energy.com, rtbrown@duke-energy.com, 
+jtconrad@duke-energy.com, odalton@enron.com
+cc:  
+Subject: Selling to ENRON
+
+
+Yesterday afternoon (1/8/01) during a conference call with ENRON, there was
+a discussion regarding issues associated with hourly sales to ENRON in
+order to define expectations associated with these hourly sales. Below is a
+summary of the expectations and conclusions reached.
+
+Non-Firm Energy Sales:
+Duke Power regards a verbal commitment to sell non-firm hourly energy to a
+customer as an agreement for Duke to sell/deliver energy to the designated
+delivery point and the customer, ENRON, to purchase/receive this energy at
+the designated delivery point with ENRON taking the risk of obtaining
+transmission paths beyond the designated delivery point and completing
+required tags correctly. After a non-firm energy schedule has begun and a
+new official TLR event occurs which results in curtailing the schedule,
+Duke considers this a Force Majuere event and ENRON will only be billed for
+the energy delivered.
+
+Take or Pay Energy Sales:
+Duke Power regards a verbal commitment to sell Take or Pay energy to a
+customer as an agreement for  the customer, ENRON, to purchase this energy
+at the designated delivery point with ENRON taking all risks and accepting
+to purchase all energy scheduled.
+
+ENRON expressed the desire to develop  a strong relationship with Duke
+built on conducting business ""the right way"". The ENRON Real-time Desk
+Management is committed to this desire and are our contacts for future
+problems and concerns.
+Kayne Coulter, Mgr., Real-Time Desk  1-713-853-4340
+Juan Hernandez, Supervisor, Real-Time Desk  1-713-853-0383
+
+
+"
+36,Laurel Bolt,kayne.coulter@enron.com,cyril.price@enron.com,"Thu, 31 Aug 2000 02:41:00 -0700 (PDT)"," jhernan3.nsf
+
+Laurel has informed me that anytime you have problems with enpower to call 
+her.  She has the tools at her house to accomplish the necessary task.
+
+Work  34873
+steno 635
+pager 713-761-5792
+cell 281-381-7430
+home 281-286-2076
+
+Theresa 
+pager 800-718-1341
+
+Thanks
+Kayne"
+37,Holiday Pay,kayne.coulter@enron.com,cyril.price@enron.com,"Fri, 16 Feb 2001 06:02:00 -0800 (PST)"," dbaughm.nsf
+
+---------------------- Forwarded by Kayne Coulter/HOU/ECT on 02/16/2001 02:01 
+PM ---------------------------
+Anne Labbe @ ENRON   02/16/2001 01:27 PM
+
+To: Kayne Coulter/HOU/ECT@ECT
+cc:  
+Subject: Holiday Pay
+
+Just an FYI that your shift workers will receive their holiday pay for 
+1/15/01 on their next paycheck.  If you have any questions or problems, 
+please don't hesitate to let me know.
+
+"
+38,ERCOT,larry.jester@enron.com,cyril.price@enron.com,"Fri, 26 Jan 2001 08:50:00 -0800 (PST)"," dbaughm.nsf
+
+Mike in the back office reminded me to tell everyone that ISO numbers need to 
+be put into the Oasis line in Enpower.  Since he does the losses manually 
+after the fact this will help him a lot.  Also, the link to the Ercot 
+intranet is attached below.  If you trade Ercot, please add it to your 
+favorites.  ISO messages, real time load display info, and a new real-time 
+ATC calculator matrix are all there.
+
+You guys are doing a great job backfilling KCPL and moving power across the 
+tie when we have the transmission.  Sorry about the P&L and Enpower being 
+hairy when we do it.  As you've seen, however, when the spreads are there we 
+are printing money.  
+
+Be careful also when putting in deals with regards to what book they go in.  
+This morning there was a Cinergy wheel in the Ercot book.  It's easy to mess 
+up even for the veterns.  Richard ""somehow"" had a PJM financial deal in the 
+Ercot book this morning that just coincidentally lost over $2000.  I'm not 
+sure what comment to make on that one.
+
+Thanks again guys, the Ercot book is up over $160K for the month due in part 
+to the job you guys are doing.  If you work the phones hard in Ercot, there 
+are always people to get between for solid spreads.  
+
+Late,
+
+LJ"
+39,Nerc Training,kayne.coulter@enron.com,cyril.price@enron.com,"Thu, 21 Sep 2000 05:58:00 -0700 (PDT)"," jhernan3.nsf
+
+I have made adjustments to the schedule concerning Nerc Training classes.  
+The class runs from 8 A.M. until 4 P.M.  
+
+Sample testing  can be done the following week at your own pace.
+
+Please check the schedule at M:/electric/24hr/misc/schedule
+
+Everyone should be o.k.
+
+
+
+
+Thanks
+Kayne"

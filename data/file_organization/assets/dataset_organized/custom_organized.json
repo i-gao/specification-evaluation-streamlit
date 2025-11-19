@@ -1,0 +1,544 @@
+{
+  "Family Reunion Invitation": [
+    {
+      "filename": "INITATION-LETTER-2025-03-26.docx",
+      "create_date": "2025-03-26 10:26:02",
+      "edit_date": "2025-03-28 10:26:02",
+      "file_contents_preview": "Subject: Family Reunion Invitation\n\nDear Family,\n\nWe are excited to invite you to our upcoming family reunion! This family_reunion_invitation is a special opportunity for all of us to reconnect and celebrate together.\n\nPlease find the details enclosed in this invitation_letter.",
+      "root": "invitation_letter",
+      "extension": ".docx",
+      "theme": "Family_Reunion_Invitation",
+      "original_filename": "INVITATION-LETTER.docx"
+    },
+    {
+      "filename": "INITATION-LETTER-2025-03-23--v1.pdf",
+      "create_date": "2025-03-23 10:26:02",
+      "edit_date": "2025-03-28 10:26:02",
+      "file_contents_preview": "Subject: Family Reunion Invitation\n\nDear Family,\n\nWe are excited to send you this family_reunion_invitation as part of our ongoing invitation_letter series. Please join us for a memorable family reunion event where we can reconnect and celebrate together.\n\nWarm regards,  \nThe Family Reunion Committee",
+      "root": "invitation_letter",
+      "extension": ".pdf",
+      "theme": "Family_Reunion_Invitation",
+      "original_filename": "INVITATION-LETTER-2025-03-23--v2.pdf"
+    },
+    {
+      "filename": "RSP-LIST-FAMILY-REUNION-INITATION-2025-03-24.xlsx",
+      "create_date": "2025-03-24 10:26:02",
+      "edit_date": "2025-03-27 10:26:02",
+      "file_contents_preview": null,
+      "root": "rsvp_list_Family_Reunion_Invitation",
+      "extension": ".xlsx",
+      "theme": "Family_Reunion_Invitation",
+      "original_filename": "RSVP-LIST-FAMILY-REUNION-INVITATION-2025-03-24.xlsx"
+    },
+    {
+      "filename": "RSP-LIST-2025-03-25.csv",
+      "create_date": "2025-03-25 10:26:02",
+      "edit_date": "2025-03-25 10:26:02",
+      "file_contents_preview": "# RSVP List for Family_Reunion_Invitation Project\n# Keywords: Family_Reunion_Invitation, familyreunioninvitation, family_reunion_invitation, family-reunion-invitation, family reunion invitation\n# Filename root: rsvp_list.csv\nName,Email,Attending,Guests,Comments",
+      "root": "rsvp_list",
+      "extension": ".csv",
+      "theme": "Family_Reunion_Invitation",
+      "original_filename": "rsvp list.csv"
+    },
+    {
+      "filename": "INITATION-LETTER-2025-03-21--v0.pdf",
+      "create_date": "2025-03-21 10:26:02",
+      "edit_date": "2025-03-25 10:26:02",
+      "file_contents_preview": "Subject: Family Reunion Invitation\n\nDear Family,\n\nWe are excited to send you this family_reunion_invitation as part of our ongoing invitation_letter series. Please join us for a memorable family reunion event where we can reconnect and celebrate together.\n\nWarm regards,  \nThe Family Reunion Committee",
+      "root": "invitation_letter",
+      "extension": ".pdf",
+      "theme": "Family_Reunion_Invitation",
+      "original_filename": "INVITATION-LETTER--v1.pdf"
+    }
+  ],
+  "Work Project Proposal Final": [
+    {
+      "filename": "PROPOSAL-2025-04-12--v2.docx",
+      "create_date": "2025-04-12 10:26:02",
+      "edit_date": "2025-04-12 10:26:02",
+      "file_contents_preview": "Work Project Proposal Final\n\nThis document serves as the proposal_draft for the Work_Project_Proposal_Final initiative.  \nIt outlines key objectives and strategies related to managing files, emails, and other digital content efficiently.  \nKeywords: Work_Project_Proposal_Final, workprojectproposalfinal, work_project_proposal_final, work-project-proposal-final, work project proposal final.",
+      "root": "proposal_draft",
+      "extension": ".docx",
+      "theme": "Work_Project_Proposal_Final",
+      "original_filename": "proposal-draft-FINAL.docx"
+    },
+    {
+      "filename": "PROPOSAL-2025-04-05--v0.pdf",
+      "create_date": "2025-04-05 10:26:02",
+      "edit_date": "2025-04-07 10:26:02",
+      "file_contents_preview": "Work_Project_Proposal_Final\n\nThis document outlines the comprehensive plan for the Work_Project_Proposal_Final initiative.  \nThe proposal_final aims to streamline everyday computer tasks such as managing files, emails, and digital content efficiently.  \nKeywords: Work_Project_Proposal_Final, workprojectproposalfinal, work_project_proposal_final, work-project-proposal-final, work project proposal final",
+      "root": "proposal_final",
+      "extension": ".pdf",
+      "theme": "Work_Project_Proposal_Final",
+      "original_filename": "proposal_final__v1.pdf"
+    },
+    {
+      "filename": "PROPOSAL(2)-2025-04-08.pdf",
+      "create_date": "2025-04-08 10:26:02",
+      "edit_date": "2025-04-09 10:26:02",
+      "file_contents_preview": "Work_Project_Proposal_Final\n\nThis document serves as the proposal_draft for the Work_Project_Proposal_Final initiative.  \nIt outlines key objectives and strategies related to the workprojectproposalfinal theme.  \nThe proposal_draft aims to guide project execution and ensure alignment with overall goals.",
+      "root": "proposal_draft",
+      "extension": ".pdf",
+      "theme": "Work_Project_Proposal_Final",
+      "original_filename": "proposal draft (2).pdf"
+    },
+    {
+      "filename": "PROPOSAL-2025-04-09--v0.docx",
+      "create_date": "2025-04-09 10:26:02",
+      "edit_date": "2025-04-11 10:26:02",
+      "file_contents_preview": "Work Project Proposal Final\n\nThis document outlines the comprehensive plan for the Work_Project_Proposal_Final initiative.  \nThe proposal_final aims to streamline project workflows and enhance productivity for everyday users managing files, emails, and digital content.  \nKey objectives and strategies are detailed within to ensure successful implementation.",
+      "root": "proposal_final",
+      "extension": ".docx",
+      "theme": "Work_Project_Proposal_Final",
+      "original_filename": "proposal final.docx"
+    },
+    {
+      "filename": "PROPOSAL-2025-04-10--v1.docx",
+      "create_date": "2025-04-10 10:26:02",
+      "edit_date": "2025-04-12 10:26:02",
+      "file_contents_preview": "Work Project Proposal Final\n\nThis document serves as the proposal_draft for the Work_Project_Proposal_Final initiative.  \nIt outlines key objectives and strategies related to managing files, emails, and other digital content efficiently.  \nKeywords: Work_Project_Proposal_Final, workprojectproposalfinal, work_project_proposal_final, work-project-proposal-final, work project proposal final.",
+      "root": "proposal_draft",
+      "extension": ".docx",
+      "theme": "Work_Project_Proposal_Final",
+      "original_filename": "proposal-draft-DRAFT.docx"
+    },
+    {
+      "filename": "PROPOSAL-2025-04-07--v1.pdf",
+      "create_date": "2025-04-07 10:26:02",
+      "edit_date": "2025-04-08 10:26:02",
+      "file_contents_preview": "Work_Project_Proposal_Final\n\nThis document outlines the comprehensive plan for the Work_Project_Proposal_Final initiative.  \nThe proposal_final aims to streamline everyday computer tasks such as managing files, emails, and digital content efficiently.  \nKeywords: Work_Project_Proposal_Final, workprojectproposalfinal, work_project_proposal_final, work-project-proposal-final, work project proposal final",
+      "root": "proposal_final",
+      "extension": ".pdf",
+      "theme": "Work_Project_Proposal_Final",
+      "original_filename": "proposal_final__v2.pdf"
+    },
+    {
+      "filename": "PROPOSAL-2025-04-09--v2.pdf",
+      "create_date": "2025-04-09 10:26:02",
+      "edit_date": "2025-04-10 10:26:02",
+      "file_contents_preview": "Work_Project_Proposal_Final\n\nThis document outlines the comprehensive plan for the Work_Project_Proposal_Final initiative.  \nThe proposal_final aims to streamline everyday computer tasks such as managing files, emails, and digital content efficiently.  \nKeywords: Work_Project_Proposal_Final, workprojectproposalfinal, work_project_proposal_final, work-project-proposal-final, work project proposal final",
+      "root": "proposal_final",
+      "extension": ".pdf",
+      "theme": "Work_Project_Proposal_Final",
+      "original_filename": "proposal_final__v3.pdf"
+    },
+    {
+      "filename": "PROPOSAL-(1)-2025-04-06.pdf",
+      "create_date": "2025-04-06 10:26:02",
+      "edit_date": "2025-04-06 10:26:02",
+      "file_contents_preview": "Work_Project_Proposal_Final\n\nThis document serves as the proposal_draft for the Work_Project_Proposal_Final initiative.  \nIt outlines key objectives and strategies related to the workprojectproposalfinal theme.  \nThe proposal_draft aims to guide project execution and ensure alignment with overall goals.",
+      "root": "proposal_draft",
+      "extension": ".pdf",
+      "theme": "Work_Project_Proposal_Final",
+      "original_filename": "proposal draft 2025 (1).pdf"
+    }
+  ],
+  "Fitness Tracker Reports": [
+    {
+      "filename": "DAILY-SUMMARY-FITNESS-TRACKER-REPORTS-2025-06-21.xlsx",
+      "create_date": "2025-06-21 10:26:02",
+      "edit_date": "2025-06-21 10:26:02",
+      "file_contents_preview": null,
+      "root": "daily_summary_Fitness_Tracker_Reports",
+      "extension": ".xlsx",
+      "theme": "Fitness_Tracker_Reports",
+      "original_filename": "DAILY-SUMMARY-FITNESS-TRACKER-REPORTS.xlsx"
+    },
+    {
+      "filename": "DAILY-SUMMARY-2025-06-22--v1.pdf",
+      "create_date": "2025-06-22 10:26:02",
+      "edit_date": "2025-06-26 10:26:02",
+      "file_contents_preview": "Fitness Tracker Reports - Daily Summary\n\nThis report provides an overview of your daily activity as recorded by the fitness tracker.\n\nKeywords: Fitness_Tracker_Reports, fitnesstrackerreports, fitness_tracker_reports, fitness-tracker-reports, fitness tracker reports\n\nFilename root: daily_summary\n\nReport generated in PDF format.",
+      "root": "daily_summary",
+      "extension": ".pdf",
+      "theme": "Fitness_Tracker_Reports",
+      "original_filename": "daily-summary-FINAL.pdf"
+    },
+    {
+      "filename": "DAILY-SUMMARY-2025-06-20--v0.pdf",
+      "create_date": "2025-06-20 10:26:02",
+      "edit_date": "2025-06-25 10:26:02",
+      "file_contents_preview": "Fitness Tracker Reports - Daily Summary\n\nThis report provides an overview of your daily activity as recorded by the fitness tracker.\n\nKeywords: Fitness_Tracker_Reports, fitnesstrackerreports, fitness_tracker_reports, fitness-tracker-reports, fitness tracker reports\n\nFilename root: daily_summary\n\nReport generated in PDF format.",
+      "root": "daily_summary",
+      "extension": ".pdf",
+      "theme": "Fitness_Tracker_Reports",
+      "original_filename": "daily-summary-DRAFT.pdf"
+    },
+    {
+      "filename": "DAILY-SUMMARY-2025-06-25.csv",
+      "create_date": "2025-06-25 10:26:02",
+      "edit_date": "2025-06-26 10:26:02",
+      "file_contents_preview": "# Fitness_Tracker_Reports - Daily Summary Report\n# Filename Root: daily_summary.csv\n# Keywords: Fitness_Tracker_Reports, fitnesstrackerreports, fitness_tracker_reports, fitness-tracker-reports, fitness tracker reports\nDate,Steps,Calories Burned,Active Minutes,Heart Rate Average",
+      "root": "daily_summary",
+      "extension": ".csv",
+      "theme": "Fitness_Tracker_Reports",
+      "original_filename": "DAILY-SUMMARY.csv"
+    }
+  ],
+  "Grocery List Weekly": [
+    {
+      "filename": "WEEKLY-GROCERY-LIST-GROCERY-LIST-WEEKLY-2025-01-26--v0.xlsx",
+      "create_date": "2025-01-26 10:26:02",
+      "edit_date": "2025-01-29 10:26:02",
+      "file_contents_preview": null,
+      "root": "weekly_grocery_list_Grocery_List_Weekly",
+      "extension": ".xlsx",
+      "theme": "Grocery_List_Weekly",
+      "original_filename": "WEEKLY-GROCERY-LIST-GROCERY-LIST-WEEKLY--v1.xlsx"
+    },
+    {
+      "filename": "WEEKLY-GROCERY-LIST-2025-01-25.docx",
+      "create_date": "2025-01-25 10:26:02",
+      "edit_date": "2025-01-25 10:26:02",
+      "file_contents_preview": "Weekly Grocery List Document\nProject Theme Keywords: Grocery_List_Weekly, grocerylistweekly, grocery_list_weekly, grocery-list-weekly, grocery list weekly\nFilename Root: weekly_grocery_list\nThis document is intended for everyday users managing their weekly grocery needs efficiently.",
+      "root": "weekly_grocery_list",
+      "extension": ".docx",
+      "theme": "Grocery_List_Weekly",
+      "original_filename": "Weekly_Grocery_List.docx"
+    },
+    {
+      "filename": "WEEKLY-GROCERY-LIST-GROCERY-LIST-WEEKLY-2025-01-28--v1.xlsx",
+      "create_date": "2025-01-28 10:26:02",
+      "edit_date": "2025-01-29 10:26:02",
+      "file_contents_preview": null,
+      "root": "weekly_grocery_list_Grocery_List_Weekly",
+      "extension": ".xlsx",
+      "theme": "Grocery_List_Weekly",
+      "original_filename": "WEEKLY-GROCERY-LIST-GROCERY-LIST-WEEKLY--v2.xlsx"
+    },
+    {
+      "filename": "WEEKLY-GROCERY-LIST-2025-01-28.txt",
+      "create_date": "2025-01-28 10:26:02",
+      "edit_date": "2025-02-02 10:26:02",
+      "file_contents_preview": "# weekly_grocery_list.txt\n# Project Theme: Grocery_List_Weekly\n# Keywords: Grocery_List_Weekly, grocerylistweekly, grocery_list_weekly, grocery-list-weekly, grocery list weekly\n# This file contains the weekly grocery list for easy reference and organization.",
+      "root": "weekly_grocery_list",
+      "extension": ".txt",
+      "theme": "Grocery_List_Weekly",
+      "original_filename": "weekly_grocery_list.txt"
+    },
+    {
+      "filename": "MEAL-PLAN-2025-01-28.docx",
+      "create_date": "2025-01-28 10:26:02",
+      "edit_date": "2025-01-30 10:26:02",
+      "file_contents_preview": "Grocery List Weekly Planner  \nProject: meal_plan  \nThis document is designed to help organize your weekly grocery list efficiently.  \nKeywords: Grocery_List_Weekly, grocerylistweekly, grocery_list_weekly, grocery-list-weekly, grocery list weekly",
+      "root": "meal_plan",
+      "extension": ".docx",
+      "theme": "Grocery_List_Weekly",
+      "original_filename": "meal-plan.docx"
+    }
+  ],
+  "Email Backup January": [
+    {
+      "filename": "EMAIL-BACKUP-JAN-EMAIL-BACKUP-JANUARY-2025-01-14--v2.mbox",
+      "create_date": "2025-01-14 10:26:02",
+      "edit_date": "2025-01-15 10:26:02",
+      "file_contents_preview": null,
+      "root": "email_backup_jan_Email_Backup_January",
+      "extension": ".mbox",
+      "theme": "Email_Backup_January",
+      "original_filename": "EMAIL-BACKUP-JAN-EMAIL-BACKUP-JANUARY--v3.mbox"
+    },
+    {
+      "filename": "EMAIL-BACKUP-JAN-EMAIL-BACKUP-JANUARY-2025-01-12--v1.mbox",
+      "create_date": "2025-01-12 10:26:02",
+      "edit_date": "2025-01-16 10:26:02",
+      "file_contents_preview": null,
+      "root": "email_backup_jan_Email_Backup_January",
+      "extension": ".mbox",
+      "theme": "Email_Backup_January",
+      "original_filename": "EMAIL-BACKUP-JAN-EMAIL-BACKUP-JANUARY--v2.mbox"
+    },
+    {
+      "filename": "EMAIL-BACKUP-JAN-EMAIL-BACKUP-JANUARY-2025-01-10.pst",
+      "create_date": "2025-01-10 10:26:02",
+      "edit_date": "2025-01-15 10:26:02",
+      "file_contents_preview": null,
+      "root": "email_backup_jan_Email_Backup_January",
+      "extension": ".pst",
+      "theme": "Email_Backup_January",
+      "original_filename": "email-backup-jan-Email-Backup-January-2025.pst"
+    },
+    {
+      "filename": "CONTACTS-JAN-2025-01-10--v1.csv",
+      "create_date": "2025-01-10 10:26:02",
+      "edit_date": "2025-01-10 10:26:02",
+      "file_contents_preview": "# File: contacts_jan.csv\n# Project Theme Keywords: Email_Backup_January, emailbackupjanuary, email_backup_january, email-backup-january, email backup january\n# Root Directory: contacts_jan\n# Description: Everyday user of the computer, managing files, emails, and other digital content\nName,Email,Phone",
+      "root": "contacts_jan",
+      "extension": ".csv",
+      "theme": "Email_Backup_January",
+      "original_filename": "contactsJanFinal.csv"
+    },
+    {
+      "filename": "CONTACTS-JAN-2025-01-08--v0.csv",
+      "create_date": "2025-01-08 10:26:02",
+      "edit_date": "2025-01-09 10:26:02",
+      "file_contents_preview": "# File: contacts_jan.csv\n# Project Theme Keywords: Email_Backup_January, emailbackupjanuary, email_backup_january, email-backup-january, email backup january\n# Root Directory: contacts_jan\n# Description: Everyday user of the computer, managing files, emails, and other digital content\nName,Email,Phone",
+      "root": "contacts_jan",
+      "extension": ".csv",
+      "theme": "Email_Backup_January",
+      "original_filename": "contactsJanDraft.csv"
+    },
+    {
+      "filename": "CONTACTS-JAN-EMAIL-BACKUP-JANUARY-2025-01-08.vcf",
+      "create_date": "2025-01-08 10:26:02",
+      "edit_date": "2025-01-09 10:26:02",
+      "file_contents_preview": null,
+      "root": "contacts_jan_Email_Backup_January",
+      "extension": ".vcf",
+      "theme": "Email_Backup_January",
+      "original_filename": "Contacts_Jan_Email_Backup_January__v1.vcf"
+    },
+    {
+      "filename": "EMAIL-BACKUP-JAN-EMAIL-BACKUP-JANUARY-2025-01-10--v0.mbox",
+      "create_date": "2025-01-10 10:26:02",
+      "edit_date": "2025-01-11 10:26:02",
+      "file_contents_preview": null,
+      "root": "email_backup_jan_Email_Backup_January",
+      "extension": ".mbox",
+      "theme": "Email_Backup_January",
+      "original_filename": "EMAIL-BACKUP-JAN-EMAIL-BACKUP-JANUARY-2025-01-10--v1.mbox"
+    }
+  ],
+  "Vacation Photos 2023 Summer": [
+    {
+      "filename": "BEACH-PHOTOSACATION-PHOTOS-SUMMER-2025-01-17.png",
+      "create_date": "2025-01-17 10:26:02",
+      "edit_date": "2025-01-20 10:26:02",
+      "file_contents_preview": null,
+      "root": "beach_photos_Vacation_Photos_2023_Summer",
+      "extension": ".png",
+      "theme": "Vacation_Photos_2023_Summer",
+      "original_filename": "beach_photos_Vacation_Photos_2023_Summer.png"
+    },
+    {
+      "filename": "BEACH-PHOTOSACATION-PHOTOS-SUMMER-2025-01-12.jpeg",
+      "create_date": "2025-01-12 10:26:02",
+      "edit_date": "2025-01-16 10:26:02",
+      "file_contents_preview": null,
+      "root": "beach_photos_Vacation_Photos_2023_Summer",
+      "extension": ".jpeg",
+      "theme": "Vacation_Photos_2023_Summer",
+      "original_filename": "beachPhotosVacationPhotos2023Summer.jpeg"
+    },
+    {
+      "filename": "HOTEL-RECEIPTS-2-2025-01-15.pdf",
+      "create_date": "2025-01-15 10:26:02",
+      "edit_date": "2025-01-20 10:26:02",
+      "file_contents_preview": "Hotel Receipts for Vacation_Photos_2023_Summer  \nProject Keywords: Vacation_Photos_2023_Summer, vacationphotos2023summer, vacation_photos_2023_summer  \nThis document contains all hotel receipts related to the Vacation_Photos_2023_Summer project.  \nRoot Filename: hotel_receipts.pdf  \nPlease keep these records for expense tracking and reimbursement.",
+      "root": "hotel_receipts",
+      "extension": ".pdf",
+      "theme": "Vacation_Photos_2023_Summer",
+      "original_filename": "hotel receipts 2.pdf"
+    },
+    {
+      "filename": "BEACH-PHOTOSACATION-PHOTOS-SUMMER-2025-01-12.jpg",
+      "create_date": "2025-01-12 10:26:02",
+      "edit_date": "2025-01-16 10:26:02",
+      "file_contents_preview": null,
+      "root": "beach_photos_Vacation_Photos_2023_Summer",
+      "extension": ".jpg",
+      "theme": "Vacation_Photos_2023_Summer",
+      "original_filename": "BEACH-PHOTOS-VACATION-PHOTOS-2023-SUMMER.jpg"
+    },
+    {
+      "filename": "HOTEL-RECEIPTS-1-2025-01-13.pdf",
+      "create_date": "2025-01-13 10:26:02",
+      "edit_date": "2025-01-15 10:26:02",
+      "file_contents_preview": "Hotel Receipts for Vacation_Photos_2023_Summer  \nProject Keywords: Vacation_Photos_2023_Summer, vacationphotos2023summer, vacation_photos_2023_summer  \nThis document contains all hotel receipts related to the Vacation_Photos_2023_Summer project.  \nRoot Filename: hotel_receipts.pdf  \nPlease keep these records for expense tracking and reimbursement.",
+      "root": "hotel_receipts",
+      "extension": ".pdf",
+      "theme": "Vacation_Photos_2023_Summer",
+      "original_filename": "hotel receipts 01 13 1.pdf"
+    }
+  ],
+  "Birthday Party Planning": [
+    {
+      "filename": "GUEST-LIST-2025-03-09.csv",
+      "create_date": "2025-03-09 10:26:02",
+      "edit_date": "2025-03-13 10:26:02",
+      "file_contents_preview": "# File: guest_list.csv\n# Project Theme Keywords: Birthday_Party_Planning, birthdaypartyplanning, birthday_party_planning, birthday-party-planning, birthday party planning\n# Root Filename: guest_list\nName,Email,RSVP Status,Notes",
+      "root": "guest_list",
+      "extension": ".csv",
+      "theme": "Birthday_Party_Planning",
+      "original_filename": "GUEST-LIST.csv"
+    },
+    {
+      "filename": "GUEST-LIST-BIRTHDAY-PARTY-PLANNING-(1)-2025-03-14.xlsx",
+      "create_date": "2025-03-14 10:26:02",
+      "edit_date": "2025-03-14 10:26:02",
+      "file_contents_preview": null,
+      "root": "guest_list_Birthday_Party_Planning",
+      "extension": ".xlsx",
+      "theme": "Birthday_Party_Planning",
+      "original_filename": "guestListBirthdayPartyPlanning__(1).xlsx"
+    },
+    {
+      "filename": "GUEST-LIST-2025-03-15.txt",
+      "create_date": "2025-03-15 10:26:02",
+      "edit_date": "2025-03-15 10:26:02",
+      "file_contents_preview": "# guest_list.txt\n# Project Theme: Birthday_Party_Planning\n# Keywords: Birthday_Party_Planning, birthdaypartyplanning, birthday_party_planning, birthday-party-planning, birthday party planning\n\nThis file contains the guest list for the upcoming birthday party planning project.",
+      "root": "guest_list",
+      "extension": ".txt",
+      "theme": "Birthday_Party_Planning",
+      "original_filename": "guest-list.txt"
+    },
+    {
+      "filename": "GUEST-LIST-BIRTHDAY-PARTY-PLANNING-(2)-2025-03-16.xlsx",
+      "create_date": "2025-03-16 10:26:02",
+      "edit_date": "2025-03-16 10:26:02",
+      "file_contents_preview": null,
+      "root": "guest_list_Birthday_Party_Planning",
+      "extension": ".xlsx",
+      "theme": "Birthday_Party_Planning",
+      "original_filename": "guestListBirthdayPartyPlanning__(2).xlsx"
+    },
+    {
+      "filename": "PARTY-BUDGET-BIRTHDAY-PARTY-PLANNING-2025-03-09.xlsx",
+      "create_date": "2025-03-09 10:26:02",
+      "edit_date": "2025-03-14 10:26:02",
+      "file_contents_preview": null,
+      "root": "party_budget_Birthday_Party_Planning",
+      "extension": ".xlsx",
+      "theme": "Birthday_Party_Planning",
+      "original_filename": "PARTY-BUDGET-BIRTHDAY-PARTY-PLANNING.xlsx"
+    }
+  ],
+  "Unsorted": [
+    {
+      "filename": "SCREENSHOT-2025-08-27.png",
+      "create_date": "2025-08-27 10:26:02",
+      "edit_date": "2025-08-27 10:26:02",
+      "file_contents_preview": null,
+      "root": "Screenshot",
+      "extension": ".png",
+      "theme": null,
+      "original_filename": "Screenshot_08_27_25.png"
+    },
+    {
+      "filename": "SCREEN-SHOT-2025-05-18.png",
+      "create_date": "2025-05-18 10:26:02",
+      "edit_date": "2025-05-18 10:26:02",
+      "file_contents_preview": null,
+      "root": "Screen Shot",
+      "extension": ".png",
+      "theme": null,
+      "original_filename": "screen-shot.png"
+    }
+  ],
+  "Downloaded Movie Collection": [
+    {
+      "filename": "MOIE-FILE-DOWNLOADED-MOIE-COLLECTION-2025-01-02.avi",
+      "create_date": "2025-01-02 10:26:02",
+      "edit_date": "2025-01-02 10:26:02",
+      "file_contents_preview": null,
+      "root": "movie_file_Downloaded_Movie_Collection",
+      "extension": ".avi",
+      "theme": "Downloaded_Movie_Collection",
+      "original_filename": "MOVIE-FILE-DOWNLOADED-MOVIE-COLLECTION.avi"
+    },
+    {
+      "filename": "MOIE-FILE-DOWNLOADED-MOIE-COLLECTION-2024-12-31.mp4",
+      "create_date": "2024-12-31 10:26:02",
+      "edit_date": "2024-12-31 10:26:02",
+      "file_contents_preview": null,
+      "root": "movie_file_Downloaded_Movie_Collection",
+      "extension": ".mp4",
+      "theme": "Downloaded_Movie_Collection",
+      "original_filename": "movie_file_downloaded_movie_collection_12_31_24.mp4"
+    },
+    {
+      "filename": "MOIE-FILE-DOWNLOADED-MOIE-COLLECTION-2025-01-03.mkv",
+      "create_date": "2025-01-03 10:26:02",
+      "edit_date": "2025-01-08 10:26:02",
+      "file_contents_preview": null,
+      "root": "movie_file_Downloaded_Movie_Collection",
+      "extension": ".mkv",
+      "theme": "Downloaded_Movie_Collection",
+      "original_filename": "MOVIE FILE DOWNLOADED MOVIE COLLECTION.mkv"
+    }
+  ],
+  "Home Renovation Quotes": [
+    {
+      "filename": "QUOTE-REQUESTS-2025-08-24.docx",
+      "create_date": "2025-08-24 10:26:02",
+      "edit_date": "2025-08-28 10:26:02",
+      "file_contents_preview": "Home Renovation Quotes Project  \nDocument: quote_requests.docx  \n\nThis file contains detailed Home_Renovation_Quotes and related information.  \nKeywords included: homerenovationquotes, home_renovation_quotes, home-renovation-quotes, home renovation quotes.",
+      "root": "quote_requests",
+      "extension": ".docx",
+      "theme": "Home_Renovation_Quotes",
+      "original_filename": "quote-requests.docx"
+    },
+    {
+      "filename": "QUOTE-REQUESTS-2-2025-08-24.pdf",
+      "create_date": "2025-08-24 10:26:02",
+      "edit_date": "2025-08-24 10:26:02",
+      "file_contents_preview": "Home Renovation Quotes Project  \nDocument: quote_requests.pdf  \n\nThis file contains detailed home renovation quotes to assist with your project planning.  \nKeywords: Home_Renovation_Quotes, homerenovationquotes, home_renovation_quotes, home-renovation-quotes, home renovation quotes.",
+      "root": "quote_requests",
+      "extension": ".pdf",
+      "theme": "Home_Renovation_Quotes",
+      "original_filename": "quoteRequests 2.pdf"
+    },
+    {
+      "filename": "QUOTE-REQUESTS-1-2025-08-22.pdf",
+      "create_date": "2025-08-22 10:26:02",
+      "edit_date": "2025-08-23 10:26:02",
+      "file_contents_preview": "Home Renovation Quotes Project  \nDocument: quote_requests.pdf  \n\nThis file contains detailed home renovation quotes to assist with your project planning.  \nKeywords: Home_Renovation_Quotes, homerenovationquotes, home_renovation_quotes, home-renovation-quotes, home renovation quotes.",
+      "root": "quote_requests",
+      "extension": ".pdf",
+      "theme": "Home_Renovation_Quotes",
+      "original_filename": "quoteRequests 1.pdf"
+    },
+    {
+      "filename": "QUOTE-REQUESTS-HOME-RENOATION-QUOTES-2025-08-26.eml",
+      "create_date": "2025-08-26 10:26:02",
+      "edit_date": "2025-08-31 10:26:02",
+      "file_contents_preview": null,
+      "root": "quote_requests_Home_Renovation_Quotes",
+      "extension": ".eml",
+      "theme": "Home_Renovation_Quotes",
+      "original_filename": "QUOTE-REQUESTS-HOME-RENOVATION-QUOTES.eml"
+    }
+  ],
+  "Tax Documents 2023": [
+    {
+      "filename": "TAX-RETURN-2024-12-02.pdf",
+      "create_date": "2024-12-02 10:26:02",
+      "edit_date": "2024-12-04 10:26:02",
+      "file_contents_preview": "Tax Documents 2023 Overview  \nThis file contains important information related to tax_return_2023.  \nPlease refer to taxdocuments2023 guidelines for accurate filing.  \nEnsure all tax-documents-2023 are reviewed before submission.  \nFor any queries, consult the tax_documents_2023 support resources.",
+      "root": "tax_return_2023",
+      "extension": ".pdf",
+      "theme": "Tax_Documents_2023",
+      "original_filename": "TAX-RETURN-2023.pdf"
+    },
+    {
+      "filename": "W2-FORM-TAX-DOCUMENTS-2024-11-30.png",
+      "create_date": "2024-11-30 10:26:02",
+      "edit_date": "2024-12-02 10:26:02",
+      "file_contents_preview": null,
+      "root": "w2_form_Tax_Documents_2023",
+      "extension": ".png",
+      "theme": "Tax_Documents_2023",
+      "original_filename": "W2-FORM-TAX-DOCUMENTS-2023.png"
+    },
+    {
+      "filename": "W2-FORM-TAX-DOCUMENTS-2024-11-27.jpg",
+      "create_date": "2024-11-27 10:26:02",
+      "edit_date": "2024-11-30 10:26:02",
+      "file_contents_preview": null,
+      "root": "w2_form_Tax_Documents_2023",
+      "extension": ".jpg",
+      "theme": "Tax_Documents_2023",
+      "original_filename": "w2_form_tax_documents_2023.jpg"
+    },
+    {
+      "filename": "W2-FORM-2024-12-01.pdf",
+      "create_date": "2024-12-01 10:26:02",
+      "edit_date": "2024-12-03 10:26:02",
+      "file_contents_preview": "Tax Documents 2023 Project  \nDocument Type: W2 Form  \nThis file contains essential tax information for the year 2023.  \nKeywords: Tax_Documents_2023, taxdocuments2023, tax_documents_2023, tax-documents-2023, tax documents 2023  \nPlease review all entries carefully for accuracy.",
+      "root": "w2_form",
+      "extension": ".pdf",
+      "theme": "Tax_Documents_2023",
+      "original_filename": "w2 form.pdf"
+    }
+  ]
+}

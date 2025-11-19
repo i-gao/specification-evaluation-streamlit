@@ -1,0 +1,399 @@
+email_id,subject,from,to,date,message
+0,ST-Cali short position for Monday 04/30,bill.iii@enron.com,portland.shift@enron.com,"Sat, 28 Apr 2001 19:01:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+ST-CALI is short 50 mws in NP-15 on Monday on peak.  Please buy for ST-CALI (under their book) and sell to the California Imbalance for them.  They are short at $340.
+Thanks,
+Bill"
+1,ECTSTCALI LENGTH,bill.iii@enron.com,portland.shift@enron.com,"Thu, 19 Apr 2001 23:40:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+In addition to the EES length in NP-15 for 04-20, we also have ST-CALI length in PGE3 for 04_20 and 04_21.  ST-CALI is 40 mws long in PGE 3 on peak beginning HE 7.  We will sell this energy off under ST-CALI's book and figure out a cost basis later.
+
+Thanks.
+Bill"
+2,EPE length for 4/11,bill.iii@enron.com,portland.shift@enron.com,"Tue, 10 Apr 2001 22:49:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+We parked some length with EL Paso for this morning (04/11) at PV.  We need to sell the energy at PV.  The length is in Enpower already.  Please make the sale at PV under ST-SW.  Aepco, MWD, TNP and LDWP should be buying.  The price for deal #577883 goes in the model...not the price you sold it at.
+
+EPE length is in Enpower, deal# 577883, this will be out in RT Position Manager.  56mws for the day.
+The schedule is as follows:
+
+HE 1	8 mws
+HE2	8 mws
+HE3	8 mws
+HE4	8mws
+HE5	8mws
+HE6	10mws
+HE24	6mws
+
+TOTAL 	= 56mws
+
+Please sell this power real time.
+Check with the dispatchers EARLY, Lisa Gang's sheet shows everything you need.
+
+Call Holdenn or myself with any questions.
+Thanks,
+Bill"
+3,EES--CAISO Notice - Distribution of Funds for January Preliminary,bill.iii@enron.com,portland.shift@enron.com,"Thu, 12 Apr 2001 15:27:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+We need to sell all the EES all the time.
+The imbalance is always zero...it doesn't matter what the beep prints(unless its negative-then you can bet we will get charged!!!).
+
+Any ideas, or advice for them?
+Let me know.
+
+Bill
+
+---------------------- Forwarded by Bill Williams III/PDX/ECT on 04/12/2001 08:29 AM ---------------------------
+To:	Bill Williams III/PDX/ECT@ECT
+cc:	Daniel Kang/HOU/EES@EES, Jubran Whalan/HOU/EES@EES 
+
+Subject:	CAISO Notice - Distribution of Funds for January Preliminary Invo	ice
+
+Bill,
+
+We are still in a bad position with the ISO.  I have noticed that you have not been able to sell all of our length in the real time market. Given the below statement by the ISO we would ask your traders to get as aggressive as possible on the sales (ie just sell it) . Receiving  cents on the dollar from the ISO is not a sound business proposition for us.  Do you have any ideas, we welcome your advice .... 
+
+Thanks 
+
+NFB   
+---------------------- Forwarded by Neil Bresnan/HOU/EES on 04/12/2001 07:22 AM ---------------------------
+
+
+""Woertz, Byron"" <BWoertz@caiso.com> on 04/11/2001 06:31:30 PM
+To:	ISO Market Participants <IMCEAEX-_O=CAISO_OU=CORPORATE_CN=DISTRIBUTION+20LISTS_CN=ISO+20MARKET+20PARTICIPANTS@caiso.com>
+cc:	SC Settlements Contacts <IMCEAEX-_O=CAISO_OU=CORPORATE_CN=DISTRIBUTION+20LISTS_CN=SCSETTLECONTACTS@caiso.com> 
+Subject:	CAISO Notice - Distribution of Funds for January Preliminary Invo	ice
+
+
+		ISO Market Participants:
+		Cash clearing related to the preliminary invoice for January
+2001 was scheduled for April 3, 2001.  Due to a shortfall in receipts from
+market debtors, the ISO was required to perform calculations in accordance
+with ISO Tariff Section 11 and Settlements and Billing Protocol (""SABP"")
+Section 6 to determine the appropriate pro-rata distributions to scheduling
+coordinators.  These calculations have been completed, and a distribution of
+available funds was made today.
+		A total distribution of $5,980,329 was made against accounts
+payable of $835,450,697, resulting in a pay-out percentage of 0.7%.  Total
+market related collections were $12,952,985, which were reduced to the
+$5,940,329 to cover GMC short-payments and other adjustments.
+		The ISO will provide a comprehensive reporting of the
+January preliminary settlement later this week, and will thereafter
+distribute a current certification of amounts owed.
+		Phil Leiber
+		Dir. Financial Planning & Treasurer
+		California ISO
+		916 351-2168
+		916-351-2259 (fax)
+
+
+		Byron B. Woertz, Jr.
+		Director, Client Relations
+		(916) 608-7066
+		(800) 481-7037 - Pager
+
+
+"
+4,Willamette,bill.iii@enron.com,portland.shift@enron.com,"Fri, 20 Apr 2001 21:39:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+We are expecting  Willamette Industries back tomorrow.  Please be in touch with them and Les, and maximize the profit for these guys (last month we made $78,000).
+Thanks,
+Bill
+
+
+
+Lester Rawson
+04/20/2001 02:36 PM
+To:	Bill Williams III/PDX/ECT@ECT
+cc:	 
+
+Subject:	Willamette
+
+Real Time Traders,
+
+Willamette Ind. expects to be back tomorrow 4/21. Doug Reiner will call in the morning. Willamette expects to have 10 - 15 Mw available each hour.
+
+Call me if there are any questions.
+
+Les
+"
+5,Scheduling Wheels,kourtney.nelson@enron.com,portland.shift@enron.com,"Tue, 3 Apr 2001 16:30:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+
+Just a reminder that when entering a wheel, the Interchange ID must be the same for the import and export.  When the Import is labeled as ""EPMI_CISO_**"" and the Export as ""CISO_EPMI_**,"" the ISO views these as unique imports and exports.  They will not be linked together for a wheel, thus causing ancillary services charges to occur.  
+
+Thank you!"
+6,Enron Calgary,bill.iii@enron.com,portland.shift@enron.com,"Wed, 4 Apr 2001 17:32:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+We will have the phones for this weekend for Enron Canada.  We will get the phones at 6 on Friday (or thereabouts) and will have them till 6 on Sunday morning (or thereaboot).  Same as before.  We need to update the calgary log on explorer and the written log (in the white Canada binder) if there are any rerates.  Please contact Bill Greenizian, John Zufferli or myself with questions.
+
+I will be in Las Vegas through Sunday but will be reachable on my cell at 503-887-3449 to answer any questions.
+
+Thanks,
+Bill "
+7,NEW Scheduling Coordinator ID's for Cali Utilities.,bill.iii@enron.com,portland.shift@enron.com,"Mon, 30 Apr 2001 15:27:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+
+---------------------- Forwarded by Bill Williams III/PDX/ECT on 04/30/2001 08:34 AM ---------------------------
+
+
+CAISO Market Operations - Hour Ahead	 <IMCEAEX-_O=CAISO_OU=CORPORATE_CN=SYSTEM_CN=MARKETOPSHOURAHEAD@caiso.com> on 04/30/2001 08:30:22 AM
+To:	""Market Status: Hour-Ahead/Real-Time"" <IMCEAEX-_O=CAISO_OU=CORPORATE_CN=DISTRIBUTION+20LISTS_CN=MKTSTATHOURAHEAD@caiso.com>
+cc:	 
+
+Subject:	PG&E New SCIDs
+
+
+NOTICE TO MARKET PARTICIPANTS - PG&E SCIDs CHANGE:  Effective Trade Date
+Tuesday, May 1st 2001.  PG&E will begin scheduling energy trades and bids
+under new SCIDs. The OLD PG&E SCIDs WILL NO LONGER BE VALID.  ALL PG&E
+related scheduling transactions will use these new SCIDs beginning with
+submission of Day Ahead schedules on Monday, April 30th for Trade Date,
+Tuesday May 1, 2001.  The new SCIDs are as follows:  PCG1=PCGB; PGAE=PGAB;
+COTP=COTB.  Any (7 day) advance schedules that may have already been
+submitted using the old SCIDs, must be remove (deleted) and rescheduled
+using the New SCIDs.  Please see the Market Stoups email for PG&E contact
+numbers.  Distributed on behalf of PG&E to facilitate their transition to
+the new SCIDs.  Sent by Market Operations (916) 351-4409.
+
+"
+8,Pacificorp Buy-Resales,bill.iii@enron.com,portland.shift@enron.com,"Tue, 17 Apr 2001 23:24:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+Group,
+When doing a buy-resale with Pacificorp, we need to agree on the buy and the resale prices on the phone.  These prices need to be recorded in your trade log.  We also need to now check the prices nightly on buy-resales with Pacificorp when doing the SAR.  We are having numerous discrepancies with Pacificorp because of problems with buy-resale deal entry.  I have listened to several tapes where only the spread ($10 or $20 dollars) is mentioned.  Let's be sure to  establish these prices, do the confirms nightly, and make sure we can continue to work closely with this counterparty. 
+
+On a separate note...please be sure to use two tags on any buy-resales.
+
+Thanks.
+
+Bill"
+9,Schedule cut at COB to run real time,cara.semperger@enron.com,portland.shift@enron.com,"Tue, 24 Apr 2001 21:52:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+Our upstream is Sempra, our Downstream is Mirant, it is a llh schedule that was cut by 1 mw HE 4-6, 23-24.  Mirant is taking it to real time, and Snohomish who is generating agrees with this.
+
+Please call Mirant for the hours above to make sure everything is being handled.  The path is marked in lotus notes with a cut symbol.
+
+Cara"
+10,Change in Late Day Rotation--Please note,cara.semperger@enron.com,portland.shift@enron.com,"Wed, 25 Apr 2001 21:45:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+The Late Day Rotation for Preschedule coverage is as follows:
+
+Monday - Lisa
+Tuesday - Stacy
+Wednesday-Donald
+Thursday - Diane
+Friday - Susie
+
+Please refer late calls for preschedulers who have left for the day to the late day person.  
+"
+11,Scheduling Intranet Site,cara.semperger@enron.com,portland.shift@enron.com,"Thu, 21 Dec 2000 08:45:00 -0800 (PST)"," kate symes 6-27-02.nsf
+
+Here is the address of our internal intranet site.
+
+P:\Scheduling\EnronWestSchedulingWebsite.html"
+12,Supplemental Entry in Caps,bill.iii@enron.com,portland.shift@enron.com,"Mon, 23 Apr 2001 18:47:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+There had been some interest in this.  See me with questions...there is a hard copy in your mailbox.
+
+ "
+13,Mid C Schedule going real time APRIL 4,mike.purcell@enron.com,portland.shift@enron.com,"Tue, 3 Apr 2001 23:03:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+BUY	
+SALE
+
+PRM  incorrectly reported PGE as the sink.
+Let me know if you have any questions.
+Mike"
+14,Length for 04/24/01,bill.iii@enron.com,portland.shift@enron.com,"Tue, 24 Apr 2001 00:09:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+We have length again in NP (on-peak) for 04/24/01 and EES long/short in SDG1 to take care of as well.  There is 25 mws of ST-WBOM length at $266 in NP-15...there is also 50 mws of ST-Cali length(50/50 over $266) in NP-15.  EES2 is alternatively long off-peak and short on-peak in SDG1.  Enpower deals need to be made under the appropriate books in NP (buy from imbalance/sell to ?...) and with a $5 spread as normal for EES.  If you have questions, please let me know.
+
+Thank you,
+
+Bill"
+15,ISO Hour Ahead Schedule Adjustments,bill.iii@enron.com,portland.shift@enron.com,"Wed, 4 Apr 2001 15:26:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+Group,
+Please see below.  It is important that we notify our customers regarding changes in the schedules.  All the updated phone numbers have been put in your boxes and a sheet with numbers is also taped to the desk.  If you cannot reach a customer, please attempt to notify Chris Foster or myself.
+Thanks,
+Bill
+
+
+---------------------- Forwarded by Bill Williams III/PDX/ECT on 04/04/2001 08:29 AM ---------------------------
+   
+	  From:  Chris H Foster                           04/03/2001 10:24 AM	
+		
+
+
+To:	Bill Williams III/PDX/ECT@ECT
+cc:	Greg Wolfe/HOU/ECT@ECT 
+
+Subject:	ISO Hour Ahead Schedule Adjustments
+
+Bill:
+
+Can you make an effort to tell everyone in real time to try to remember to contact the services customers when a schedule adjustment that incs of decs their generation comes from the ISO.  If we tell them what their final schedule is, they can't argue that it was our fault.  Even if we do not notify them, it is currently our position, that it is not our fault, but at a minimum, for customer service, we should try to notify them.
+
+Thanks!
+
+Chris
+
+"
+16,Position Manager at Mead230,bill.iii@enron.com,portland.shift@enron.com,"Fri, 16 Mar 2001 05:01:00 -0800 (PST)"," kate symes 6-27-02.nsf
+
+Folks...
+We are also out in position manager for Saturday at Mead 230 because of the 
+LV Cogen sale going RT.
+
+---------------------- Forwarded by Bill Williams III/PDX/ECT on 03/16/2001 
+01:05 PM ---------------------------
+
+
+Stanley Cocke
+03/16/2001 01:00 PM
+To: Portland Shift
+cc: Cara Semperger/PDX/ECT@ECT, Stacy Runswick/PDX/ECT@ECT, Mark 
+Fisher/EWC/Enron@Enron, Tom Alonso/PDX/ECT@ECT, Jeremy Morris/PDX/ECT@ECT, 
+Jeff Richter/HOU/ECT@ECT, Carla Hoffman/PDX/ECT@ECT 
+
+Subject: Position Manager at Mead230
+
+Just wanted to let everyone know that we will be out in position manager for 
+Sunday, 3/18.  We're out a total of 102MW, 17MW for HE11-16.  This is an LV 
+Cogen schedule that is going real-time.
+
+Thanks,
+Stan
+"
+17,Length for Monday,bill.iii@enron.com,portland.shift@enron.com,"Fri, 20 Apr 2001 21:24:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+We have length on peak Monday, 04-23 in NP-15.  The energy is in PGE3, 25 mws are under ST-WBOM and 56 mws are in ST-CALI.  We need to sell all 81 mws.  In Enpower we buy the 25 mws from imbalance under ST-WBOM, and sell them under ST-WBOM.  ST-WBOM is long at $230.  We buy the 56 mws under the ST-CALI book and then sell it off for a profit split under the ST-CALI book.  I will be in Seattle this weekend.  If you have any questions, you can reach me on my cell phone.
+
+Thanks,
+Bill"
+18,PV LLH PATH CUT GOING TO REAL TIME,cara.semperger@enron.com,portland.shift@enron.com,"Fri, 27 Apr 2001 23:24:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+We have a month long path LLH PV that has been cut on HE 5 and 6 for Saturday 4/28
+
+The original path is :
+
+TEP@PV-NEVP-CPS-E-SPP-IPC-PAC-SDGE-CISO(T)PVN.GILA/SP15- SDGE@SP15.
+
+HE 5 was cut by 3 MW, HE 6 was cut by 8.  SDGE HAS ASKED TO TAKE THIS TO REAL TIME.
+
+Please call and make sure that everything is going ok on this path SATURDAY.
+
+Thanks,
+
+
+C"
+19,"Parking with El Paso tomorrow, 12/8/00",john.forney@enron.com,portland.shift@enron.com,"Thu, 7 Dec 2000 09:00:00 -0800 (PST)"," kate symes 6-27-02.nsf
+
+We are long in Enpower for tomorrow due to a parking arrangement with EPE at 
+PV.     We added this deal late,  so make sure that the EPE dispatcher knows 
+of this late preschedule of energy to EPE.
+We are long the following hours/mws:
+
+He 7-10    3mw's
+He 11-22     10mw's
+
+The length is reflected on deal #476644 and this energy should be marketed 
+hourly.    We need to communicate early with EPE and make sure that this goes 
+as smoothly  as possible.     Once sold,  of course enter the sale( under ST 
+SW book)  and route to the length.
+This deal is completely ST SW in Enpower and we will share any profits with 
+ST SW.
+
+Thanks,
+JMF
+"
+20,Length from APX,bill.iii@enron.com,portland.shift@enron.com,"Mon, 9 Apr 2001 16:33:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+Group,
+I have purchased 8 mws from the service desk for Tuesday (04/10) in SP-15.  We bought 8 mws from a service customer through the APX.  I have made the entries into CAPs for the purchase from APX.  I have inc'd load in ST-WBOM.  Load will need to be dec'd and the energy sold off. You may want to  combine it with EES(or buy some mws to make it a whole piece to sell) and use NCPA to move it North.  Or maybe export it at Silverpeak.  The schedule is as follows.  8 mw, HE 1-24 on 04/10 in SP-15.  The price is $150 peak, and $100 off peak.  Purchase from Services is #574640, and purchase from APX is #574629.  Please make any buy-resales and sales under ST-WBOM. 
+Please call with any questions.
+
+Thanks,
+Bill
+"
+21,Meeting 04-11,bill.iii@enron.com,portland.shift@enron.com,"Mon, 9 Apr 2001 15:46:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+Group,
+Just a quick reminder.  We have a meeting April 11 at 4:30 in the afternoon.  We will review ytd performance of the group, areas where we are doing well, and areas for improviement.  Please bring your thoughts and material to take notes.  We will also have a couple Hot Lips Pizzas again. 
+ 
+Additionally, I have not heard from all of you regarding the class on April 27th and 28th. 
+The course is Electric System Operation for the Non-engineer.  The course highlights include:
+Generation
+Transmission and Overhead
+Distribution Systems
+Underground Distribution
+Switchgear
+Voltage Control
+Matching Generation
+
+The course will purportedly provide a comprehensive understanding of system operations including fossil fuel, hydro and nuclear generation, transmission and distribution.  The course should provide not only technical information but also economics of operation, system and equipment protection and safety.
+
+If I have not heard from you by Noon on the 11th, I will assume that you are not interested.
+Thanks,
+
+Bill"
+22,Montana Power Company MARCH 2001,virginia.thompson@enron.com,portland.shift@enron.com,"Tue, 24 Apr 2001 23:46:00 -0700 (PDT)"," 
+
+Dear Real-Timers,
+
+We are having the same problem with Montana Power's checkout as we had last month: the volume of disputes is overwhelming!!
+
+I have looked at the Inc sheets and found that EnPower matches the Inc. sheets.
+But in fairness to MPC's disputes, last month when I trusted the Inc sheets, and I pulled the tapes, I found that our Inc. sheets were wrong in a number of places.
+
+Mike and I are doing the March 2001 checkout and are having trouble finding your logs, your notebooks, or any information regarding the dates in question.
+
+I am listing below the dates and HE that we are having disputes for.  Please look at your logs and let me know the MW value, price, and who you spoke to at MPC at what time.  Please do not give me what the Inc sheets say, as Mike and I have already looked at them.
+
+I expect an answer from each of you ASAP.
+
+
+
+3/01/01		Meyers / Guzman			HE 1 (sold to WESCO)	HE 4 (sold to PowerEx)
+3/02/01		Causholli/Salisbury (sent to Holden)	HE 8 (sold to Sempra)
+3/06/01		Meyers/Salisbury & Solberg/Harasin  HE 13 ( 2 deals )	HE 21 (sold to Snohomish)
+3/08/01		Meyers/Harasin			HE 1 (sold to Sempra)	HE 2 (sold to Sempra)
+3/10/01		Causholli/Solberg & Slinger/Guzman  HE 7 (not in INC, but in EnPower)	   HE 8 ( sold to Powerex)   HE 15 (slod to PSPL)
+3/11/01		Meyers/Guzman			HE 8 (sold to PowerEx)  HE 9 (sold to PowerEx)
+3/13/01		Causholli/Porter			HE 9 (sold to WESCO)
+3/14/01		Salisbury/Meyers/Linder		HE 2 (2 deals)
+3/16/01		Salisbury/Porter & Causholli	HE 4 (sold to SCL)  HE 20 (sold to PSPL)
+3/21/01 		Porter/Guzman			HE 6 (not in Inc)
+3/23/01		Meyers/Linder			HE 13 (sold to WESCO)
+3/28/01		Salisbury/Slinger & Dean		HE 5 (sold to PSPL)
+
+
+As you can see, the number of dusputes is too large.  Please respond as soon as possible so that we can chack out this week.  MPC is calling me every day.
+
+Thanks for your help,
+
+Virginia
+
+
+ "
+23,PNM parking for Monday,bill.iii@enron.com,portland.shift@enron.com,"Mon, 16 Apr 2001 01:18:00 -0700 (PDT)"," holden salisbury 6-26-02.PST
+
+We have parking with PNM for off-peak on Monday.  The energy schedule is as follows.  The energy is at 4C but you should be able to move it to PV with PNM if you ask nicely.  We will split the upside over $35 with ST SW via annuity.  Please make all transmission purchases or other sales under their book.  
+
+Deal number on the buy from PNM is #581199.
+
+The shape of this length is:
+
+HE1	50
+HE2	50
+HE3	50
+HE4	50
+HE5	45
+HE6	20
+HE23	35
+HE24	50
+
+Day total is 350.
+
+Thanks
+Bill"

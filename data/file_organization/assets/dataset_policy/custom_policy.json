@@ -1,0 +1,201 @@
+{
+  "moving_rules": [
+    {
+      "conditions": {
+        "content_contains": [
+          "Vacation_Photos_2023_Summer",
+          "vacationphotos2023summer",
+          "vacation_photos_2023_summer",
+          "vacation-photos-2023-summer",
+          "vacation photos 2023 summer"
+        ],
+        "name_contains": [
+          "Vacation_Photos_2023_Summer",
+          "vacationphotos2023summer",
+          "vacation_photos_2023_summer",
+          "vacation-photos-2023-summer",
+          "vacation photos 2023 summer"
+        ]
+      },
+      "folder": "Vacation Photos 2023 Summer"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Tax_Documents_2023",
+          "taxdocuments2023",
+          "tax_documents_2023",
+          "tax-documents-2023",
+          "tax documents 2023"
+        ],
+        "name_contains": [
+          "Tax_Documents_2023",
+          "taxdocuments2023",
+          "tax_documents_2023",
+          "tax-documents-2023",
+          "tax documents 2023"
+        ]
+      },
+      "folder": "Tax Documents 2023"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Work_Project_Proposal_Final",
+          "workprojectproposalfinal",
+          "work_project_proposal_final",
+          "work-project-proposal-final",
+          "work project proposal final"
+        ],
+        "name_contains": [
+          "Work_Project_Proposal_Final",
+          "workprojectproposalfinal",
+          "work_project_proposal_final",
+          "work-project-proposal-final",
+          "work project proposal final"
+        ]
+      },
+      "folder": "Work Project Proposal Final"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Family_Reunion_Invitation",
+          "familyreunioninvitation",
+          "family_reunion_invitation",
+          "family-reunion-invitation",
+          "family reunion invitation"
+        ],
+        "name_contains": [
+          "Family_Reunion_Invitation",
+          "familyreunioninvitation",
+          "family_reunion_invitation",
+          "family-reunion-invitation",
+          "family reunion invitation"
+        ]
+      },
+      "folder": "Family Reunion Invitation"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Birthday_Party_Planning",
+          "birthdaypartyplanning",
+          "birthday_party_planning",
+          "birthday-party-planning",
+          "birthday party planning"
+        ],
+        "name_contains": [
+          "Birthday_Party_Planning",
+          "birthdaypartyplanning",
+          "birthday_party_planning",
+          "birthday-party-planning",
+          "birthday party planning"
+        ]
+      },
+      "folder": "Birthday Party Planning"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Grocery_List_Weekly",
+          "grocerylistweekly",
+          "grocery_list_weekly",
+          "grocery-list-weekly",
+          "grocery list weekly"
+        ],
+        "name_contains": [
+          "Grocery_List_Weekly",
+          "grocerylistweekly",
+          "grocery_list_weekly",
+          "grocery-list-weekly",
+          "grocery list weekly"
+        ]
+      },
+      "folder": "Grocery List Weekly"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Email_Backup_January",
+          "emailbackupjanuary",
+          "email_backup_january",
+          "email-backup-january",
+          "email backup january"
+        ],
+        "name_contains": [
+          "Email_Backup_January",
+          "emailbackupjanuary",
+          "email_backup_january",
+          "email-backup-january",
+          "email backup january"
+        ]
+      },
+      "folder": "Email Backup January"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Home_Renovation_Quotes",
+          "homerenovationquotes",
+          "home_renovation_quotes",
+          "home-renovation-quotes",
+          "home renovation quotes"
+        ],
+        "name_contains": [
+          "Home_Renovation_Quotes",
+          "homerenovationquotes",
+          "home_renovation_quotes",
+          "home-renovation-quotes",
+          "home renovation quotes"
+        ]
+      },
+      "folder": "Home Renovation Quotes"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Downloaded_Movie_Collection",
+          "downloadedmoviecollection",
+          "downloaded_movie_collection",
+          "downloaded-movie-collection",
+          "downloaded movie collection"
+        ],
+        "name_contains": [
+          "Downloaded_Movie_Collection",
+          "downloadedmoviecollection",
+          "downloaded_movie_collection",
+          "downloaded-movie-collection",
+          "downloaded movie collection"
+        ]
+      },
+      "folder": "Downloaded Movie Collection"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Fitness_Tracker_Reports",
+          "fitnesstrackerreports",
+          "fitness_tracker_reports",
+          "fitness-tracker-reports",
+          "fitness tracker reports"
+        ],
+        "name_contains": [
+          "Fitness_Tracker_Reports",
+          "fitnesstrackerreports",
+          "fitness_tracker_reports",
+          "fitness-tracker-reports",
+          "fitness tracker reports"
+        ]
+      },
+      "folder": "Fitness Tracker Reports"
+    }
+  ],
+  "naming_policy": {
+    "case": "upper",
+    "delimiter": "-",
+    "include_date": true,
+    "date_format": "%Y-%m-%d",
+    "version": " v{n}"
+  }
+}

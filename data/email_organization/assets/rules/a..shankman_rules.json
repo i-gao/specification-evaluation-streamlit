@@ -1,0 +1,80 @@
+{
+  "valid_rules": [
+    {
+      "name": "Emails with subject mentioning meetings should go to Calendar folder",
+      "conditions": "subject_contains \"meeting\" OR subject_contains \"mtg\" OR subject_contains \"invite\" OR subject_contains \"calendar\"",
+      "folder": "calendar"
+    },
+    {
+      "name": "Emails about California updates should go to California folder",
+      "conditions": "subject_contains \"california\"",
+      "folder": "california"
+    },
+    {
+      "name": "Emails from Gail Brownfeld or about Sempra, depositions, or synfuel should go to Deleted Items > Sempra folder",
+      "conditions": "from_contains \"gail.brownfeld@enron.com\" OR subject_contains \"sempra\" OR content_contains \"sempra\" OR subject_contains \"depo\" OR subject_contains \"deposition\" OR subject_contains \"synfuel\"",
+      "folder": "deleted items > sempra"
+    },
+    {
+      "name": "Emails from Brendan Fitzsimmons or about Hill stimulus bill should go to Americas > Regulatory folder",
+      "conditions": "from_contains \"brendan.fitzsimmons@enron.com\" OR subject_contains \"hill stimulus bill update\" OR content_contains \"stimulus bill\"",
+      "folder": "americas > regulatory"
+    },
+    {
+      "name": "Emails mentioning anthrax or OOC/MRHA should go to Americas > MRHA > OOC folder",
+      "conditions": "subject_contains \"anthrax\" OR content_contains \"anthrax\" OR subject_contains \"ooc\" OR content_contains \"out of compliance\" OR subject_contains \"mrha\"",
+      "folder": "americas > mrha > ooc"
+    },
+    {
+      "name": "Emails about EnronOnline or IT systems should go to Americas > IT folder",
+      "conditions": "subject_contains \"enrononline\" OR content_contains \"enrononline\" OR subject_contains \"password\" OR subject_contains \"server\" OR subject_contains \"vpn\" OR subject_contains \"email outage\"",
+      "folder": "americas > it"
+    },
+    {
+      "name": "Emails about budgeting, forecasts, or business plans should go to Americas > Business Plans folder",
+      "conditions": "(subject_contains \"budget\" AND content_contains \"allocations\") OR subject_contains \"budget allocations\" OR subject_contains \"business plan\" OR subject_contains \"forecast\" OR subject_contains \"strategy\"",
+      "folder": "americas > business plans"
+    },
+    {
+      "name": "Emails about EGM or mid-market customer transitions should go to Americas > Gas folder",
+      "conditions": "subject_contains \"egm\" OR subject_contains \"mid-market customer transition\"",
+      "folder": "americas > gas"
+    },
+    {
+      "name": "Emails about SOX financing, payment/prepayment requests, MTBE/Equiva should go to Americas > ESVL folder",
+      "conditions": "subject_contains \"prepayment request\" OR subject_contains \"payment request\" OR subject_contains \"sox\" OR content_contains \"so2\" OR content_contains \"mtbe\" OR content_contains \"equiva\" OR from_contains \"louisdreyfus.com\" OR from_contains \"h..harrison@enron.com\" OR from_contains \"s..bradford@enron.com\" OR from_contains \"c..lewis@enron.com\"",
+      "folder": "americas > esvl"
+    },
+    {
+      "name": "Emails from galleries or about artists should go to Art Comm folder",
+      "conditions": "(from_contains \"gallery\" OR from_contains \"galerie\" OR from_contains \"glry\" OR from_contains \"mfah.org\") OR subject_contains \"burtynsky\" OR subject_contains \"lewandowski\" OR subject_contains \"paley\" OR subject_contains \"schulz\" OR (subject_contains \"invoice\" AND from_contains \"galerie\")",
+      "folder": "art comm"
+    },
+    {
+      "name": "Emails about trading simulations or London contacts should go to Global Mkts folder",
+      "conditions": "subject_contains \"trading simulation\" OR subject_contains \"london contact\" OR from_contains \"sophie.kingsley@enron.com\" OR content_contains \"trader\"",
+      "folder": "global mkts"
+    },
+    {
+      "name": "Personal emails from common personal domains or with casual subjects should go to Personal folder",
+      "conditions": "from_contains \"@aol.com\" OR from_contains \"@rocketmail.com\" OR from_contains \"@abc.com\" OR from_contains \"sheckys.com\" OR from_contains \"unterberg.com\" OR from_contains \"capitalz.com\" OR subject_contains \"thank you\" OR subject_contains \"it's me\" OR subject_contains \"menina\"",
+      "folder": "personal"
+    }
+  ],
+  "edge_cases": [
+    {
+      "email_id": "20",
+      "folder": "americas > hr",
+      "subject": "Executive Referral from Ken Lay - Gerardo Segura",
+      "from": "andria.stevens@enron.com"
+    }
+  ],
+  "metadata": {
+    "email_file": "a..shankman.csv",
+    "solution_file": "a..shankman.csv",
+    "total_emails": 37,
+    "covered_emails": 36,
+    "edge_case_count": 1,
+    "model_name": "gpt-5"
+  }
+}

@@ -1,0 +1,201 @@
+{
+  "moving_rules": [
+    {
+      "conditions": {
+        "content_contains": [
+          "Grant_Proposal_NSF_2024",
+          "grantproposalnsf2024",
+          "grant_proposal_nsf_2024",
+          "grant-proposal-nsf-2024",
+          "grant proposal nsf 2024"
+        ],
+        "name_contains": [
+          "Grant_Proposal_NSF_2024",
+          "grantproposalnsf2024",
+          "grant_proposal_nsf_2024",
+          "grant-proposal-nsf-2024",
+          "grant proposal nsf 2024"
+        ]
+      },
+      "folder": "Grant Proposal NSF 2024"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Experiment_Data_Photosynthesis_March",
+          "experimentdataphotosynthesismarch",
+          "experiment_data_photosynthesis_march",
+          "experiment-data-photosynthesis-march",
+          "experiment data photosynthesis march"
+        ],
+        "name_contains": [
+          "Experiment_Data_Photosynthesis_March",
+          "experimentdataphotosynthesismarch",
+          "experiment_data_photosynthesis_march",
+          "experiment-data-photosynthesis-march",
+          "experiment data photosynthesis march"
+        ]
+      },
+      "folder": "Experiment Data Photosynthesis March"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Literature_Review_CRISPR_Paper",
+          "literaturereviewcrisprpaper",
+          "literature_review_crispr_paper",
+          "literature-review-crispr-paper",
+          "literature review crispr paper"
+        ],
+        "name_contains": [
+          "Literature_Review_CRISPR_Paper",
+          "literaturereviewcrisprpaper",
+          "literature_review_crispr_paper",
+          "literature-review-crispr-paper",
+          "literature review crispr paper"
+        ]
+      },
+      "folder": "Literature Review CRISPR Paper"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Paper_Draft_Microbial_Metabolism",
+          "paperdraftmicrobialmetabolism",
+          "paper_draft_microbial_metabolism",
+          "paper-draft-microbial-metabolism",
+          "paper draft microbial metabolism"
+        ],
+        "name_contains": [
+          "Paper_Draft_Microbial_Metabolism",
+          "paperdraftmicrobialmetabolism",
+          "paper_draft_microbial_metabolism",
+          "paper-draft-microbial-metabolism",
+          "paper draft microbial metabolism"
+        ]
+      },
+      "folder": "Paper Draft Microbial Metabolism"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Conference_Presentation_ICAR_2024",
+          "conferencepresentationicar2024",
+          "conference_presentation_icar_2024",
+          "conference-presentation-icar-2024",
+          "conference presentation icar 2024"
+        ],
+        "name_contains": [
+          "Conference_Presentation_ICAR_2024",
+          "conferencepresentationicar2024",
+          "conference_presentation_icar_2024",
+          "conference-presentation-icar-2024",
+          "conference presentation icar 2024"
+        ]
+      },
+      "folder": "Conference Presentation ICAR 2024"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Vacation_Photos_Hawaii_2023",
+          "vacationphotoshawaii2023",
+          "vacation_photos_hawaii_2023",
+          "vacation-photos-hawaii-2023",
+          "vacation photos hawaii 2023"
+        ],
+        "name_contains": [
+          "Vacation_Photos_Hawaii_2023",
+          "vacationphotoshawaii2023",
+          "vacation_photos_hawaii_2023",
+          "vacation-photos-hawaii-2023",
+          "vacation photos hawaii 2023"
+        ]
+      },
+      "folder": "Vacation Photos Hawaii 2023"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Data_Analysis_Gene_Expression_Raw",
+          "dataanalysisgeneexpressionraw",
+          "data_analysis_gene_expression_raw",
+          "data-analysis-gene-expression-raw",
+          "data analysis gene expression raw"
+        ],
+        "name_contains": [
+          "Data_Analysis_Gene_Expression_Raw",
+          "dataanalysisgeneexpressionraw",
+          "data_analysis_gene_expression_raw",
+          "data-analysis-gene-expression-raw",
+          "data analysis gene expression raw"
+        ]
+      },
+      "folder": "Data Analysis Gene Expression Raw"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Manuscript_Revision_Reviewer_Comments",
+          "manuscriptrevisionreviewercomments",
+          "manuscript_revision_reviewer_comments",
+          "manuscript-revision-reviewer-comments",
+          "manuscript revision reviewer comments"
+        ],
+        "name_contains": [
+          "Manuscript_Revision_Reviewer_Comments",
+          "manuscriptrevisionreviewercomments",
+          "manuscript_revision_reviewer_comments",
+          "manuscript-revision-reviewer-comments",
+          "manuscript revision reviewer comments"
+        ]
+      },
+      "folder": "Manuscript Revision Reviewer Comments"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Workshop_Materials_Statistical_Methods",
+          "workshopmaterialsstatisticalmethods",
+          "workshop_materials_statistical_methods",
+          "workshop-materials-statistical-methods",
+          "workshop materials statistical methods"
+        ],
+        "name_contains": [
+          "Workshop_Materials_Statistical_Methods",
+          "workshopmaterialsstatisticalmethods",
+          "workshop_materials_statistical_methods",
+          "workshop-materials-statistical-methods",
+          "workshop materials statistical methods"
+        ]
+      },
+      "folder": "Workshop Materials Statistical Methods"
+    },
+    {
+      "conditions": {
+        "content_contains": [
+          "Flight_Booking_Summer_Trip",
+          "flightbookingsummertrip",
+          "flight_booking_summer_trip",
+          "flight-booking-summer-trip",
+          "flight booking summer trip"
+        ],
+        "name_contains": [
+          "Flight_Booking_Summer_Trip",
+          "flightbookingsummertrip",
+          "flight_booking_summer_trip",
+          "flight-booking-summer-trip",
+          "flight booking summer trip"
+        ]
+      },
+      "folder": "Flight Booking Summer Trip"
+    }
+  ],
+  "naming_policy": {
+    "case": "title",
+    "delimiter": "-",
+    "include_date": false,
+    "date_format": null,
+    "version": "_v{n}"
+  }
+}
