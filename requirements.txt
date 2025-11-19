@@ -17,8 +17,9 @@ inflect
 pandas
 scikit-learn
 json-repair>=0.40
-llm-sandbox
+llm-sandbox==0.3.18
 docker
+kubernetes
 google-cloud-storage
 google-auth
 
