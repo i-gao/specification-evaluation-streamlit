@@ -11,11 +11,12 @@ from typing import (
 )
 from collections import defaultdict
 from dataclasses import dataclass, asdict
-from data.actions import Action
 from data.dataset import Specification
 import os
 from langchain_core.messages import BaseMessage
+from langchain_core.tools import StructuredTool
 import json
+
 
 @dataclass
 class PolicyConversationTurn:
@@ -47,7 +48,7 @@ class PolicyAction:
     prompt: Dict[str, str]  # Top-level user/system prompts used to generate the thought
 
 
-DEFAULT_HOOKS = [
+DEFAULT_POST_GENERATION_HOOKS = [
     "get_state",
 ]
 
@@ -55,24 +56,23 @@ DEFAULT_HOOKS = [
 class InteractionPolicy:
     """
     An abstract class for an assistant
-
-    The policy has access to:
-    - interaction budget (C): the maximum cost of the conversation
-    - actions: the public set of task actions the policy can take
-    - initial_specification: the task signature
-    - prediction_fmt_instructions: instructions for formatting the output y
-    - msg_fmt_instructions: instructions for formatting the message to the user
-    - verbosity: whether to print verbose output
     """
 
     def __init__(
         self,
         interaction_budget: float,
-        actions: List[Action] = None,
-        initial_specification: str = None,
+        actions: List[StructuredTool] = None,
+        commonsense_instructions: str = None,
+        initial_shared_state: str = None,
         prediction_fmt_instructions: str = None,
         msg_fmt_instructions: str = None,
-        hooks: List[Union[str, Callable]] = DEFAULT_HOOKS,
+        show_prediction_fmt_instructions_in_msg: bool = False,
+        pre_conversation_hooks: List[Union[str, Callable]] = [],
+        post_user_response_hooks: List[Union[str, Callable]] = [],
+        pre_generation_hooks: List[Union[str, Callable]] = [],
+        post_generation_hooks: List[
+            Union[str, Callable]
+        ] = DEFAULT_POST_GENERATION_HOOKS,
         verbosity: Literal[0, 1, 2] = 0,
         checkpoint_file: Optional[str] = None,
         spec: Optional[Specification] = None,
@@ -92,12 +92,16 @@ class InteractionPolicy:
         self.interaction_budget = interaction_budget
         self.actions = actions
         self.verbosity = verbosity
-        self._hooks = hooks
+        self._pre_conversation_hooks = pre_conversation_hooks
+        self._post_user_response_hooks = post_user_response_hooks
+        self._pre_generation_hooks = pre_generation_hooks
+        self._post_generation_hooks = post_generation_hooks
         self.checkpoint_file = checkpoint_file
         self.spec = spec
-        self.initial_specification = initial_specification
+        self.commonsense_instructions = commonsense_instructions
         self.prediction_fmt_instructions = prediction_fmt_instructions
         self.msg_fmt_instructions = msg_fmt_instructions
+        self._show_prediction_fmt_instructions_in_msg = show_prediction_fmt_instructions_in_msg
         self.cost_type = cost_type
         if self.checkpoint_file is not None and self.spec is None:
             print(
@@ -113,6 +117,20 @@ class InteractionPolicy:
         self._model_lock = False
 
     ######## PROPERTIES ##########
+
+    @property
+    def task_context(self) -> str:
+        """
+        Get the task context.
+        """
+        out = ""
+        if self.commonsense_instructions is not None:
+            out += self.commonsense_instructions
+        if self.prediction_fmt_instructions is not None:
+            out += self.prediction_fmt_instructions
+        if len(out):
+            out = "Task context: " + out
+        return out
 
     @property
     def current_unanswered_msg(self) -> str:
@@ -218,6 +236,7 @@ class InteractionPolicy:
         self.hook_history = defaultdict(dict)
         self.agent_executor.clear_state()
         self.has_seen_system_prompt = False
+        self._model_lock = False
 
     def __call__(
         self, user_response: Optional[str] = None, user_cost: Optional[float] = None
@@ -240,14 +259,11 @@ class InteractionPolicy:
         if self._model_lock:
             print("Model is locked")
             return
-        
+
         if self.current_unanswered_msg is not None:
             assert user_response is not None and user_cost is not None, (
                 f"User response and cost must be provided on all turns except the first. The assistant's last message was '{self.current_unanswered_msg}'"
             )
-
-        if self.turn_count == 0:
-            self.run_hooks()
 
         if user_response is not None:
             if self.current_unanswered_msg is None:
@@ -263,6 +279,15 @@ class InteractionPolicy:
                 # Otherwise
                 self.conversation_history[-1].user_msg = user_response
                 self.conversation_history[-1].user_cost = user_cost
+
+            # if first user message, run pre-conversation hooks
+            if not self.has_seen_system_prompt:
+                self.run_hooks(self._pre_conversation_hooks)
+            # run post-user-response hooks
+            self.run_hooks(self._post_user_response_hooks)
+
+        # run pre-generation hooks
+        self.run_hooks(self._pre_generation_hooks)
 
         assistant_msg, wants_to_end_conversation = self.generate_message(user_response)
         assistant_cost = sum(
@@ -280,22 +305,9 @@ class InteractionPolicy:
         )
         self.wants_to_end_conversation = wants_to_end_conversation
 
-        self.run_hooks()
+        self.run_hooks(self._post_generation_hooks)
 
         return assistant_msg
-
-    def run_hooks(self) -> None:
-        """
-        Run the hooks.
-        """
-        # hook_history[idx] refers to the state before the user response to idx - 1, and before assistant message idx
-        for hook in self._hooks:
-            if self.verbosity == 2:
-                print(f"Running hook {hook}")
-            out = self._run_hook(hook)
-            if not isinstance(out, dict):
-                out = {hook: out}
-            self.hook_history[self.turn_count].update(out)
 
     def generate_message(self, user_response: Optional[str] = None) -> Tuple[str, bool]:
         """
@@ -315,6 +327,64 @@ class InteractionPolicy:
         Get the current prediction from the strong model.
         """
         raise NotImplementedError("Subclasses must implement this method")
+
+    def get_test_predictions(self, k: int) -> List[str]:
+        """
+        Get k predictions from the strong model.
+        
+        Args:
+            k: Number of predictions to generate
+            
+        Returns:
+            List[str]: List of k predictions
+        """
+        raise NotImplementedError("Subclasses must implement this method")
+
+    ######## HOOKS ##########
+
+    def run_hooks(self, hooks: List[Union[str, Callable]]) -> None:
+        """
+        Run the hooks.
+        """
+        # hook_history[idx] refers to the state before the user response to idx - 1, and before assistant message idx
+        for hook in hooks:
+            if self.verbosity == 2:
+                print(f"Running hook {hook}")
+            out = self._run_hook(hook)
+            if out is None:
+                continue
+            if not isinstance(out, dict):
+                out = {hook: out}
+            self.hook_history[self.turn_count].update(out)
+
+    def _run_hook(self, hook: Union[str, Callable]) -> None:
+        """
+        Run a hook.
+        """
+        hook_state = {
+            "conversation_history": self.conversation_history,
+            "action_history": self.action_history,
+            "turn_count": self.turn_count,
+            "specification": self.spec,
+        }
+        if isinstance(hook, Callable):
+            return hook(hook_state)
+
+        if hook == "get_state":
+            return {
+                "conversation_history": self.get_conversation_history(),
+                "action_history": self.get_action_history(),
+                "agent_executor_state": self.agent_executor.get_state(),
+                "specification_state": self.spec.get_state(),
+                "wants_to_end_conversation": self.wants_to_end_conversation,
+            }
+        elif hook == "get_test_prediction":
+            return {"test_prediction": self.get_test_prediction()}
+        elif hook == "save_checkpoint":
+            self.save_checkpoint()
+            return {}
+        else:
+            raise ValueError(f"Hook {hook} not recognized")
 
     ######## CHECKPOINTING ##########
 
@@ -347,7 +417,9 @@ class InteractionPolicy:
 
         # Save checkpoint
         if connection is not None:
-            connection.write(self.checkpoint_file, json.dumps(checkpoint_data, indent=2))
+            connection.write(
+                self.checkpoint_file, json.dumps(checkpoint_data, indent=2)
+            )
         else:
             if os.path.exists(self.checkpoint_file):
                 os.remove(self.checkpoint_file)
@@ -357,7 +429,9 @@ class InteractionPolicy:
         if self.verbosity >= 1:
             print(f"Checkpoint saved to {self.checkpoint_file}")
 
-    def load_checkpoint(self, turn_idx: int = None, connection=None) -> None:
+    def load_checkpoint(
+        self, checkpoint_file: str, turn_idx: int = None, connection=None
+    ) -> None:
         """
         Load the policy state from a checkpoint file.
         Critically, this does not save configs for the policy, so the policy must be initialized with the same configs as the checkpoint.
@@ -368,21 +442,24 @@ class InteractionPolicy:
             filename: Name of the checkpoint file (will be loaded from checkpoint_dir)
             turn_idx: If provided, only load the state up to this turn. If None, load the entire checkpoint.
         """
-        if self.checkpoint_file is None:
-            raise ValueError(
-                "Checkpoint file not set. Set checkpoint_file in __init__ to enable checkpointing."
-            )
-        if not os.path.exists(self.checkpoint_file):
-            raise FileNotFoundError(
-                f"Checkpoint file not found: {self.checkpoint_file}"
-            )
-        
+        if not os.path.exists(checkpoint_file):
+            raise FileNotFoundError(f"Checkpoint file not found: {checkpoint_file}")
+
         if connection is not None:
             # Use binary read method if available, otherwise fall back to base64 decoding
-            checkpoint_data = json.loads(connection.read(self.checkpoint_file))
+            checkpoint_data = json.loads(connection.read(checkpoint_file))
         else:
-            with open(self.checkpoint_file, "r") as f:
+            with open(checkpoint_file, "r") as f:
                 checkpoint_data = json.load(f)
+
+        # correct string keys to int keys
+        checkpoint_data["hook_history"] = {
+            int(k): v for k, v in checkpoint_data["hook_history"].items()
+        }
+        checkpoint_data["action_history"] = {
+            int(k): v for k, v in checkpoint_data["action_history"].items()
+        }
+        checkpoint_data["turn_idx"] = int(checkpoint_data["turn_idx"])
 
         if turn_idx is not None:
             # Restore a single turn based on the hook history
@@ -561,32 +638,3 @@ class InteractionPolicy:
             )
 
         return action_history
-
-    def _run_hook(self, hook: Union[str, Callable]) -> None:
-        """
-        Run a hook.
-        """
-        hook_state = {
-            "conversation_history": self.conversation_history,
-            "action_history": self.action_history,
-            "turn_count": self.turn_count,
-            "specification": self.spec,
-        }
-        if isinstance(hook, Callable):
-            return hook(hook_state)
-
-        if hook == "get_state":
-            return {
-                "conversation_history": self.get_conversation_history(),
-                "action_history": self.get_action_history(),
-                "agent_executor_state": self.agent_executor.get_state(),
-                "specification_state": self.spec.get_state(),
-                "wants_to_end_conversation": self.wants_to_end_conversation,
-            }
-        elif hook == "get_test_prediction":
-            return {"test_prediction": self._get_test_prediction()}
-        elif hook == "save_checkpoint":
-            self.save_checkpoint()
-            return {}
-        else:
-            raise ValueError(f"Hook {hook} not recognized")

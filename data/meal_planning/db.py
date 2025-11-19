@@ -14,16 +14,12 @@ DAYS_OF_THE_WEEK = [
     "sunday",
     "monday",
     "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
 ]
-MEALS = [
+MEALS_OF_THE_DAY = [
     "breakfast",
     "lunch",
+    "snack",
     "dinner",
-    # "snack",
 ]
 DIETS = [
     "Gluten free",
@@ -206,8 +202,6 @@ class Recipe:
         cuisine: Type of cuisine (e.g., "Vietnamese")
 
     Fields with defaults:
-        prep_time: Preparation time in minutes - defaults to 0
-        cook_time: Cooking time in minutes - defaults to 0
         total_time: Total time in minutes - defaults to 0
         num_servings: Number of servings yielded - defaults to 0
         rating: Recipe rating as float - defaults to 0
@@ -238,8 +232,6 @@ class Recipe:
     ingredients: List[str]
     instructions: List[str]
     cuisine: str
-    prep_time: int = 0
-    cook_time: int = 0
     total_time: int = 0
     num_servings: int = 0
     rating: float = 0
@@ -289,9 +281,7 @@ class RecipeDB(Database):
                         "ingredients": "List of ingredients with quantities",
                         "instructions": "Step-by-step cooking instructions",
                         "cuisine": "Type of cuisine (e.g., 'Vietnamese')",
-                        "prep_time": "Preparation time in minutes",
-                        "cook_time": "Cooking time in minutes",
-                        "total_time": "Total time in minutes",
+                        "total_time": "Total cook & prep time in minutes",
                         "num_servings": "Number of servings yielded",
                         "rating": "Recipe rating as float",
                         "num_reviews": "Number of reviews as int",

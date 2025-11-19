@@ -5,7 +5,7 @@ from utils.misc import parse_json
 from data.meal_planning.db import (
     RecipeDB,
     DAYS_OF_THE_WEEK,
-    MEALS,
+    MEALS_OF_THE_DAY,
     Recipe,
 )
 
@@ -45,7 +45,18 @@ def parse_meal_plan(
     }
     If auto_patch_eat_before_cook is True, then the meal plan will be patched to ensure that each recipe is cooked before it is eaten. The cook action will be inserted at the same time as the eat action.
     """
-    meal_plan = parse_json(yhat)
+    from utils.misc import parse_for_answer_tags
+    
+    # First try to parse from <meal_plan> tags
+    meal_plan_content = parse_for_answer_tags(
+        yhat, keyword="meal_plan", return_none_if_not_found=True
+    )
+    if meal_plan_content:
+        meal_plan = parse_json(meal_plan_content)
+    else:
+        # Fall back to parsing JSON directly (for backward compatibility)
+        meal_plan = parse_json(yhat)
+    
     if meal_plan is None:
         return None
 
@@ -70,7 +81,7 @@ def parse_meal_plan(
     corrected_meal_plan = defaultdict(lambda: defaultdict(list))
     servings_available = defaultdict(int)
     for day in DAYS_OF_THE_WEEK:
-        for meal_type in MEALS:
+        for meal_type in MEALS_OF_THE_DAY:
             # if this (day, meal_type) pair is missing, set it to MISSING_MEAL
             if (
                 day not in meal_plan
@@ -167,4 +178,4 @@ def parse_meal_plan(
             ):
                 corrected_meal_plan[day][meal_type] = MISSING_MEAL
 
-    return corrected_meal_plan
+    return dict(corrected_meal_plan)

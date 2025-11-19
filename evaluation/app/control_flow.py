@@ -86,6 +86,9 @@ CONTROL_FLOW_KEYS = [
     "final_specification_completed",
     "final_evaluation_completed",
     "chat_evaluation_completed",
+    "y0_yhat_evaluation_completed",
+    "search_exploration_completed",
+    "final_comparison_completed",
     "exit_survey_completed",
 ]
 SESSION_STATE_ROUND_DEFAULTS = {
@@ -98,6 +101,9 @@ SESSION_STATE_ROUND_DEFAULTS = {
     "final_specification_completed": False,
     "final_evaluation_completed": False,
     "chat_evaluation_completed": False,
+    "y0_yhat_evaluation_completed": False,
+    "search_exploration_completed": False,
+    "final_comparison_completed": False,
     "waiting_for_message_feedback": False,
     "waiting_for_spinner": False,
     "messages": [],
@@ -125,12 +131,12 @@ ROUND_CONFIGS = [
     "interaction_budget",
     "model_selector",
     "policy_selector",
-    "include_fmt_instructions",
     "spec",
     "policy",
     "simulator",
     "config",
     "brainstorm_time",
+    "search_exploration_time",
     "output_path",
 ]
 
@@ -244,6 +250,47 @@ def reset_session_state_for_round(round_index, save_user_progress: bool = True):
     # Reset dataset page state
     if "dataset_page" in st.session_state:
         del st.session_state["dataset_page"]
+    
+    # Clean up search interface session state variables
+    # Try to get the keys from each dataset's search interface
+    # We need to check all possible datasets since we don't know which one was used in the previous round
+    all_search_interface_keys = set()
+    try:
+        from data.shopping.streamlit_search_interface import SEARCH_INTERFACE_SESSION_STATE_KEYS as shopping_keys
+        all_search_interface_keys.update(shopping_keys)
+    except (ImportError, AttributeError):
+        pass
+    try:
+        from data.meal_planning.streamlit_search_interface import SEARCH_INTERFACE_SESSION_STATE_KEYS as meal_keys
+        all_search_interface_keys.update(meal_keys)
+    except (ImportError, AttributeError):
+        pass
+    try:
+        from data.travel_planner.streamlit_search_interface import SEARCH_INTERFACE_SESSION_STATE_KEYS as travel_keys
+        all_search_interface_keys.update(travel_keys)
+    except (ImportError, AttributeError):
+        pass
+    try:
+        from data.email_organization.streamlit_search_interface import SEARCH_INTERFACE_SESSION_STATE_KEYS as email_keys
+        all_search_interface_keys.update(email_keys)
+    except (ImportError, AttributeError):
+        pass
+    try:
+        from data.file_organization.streamlit_search_interface import SEARCH_INTERFACE_SESSION_STATE_KEYS as file_keys
+        all_search_interface_keys.update(file_keys)
+    except (ImportError, AttributeError):
+        pass
+    
+    # Also clean up search exploration specific keys (search_exploration_completed is in defaults, so it will be reset)
+    search_exploration_keys = [
+        "search_exploration_instructions_acknowledged",
+        "search_exploration_start_time",
+    ]
+    
+    # Remove all search interface and exploration keys
+    for key in list(all_search_interface_keys) + search_exploration_keys:
+        if key in st.session_state:
+            del st.session_state[key]
 
     # Set session state variables to defaults
     # Use deep copy to prevent modifying the original SESSION_STATE_ROUND_DEFAULTS
@@ -279,7 +326,6 @@ def reset_session_state_for_round(round_index, save_user_progress: bool = True):
         "model_selector",
         "seed",
         "policy_selector",
-        "include_fmt_instructions",
         "max_react_steps",
         "output_dir",
         "reasoning_effort",
@@ -297,13 +343,19 @@ def reset_session_state_for_round(round_index, save_user_progress: bool = True):
     st.session_state.config = get_config()
     st.session_state.output_path = get_output_path(st.session_state.config)
 
+    updated_policy_kwargs = {**st.session_state.config["policy_kwargs"]}
+    updated_policy_kwargs["model_kwargs"] = {
+        **updated_policy_kwargs["model_kwargs"],
+        **get_model_api_key(st.session_state.model_selector),
+    }
+
     st.session_state.policy = get_policy(
         st.session_state.policy_selector,
         spec=st.session_state.spec,
         checkpoint_file=os.path.join(
             st.session_state.output_path.replace(".json", "_policy_state.json")
         ),
-        **st.session_state.config["policy_kwargs"],
+        **updated_policy_kwargs,
     )
     st.session_state.simulator = get_simulator(
         "dummy",
@@ -520,19 +572,13 @@ def get_config():
             "verbosity": 2 if st.secrets.get("debug_mode", False) else 0,
             "interaction_budget": st.session_state.interaction_budget,
             "actions": st.session_state.spec.public_tools,
-            "prediction_fmt_instructions": (
-                st.session_state.spec.prediction_fmt_instructions
-                if st.session_state.include_fmt_instructions
-                else None
-            ),
-            "initial_specification": st.session_state.spec.commonsense_description,
+            "prediction_fmt_instructions": st.session_state.spec.prediction_fmt_instructions,
+            "commonsense_instructions": st.session_state.spec.commonsense_description,
             "msg_fmt_instructions": st.session_state.spec.msg_fmt_instructions,
             "cost_type": st.session_state.cost_type,
             "model_kwargs": {
                 "reasoning_effort": st.session_state.reasoning_effort,
                 **getattr(st.session_state, "model_kwargs", {}),
-                # Add appropriate API key from st.secrets based on model type
-                **get_model_api_key(st.session_state.model_selector),
             },
         },
         "interaction_budget": st.session_state.interaction_budget,
@@ -541,8 +587,6 @@ def get_config():
         "simulator_kwargs": {},
         "seed": st.session_state.seed,
         "user_first": True,
-        "include_initial_specification": False,
-        "include_fmt_instructions": st.session_state.include_fmt_instructions,
         "max_react_steps": st.session_state.max_react_steps,
         "output_dir": st.session_state.output_dir,
     }
@@ -773,6 +817,7 @@ def brainstorm_countdown():
         target_time=st.session_state.get("brainstorm_time", 0),
     )
 
+
 @st.fragment(run_every=2)
 def interaction_countdown():
     start_time, to_remove = get_countdown_params()
@@ -780,6 +825,27 @@ def interaction_countdown():
         start_time=start_time,
         time_to_remove=to_remove,
         target_time=st.session_state.interaction_budget,
+    )
+
+
+@st.fragment(run_every=2)
+def search_exploration_countdown():
+    """
+    Countdown for search exploration stage, displayed in the header.
+    Duration is loaded from st.session_state.search_exploration_time (in seconds).
+    """
+    if "search_exploration_start_time" not in st.session_state:
+        return
+    
+    # Get search duration from config - return early if not set
+    search_exploration_time = getattr(st.session_state, "search_exploration_time", None)
+    if search_exploration_time is None:
+        return
+    
+    components.countdown(
+        start_time=st.session_state.search_exploration_start_time,
+        target_time=search_exploration_time,
+        label="seconds remaining",
     )
 
 
@@ -1009,10 +1075,179 @@ def _run_fixed_evaluation(fixed_final_evaluation_form: Callable = None):
             st.rerun()
 
 
+@st.fragment
+def _run_search_exploration():
+    """
+    Run the search exploration stage with a countdown timer.
+    First shows instructions, then the search interface.
+    Duration is loaded from st.session_state.search_exploration_time (in seconds).
+    If not set, this stage is skipped.
+    """
+    if st.session_state.search_exploration_completed:
+        return
+    
+    # Get search duration from config - skip if not set
+    search_exploration_time = getattr(st.session_state, "search_exploration_time", None)
+    if search_exploration_time is None:
+        # Skip search exploration if not configured
+        st.session_state.search_exploration_completed = True
+        return
+    
+    # Check if spec has search interface
+    if not isinstance(st.session_state.spec, CustomSpecification):
+        st.session_state.search_exploration_completed = True
+        return
+    
+    if st.session_state.spec._render_search_interface_fn is None:
+        # No search interface for this dataset, skip this stage
+        st.session_state.search_exploration_completed = True
+        return
+    
+    # Check if instructions have been acknowledged
+    if "search_exploration_instructions_acknowledged" not in st.session_state:
+        st.session_state.search_exploration_instructions_acknowledged = False
+    
+    # Show instructions page first
+    if not st.session_state.search_exploration_instructions_acknowledged:
+        search_duration_minutes = search_exploration_time / 60
+        st.markdown("## Search Exploration Instructions")
+        st.markdown(
+            f"""
+            You will now have **{search_duration_minutes:.1f} minutes** to explore the database yourself using the search interface.
+            
+            During this time, you can:
+            - Search for items using natural language queries
+            - Apply filters to narrow down results
+            - Click the ❤️ button on items you like to add them to your liked list
+            
+            After the exploration time is complete, you will be asked to compare the assistant's final prediction 
+            with the items you liked during your exploration.
+            
+            **Please take your time to explore thoroughly.**
+            """
+        )
+        
+        if st.button("I understand, start exploration", type="primary", key="start_search_exploration"):
+            st.session_state.search_exploration_instructions_acknowledged = True
+            st.session_state.search_exploration_start_time = time.time()
+            st.rerun()
+        return
+    
+    # Initialize search start time if not already set
+    if "search_exploration_start_time" not in st.session_state:
+        st.session_state.search_exploration_start_time = time.time()
+    
+    # Calculate remaining time
+    elapsed_time = time.time() - st.session_state.search_exploration_start_time
+    remaining_time = max(0, search_exploration_time - elapsed_time)
+    
+    # Show continue button at the top (under specification banner), but validate time has elapsed
+    button_clicked = st.button("Finished exploring", type="primary", key="continue_from_search")
+    if button_clicked:
+        # Validate that enough time has passed
+        if remaining_time > 0:
+            minutes = int(remaining_time // 60)
+            seconds = int(remaining_time % 60)
+            search_duration_minutes = search_exploration_time / 60
+            st.error(
+                f"Please spend at least {search_duration_minutes:.1f} minutes exploring before continuing. "
+                f"You have {minutes}:{seconds:02d} remaining."
+            )
+            # Don't return - continue to render the search interface below
+        
+        else:
+            # Time has elapsed, proceed
+            st.session_state.search_exploration_completed = True
+            st.rerun()
+    
+    st.markdown("---")
+    
+    # Render the search interface (countdown is shown in header via search_exploration_countdown)
+    st.session_state.spec.render_search_interface()
+
+
+def _run_final_comparison(custom_final_evaluation_form: Callable = None):
+    """
+    Run the final comparison stage showing liked items, then final prediction, then questions.
+    """
+    if st.session_state.final_comparison_completed:
+        return
+    
+    final_prediction = st.session_state.final_prediction
+    assert final_prediction is not None, "final_prediction is not set"
+    
+    st.markdown("Review the items you liked during exploration, then compare with the assistant's final prediction.")
+    
+    # Get liked items based on dataset
+    dataset_name = st.session_state.dataset_selector
+    liked_items = None
+    
+    if dataset_name == "shopping":
+        liked_items = st.session_state.get("liked_products", set())
+    elif dataset_name == "meal_planning":
+        liked_items = st.session_state.get("liked_recipes", set())
+    elif dataset_name == "travel_planner":
+        liked_items = st.session_state.get("liked_travel_items", set())
+    
+    # Display liked items first using product cards
+    st.markdown("### Your Liked Items")
+    if isinstance(st.session_state.spec, CustomSpecification) and st.session_state.spec._render_liked_items_fn is not None:
+        # The spec should already have the DB instance in its kwargs or as an attribute
+        st.session_state.spec.render_liked_items(liked_items)
+    else:
+        st.markdown("*No search interface available for this dataset.*")
+
+    # Final evaluation form
+    from evaluation.app.forms import final_prediction_evaluation
+    
+    completed, feedback = final_prediction_evaluation(
+        likert_label='After exploring more options, do you regret the assistant\'s final prediction?',
+        stars_label="Rate the overall quality of the final prediction.",
+        text_area_label="What would you change about the final prediction after your exploration?",
+    )
+    
+    # If custom_final_evaluation_form is provided, display it
+    if custom_final_evaluation_form is not None:
+        def on_completion(feedback):
+            st.session_state.form_results["final_evaluation"].update(feedback)
+        custom_final_evaluation_form(on_completion=on_completion)
+    
+    # If completed, mark as done and save
+    if completed:
+        st.session_state.final_comparison_completed = True
+        st.session_state.final_evaluation_completed = True
+        if feedback is None:
+            feedback = {}
+        if "final_evaluation" not in st.session_state.form_results:
+            st.session_state.form_results["final_evaluation"] = {}
+        st.session_state.form_results["final_evaluation"].update(feedback)
+        
+        # Try to compute a Grade
+        try:
+            is_valid, validity_metadata = st.session_state.spec.validity_fn(
+                st.session_state.final_prediction
+            )
+            score = st.session_state.form_results["final_evaluation"].get("score", None)
+            st.session_state.final_grade = Grade(
+                prediction=st.session_state.final_prediction,
+                score=score,
+                correct=is_valid,
+                eval_metadata=validity_metadata,
+            )
+        except Exception:
+            st.session_state.final_grade = None
+        
+        save_session_data(skip_grading=True)
+
+
 def _run_custom_evaluation(custom_final_evaluation_form: Callable = None):
     """
     Run the final evaluation for a custom specification.
-    Delegates rendering to the dataset's render_evaluation hook and records results
+    Four-stage flow:
+    1. Chat evaluation (handled separately in evaluation_flow)
+    2. y0/yhat evaluation
+    3. Search exploration
+    4. Final comparison
     """
     if not st.session_state.final_specification_completed:
         return
@@ -1032,67 +1267,35 @@ def _run_custom_evaluation(custom_final_evaluation_form: Callable = None):
     final_prediction = st.session_state.final_prediction
     assert final_prediction is not None, "final_prediction is not set"
 
-    # Two-page flow orchestrated here:
-    # 1) Ask the dataset to render its first page and update session state.
-    render_fn = getattr(st.session_state.spec, "render_evaluation", None)
-    if not callable(render_fn):
-        st.error("This dataset does not implement render_evaluation(final_prediction).")
-        st.stop()
+    # Stage 2: y0/yhat evaluation
+    if not st.session_state.y0_yhat_evaluation_completed:
+        render_fn = getattr(st.session_state.spec, "render_y0_yhat_evaluation", None)
+        if not callable(render_fn):
+            # Fallback to legacy name for backwards compatibility
+            render_fn = getattr(st.session_state.spec, "render_evaluation", None)
+        
+        if not callable(render_fn):
+            st.error("This dataset does not implement render_y0_yhat_evaluation(final_prediction).")
+            st.stop()
 
-    try:
-        first_page_done, _ = render_fn(final_prediction)
-    except Exception as e:
-        st.error(f"Error in dataset render_evaluation (first page): {e}")
-        st.stop()
+        try:
+            y0_yhat_done, _ = render_fn(final_prediction)
+        except Exception as e:
+            st.error(f"Error in dataset render_y0_yhat_evaluation: {e}")
+            st.stop()
 
-    if not first_page_done:
+        if y0_yhat_done:
+            st.session_state.y0_yhat_evaluation_completed = True
+            st.rerun()
         return
 
-    # 2) Render the generic second page using the spec's render_msg_fn to display the final prediction
+    # Stage 3: Search exploration
+    if not st.session_state.search_exploration_completed:
+        _run_search_exploration()  # Duration loaded from st.session_state.search_exploration_time (in seconds)
+        return
 
-    from evaluation.app.forms import final_prediction_evaluation
-
-    completed, feedback = final_prediction_evaluation()
-
-    # If custom_final_evaluation_form is provided, display it
-    if custom_final_evaluation_form is not None:
-
-        def on_completion(feedback):
-            st.session_state.form_results["final_evaluation"].update(feedback)
-
-        custom_final_evaluation_form(on_completion=on_completion)
-
-    # If dataset indicates completion, record results and compute grade (if applicable)
-    if completed:
-        # Centralized time gating
-        current_time = time.time() - st.session_state.evaluation_start_time
-        if current_time < st.session_state.evaluation_minimum:
-            st.error(
-                f"Please spend at least {st.session_state.evaluation_minimum / 60:.1f} minutes on the evaluation before submitting. You've spent {current_time / 60:.1f} minutes so far."
-            )
-            return
-        st.session_state.final_evaluation_completed = True
-        if feedback is None:
-            feedback = {}
-        st.session_state.form_results["final_evaluation"].update(feedback)
-
-        # Try to compute a Grade when possible (backwards-compatible with relative_score)
-        try:
-            is_valid, validity_metadata = st.session_state.spec.validity_fn(
-                st.session_state.final_prediction
-            )
-            score = st.session_state.form_results["final_evaluation"].get("score", None)
-            st.session_state.final_grade = Grade(
-                prediction=st.session_state.final_prediction,
-                score=score,
-                correct=is_valid,
-                eval_metadata=validity_metadata,
-            )
-        except Exception:
-            # As a safeguard, do not block saving if grading fails
-            st.session_state.final_grade = None
-
-        save_session_data(skip_grading=True)
+    # Stage 4: Final comparison
+    _run_final_comparison(custom_final_evaluation_form=custom_final_evaluation_form)
 
 
 def _run_chat_evaluation(chat_evaluation_form: Callable = None):

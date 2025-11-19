@@ -58,7 +58,7 @@ class DummyUser(UserSimulator):
                 UserConversationTurn(
                     assistant_msg=m["content"],
                     user_msg=user_response,
-                    token_cost=None,
+                    theoretical_cost=1,
                     runtime_cost=user_cost,
                     remaining_budget=remaining_budget,
                     user_rationale=None,

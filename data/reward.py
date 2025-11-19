@@ -2,14 +2,16 @@
 Utility functions for defining reward functions.
 """
 
-from dataclasses import dataclass
-from typing import Callable, Dict, Optional, List, Tuple, Any, Union, TypedDict
+from dataclasses import dataclass, field
+import hashlib
+from typing import Callable, Dict, Optional, List, Tuple, Any
 from collections import defaultdict
 import numpy as np
 from utils.misc import parse_for_answer_tags
 import lotus
 from lotus.models import LM
 import pandas as pd
+from collections import Counter
 
 
 def get_avg_score(
@@ -76,6 +78,29 @@ def get_avg_score(
     }
 
 
+def _multiset_jaccard_reward(d: dict):
+    """
+    The reward function is the Jaccard similarity between the true and predicted sets.
+    """
+    true_set = d.get("true_set", [])
+    true_counts = Counter(true_set)
+
+    def ms_jaccard(z):
+        if len(z) > 0 and len(z) < len(true_set):
+            # behave like any_in
+            return sum(1 for v in z if v in true_set) / len(z)
+        pred_counts = Counter(z)
+        intersection = sum((true_counts & pred_counts).values())
+        union = sum((true_counts | pred_counts).values())
+        if union > 0:
+            return intersection / union
+        else:
+            # Both sets are empty - perfect match
+            return 1.0
+
+    return lambda z: ms_jaccard(z)
+
+
 def _radial_band_reward(d: dict):
     """
     The reward function is 1 if z is in the band [lower, upper], -1 if z is outside the band, and a smooth transition in between.
@@ -133,40 +158,34 @@ def _hinge_reward(d: dict) -> Callable[[float], float]:
 class Constraint:
     """
     Represents a hard or soft constraint that is part of a reward function.
-    When called on an output y, the constraint c(y) should return a value in [-1, 1].
+    When called on an output y, the constraint c(y) returns a value in [-1, 1].
 
-    We pre-define certain constraint types. These operate as follows: we assume a constraint extractor f(y) -> Any. Then:
-        c(y) = g(f(y))
-    where g is one of the following; below we give the TYPE_NAME: and a description
-    - BOOLEAN_PENALIZE_FALSE:
-        g(z) = 0 if z is True, -1 otherwise.
-        Penalize if z is False; no effect on reward otherwise.
-    - BOOLEAN_REWARD_TRUE:
-        g(z) = 1 if z is True, 0 otherwise.
-        Reward when z is True; no effect on reward otherwise.
-    - PENALIZE_ANY_NOT_IN_SET: provide a kwarg required_set
-        Assume z is an iterable
-        g(z) = 0 if all zi in z are in required_set, -1 otherwise.
-        If z is not in the required set, then penalize. Otherwise, no effect on reward.
-    - PENALIZE_ANY_IN_SET: provide a kwarg bad_set
-        Assume z is an iterable
-        g(z) = -1 if any zi in z is in bad_set, 0 otherwise.
-        If any zi is in bad set, then penalize. Otherwise, no effect on reward.
-    - GOOD_SET_BAD_SET: kwargs good_set, bad_set
-        g(z) = 1 if z in good_set, -1 if z in bad_set, 0 otherwise.
-        Reward when z is in good set; penalize when z is in bad set; no effect on reward otherwise.
-    - RADIAL_BAND: kwargs lower, upper, sigma
-        g(z) = 2 * exp(- (max{0, |z-(upper+lower)/2)| - (upper-lower)/2)^2 / 2sigma^2) - 1
-        Values in the band [lower, upper] obtain reward 1; the reward function smoothly and symmetrically decays to -1 as we move away from the band.
-    - HINGE: kwargs lower, upper, lower_val, upper_val, min_val, max_val
-        g(z) = min(max_val, max(min_val, lower_val + (upper_val - lower_val) * (z - lower) / (upper - lower)))
-        The reward function is upper_val if z >= upper, lower_val if z <= lower, and a smooth transition in between. The line is bounded by min_val and max_val.
+    We assume an extractor f(y) -> Any and define c(y) = g(f(y)) with the following types:
 
-    Since all constraints are in range [-1, 1], then a convex combination of constraints is also in range [-1, 1].
+    - BOOLEAN_PENALIZE_FALSE (penalize; hard-suitable):
+        z is a boolean. g(z) = 1 if z is False (violation active), else 0.
+    - BOOLEAN_REWARD_TRUE (reward):
+        z is a boolean. g(z) = 1 if z is True, else 0.
+    - PENALIZE_ANY_NOT_IN_SET (penalize; set-fraction):
+        z is an iterable. g(z) = fraction of elements not in required_set (in [0,1]).
+    - PENALIZE_ANY_IN_SET (penalize; set-fraction):
+        z is an iterable. g(z) = fraction of elements in bad_set (in [0,1]).
+    - REWARD_ANY_IN_SET (reward; set-fraction):
+        z is an iterable. g(z) = fraction of elements in good_set (in [0,1]).
+    - REWARD_ANY_NOT_IN_SET (reward; set-fraction):
+        z is an iterable. g(z) = fraction of elements not in required_set (in [0,1]).
+    - GOOD_SET_BAD_SET (signed set membership):
+        z is a value. g(z) = 1 if z in good_set; -1 if z in bad_set; 0 otherwise.
+    - MULTISET_JACCARD (multiset Jaccard similarity):
+        z is an iterable. g(z) = Jaccard similarity between z and true_set (in [0,1]).
+    - RADIAL_BAND (continuous reward band):
+        z is numeric. g(z) = 1 inside [lower, upper], decays smoothly toward -1 outside (sigma controls decay).
+    - HINGE (clipped linear mapping):
+        z is numeric in [lower, upper] mapped to [lower_val, upper_val], then clipped to [min_val, max_val].
 
     Attributes:
         description (str): Human-readable description of the constraint.
-        func (Callable[[Dict], float]): Function that returns a value in [-1, 1] for a given output.
+        func (Callable[[Any], float]): Mapping from extractor output to [-1, 1].
         is_hard (bool): Whether the constraint is hard or soft.
             A hard constraint will set the final reward to -1 as soon as c(y) = -1.
     """
@@ -177,7 +196,11 @@ class Constraint:
     is_hard: bool
     type: str
     _kwargs: Dict[str, Any]
+    is_discoverable_by_questions: bool = True
+    is_discoverable: bool = True
+    is_minimal: bool = False
     extractor_kwargs: Dict[str, Any] = None
+    id: str = field(init=False)
 
     def __call__(self, y: Any) -> float:
         if self.extractor_kwargs is None:
@@ -195,45 +218,67 @@ class Constraint:
 
         return self.func(value)
 
+    def __post_init__(self):
+        # Create a stable ID from a normalized description
+        normalized_desc = (self.description or "").strip().lower()
+        h = hashlib.sha1(normalized_desc.encode("utf-8")).hexdigest()[:12]
+        self.id = f"c_{h}"
+
     @property
     def oracle_value(self) -> float:
         """
-        1 if we are rewarding something, 0 if penalizing
+        Best-case value for unconstrained optimization (given our phi semantics).
         """
         if self.type in [
             "boolean_penalize_false",
             "penalize_any_not_in_set",
             "penalize_any_in_set",
         ]:
-            return 0
-        elif self.type in ["boolean_reward_true", "good_set_bad_set", "radial_band"]:
-            return 1
-        elif self.type == "hinge":
-            return self._kwargs.get("max_val", 1)
+            return 0.0
+        if self.type in [
+            "boolean_reward_true",
+            "good_set_bad_set",
+            "radial_band",
+            "reward_any_in_set",
+            "reward_any_not_in_set",
+            "multiset_jaccard",
+        ]:
+            return 1.0
+        if self.type == "hinge":
+            return float(self._kwargs.get("max_val", 1))
 
     @property
     def worst_case_value(self) -> float:
         """
-        The worst possible value of the constraint.
+        Worst-case value for unconstrained optimization (given our phi semantics).
         """
         if self.type in [
             "boolean_penalize_false",
             "penalize_any_not_in_set",
             "penalize_any_in_set",
-            "radial_band",
-            "good_set_bad_set",
         ]:
-            return -1
-        elif self.type in ["boolean_reward_true"]:
-            return 0
-        elif self.type == "hinge":
-            return self._kwargs.get("min_val", -1)
+            return 1.0
+        if self.type == "good_set_bad_set":
+            return -1.0
+        if self.type == "radial_band":
+            return -1.0
+        if self.type in [
+            "boolean_reward_true",
+            "reward_any_in_set",
+            "reward_any_not_in_set",
+            "multiset_jaccard",
+        ]:
+            return 0.0
+        if self.type == "hinge":
+            return float(self._kwargs.get("min_val", -1))
 
     def __str__(self):
         out = []
         if self.description is not None:
             out.append(f"description={self.description}")
         out.append(f"is_hard={self.is_hard}")
+        out.append(f"is_discoverable={self.is_discoverable}")
+        out.append(f"is_minimal={self.is_minimal}")
         return f"Constraint(type={self.type}, {', '.join(out)})"
 
     def __repr__(self):
@@ -244,10 +289,28 @@ class Constraint:
             "type": self.type,
             "description": self.description,
             "is_hard": self.is_hard,
+            "is_discoverable": self.is_discoverable,
+            "is_discoverable_by_questions": self.is_discoverable_by_questions,
+            "is_minimal": self.is_minimal,
             "extractor": self.extractor,
             "extractor_kwargs": self.extractor_kwargs,
             **self._kwargs,
         }
+
+    @property
+    def default_weight_sign(self) -> int:
+        """
+        Returns +1 for reward-like constraints and -1 for penalize-like constraints.
+        This allows initializing signed weights while leaving scoring unchanged.
+        """
+        if self.type in [
+            "boolean_penalize_false",
+            "penalize_any_not_in_set",
+            "penalize_any_in_set",
+        ]:
+            return -1
+        # Treat others as reward-oriented by default
+        return 1
 
     @classmethod
     def from_dict(cls, d: dict, extractor_lookup=None) -> "Constraint":
@@ -271,7 +334,9 @@ class Constraint:
         constraint_type = d["type"]
         extractor_name = d["extractor"]
         if extractor_name is None:
-            extractor = lambda y: y
+
+            def extractor(y):
+                return y
         else:
             extractor = extractor_lookup[extractor_name]
         extractor_kwargs = d.get("extractor_kwargs", {})
@@ -279,8 +344,13 @@ class Constraint:
             assert "none_val" in d
             return cls(
                 description=d["description"],
-                func=lambda z: d["none_val"] if z is None else (0 if z else -1),
+                func=lambda z: d["none_val"]
+                if z is None
+                else (1.0 if (z is False) else 0.0),
                 is_hard=d["is_hard"],
+                is_discoverable=d["is_discoverable"],
+                is_discoverable_by_questions=d.get("is_discoverable_by_questions", True),
+                is_minimal=d.get("is_minimal", False),
                 type="boolean_penalize_false",
                 extractor=extractor,
                 _kwargs={"none_val": d["none_val"]},
@@ -292,6 +362,9 @@ class Constraint:
                 description=d["description"],
                 func=lambda z: d["none_val"] if z is None else (1 if z else 0),
                 is_hard=d["is_hard"],
+                is_discoverable=d["is_discoverable"],
+                is_discoverable_by_questions=d.get("is_discoverable_by_questions", True),
+                is_minimal=d.get("is_minimal", False),
                 type="boolean_reward_true",
                 extractor=extractor,
                 _kwargs={"none_val": d["none_val"]},
@@ -305,9 +378,19 @@ class Constraint:
                 func=lambda z: (
                     d["none_val"]
                     if z is None
-                    else (0 if all(zi in d["required_set"] for zi in z) else -1)
+                    else (
+                        (
+                            lambda vals: (
+                                sum(1 for v in vals if v not in d["required_set"])
+                                / max(len(vals), 1)
+                            )
+                        )(list(z) if hasattr(z, "__iter__") else [])
+                    )
                 ),
                 is_hard=d["is_hard"],
+                is_discoverable=d["is_discoverable"],
+                is_discoverable_by_questions=d.get("is_discoverable_by_questions", True),
+                is_minimal=d.get("is_minimal", False),
                 type="penalize_any_not_in_set",
                 extractor=extractor,
                 _kwargs={
@@ -324,9 +407,19 @@ class Constraint:
                 func=lambda z: (
                     d["none_val"]
                     if z is None
-                    else (-1 if any(zi in d["bad_set"] for zi in z) else 0)
+                    else (
+                        (
+                            lambda vals: (
+                                sum(1 for v in vals if v in d["bad_set"])
+                                / max(len(vals), 1)
+                            )
+                        )(list(z) if hasattr(z, "__iter__") else [])
+                    )
                 ),
                 is_hard=d["is_hard"],
+                is_discoverable=d["is_discoverable"],
+                is_discoverable_by_questions=d.get("is_discoverable_by_questions", True),
+                is_minimal=d.get("is_minimal", False),
                 type="penalize_any_in_set",
                 extractor=extractor,
                 _kwargs={"bad_set": d["bad_set"], "none_val": d["none_val"]},
@@ -344,6 +437,9 @@ class Constraint:
                     else (1 if z in d["good_set"] else -1 if z in d["bad_set"] else 0)
                 ),
                 is_hard=d["is_hard"],
+                is_discoverable=d["is_discoverable"],
+                is_discoverable_by_questions=d.get("is_discoverable_by_questions", True),
+                is_minimal=d.get("is_minimal", False),
                 type="good_set_bad_set",
                 extractor=extractor,
                 _kwargs={
@@ -351,6 +447,72 @@ class Constraint:
                     "bad_set": d["bad_set"],
                     "none_val": d["none_val"],
                 },
+                extractor_kwargs=extractor_kwargs,
+            )
+        elif constraint_type == "reward_any_in_set":
+            assert "none_val" in d
+            assert "good_set" in d and len(d["good_set"]) > 0
+            return cls(
+                description=d["description"],
+                func=lambda z: (
+                    d["none_val"]
+                    if z is None
+                    else (
+                        (
+                            lambda vals: (
+                                sum(1 for v in vals if v in d["good_set"])
+                                / max(len(vals), 1)
+                            )
+                        )(list(z) if hasattr(z, "__iter__") else [])
+                    )
+                ),
+                is_hard=d["is_hard"],
+                is_discoverable=d["is_discoverable"],
+                is_discoverable_by_questions=d.get("is_discoverable_by_questions", True),
+                is_minimal=d.get("is_minimal", False),
+                type="reward_any_in_set",
+                extractor=extractor,
+                _kwargs={"good_set": d["good_set"], "none_val": d["none_val"]},
+                extractor_kwargs=extractor_kwargs,
+            )
+        elif constraint_type == "reward_any_not_in_set":
+            assert "none_val" in d
+            assert "required_set" in d and len(d["required_set"]) > 0
+            return cls(
+                description=d["description"],
+                func=lambda z: (
+                    d["none_val"]
+                    if z is None
+                    else (
+                        (
+                            lambda vals: (
+                                sum(1 for v in vals if v not in d["required_set"])
+                                / max(len(vals), 1)
+                            )
+                        )(list(z) if hasattr(z, "__iter__") else [])
+                    )
+                ),
+                is_hard=d["is_hard"],
+                is_discoverable=d["is_discoverable"],
+                is_discoverable_by_questions=d.get("is_discoverable_by_questions", True),
+                is_minimal=d.get("is_minimal", False),
+                type="reward_any_not_in_set",
+                extractor=extractor,
+                _kwargs={"required_set": d["required_set"], "none_val": d["none_val"]},
+                extractor_kwargs=extractor_kwargs,
+            )
+        elif constraint_type == "multiset_jaccard":
+            assert "true_set" in d
+            return cls(
+                description=d["description"],
+                func=_multiset_jaccard_reward(d),
+                is_hard=d["is_hard"],
+                is_discoverable=d["is_discoverable"],
+                is_discoverable_by_questions=d.get("is_discoverable_by_questions", True),
+                is_minimal=d.get("is_minimal", False),
+                type="multiset_jaccard",
+                extractor=extractor,
+                _kwargs={"true_set": d["true_set"]},
                 extractor_kwargs=extractor_kwargs,
             )
         elif constraint_type == "radial_band":
@@ -361,6 +523,9 @@ class Constraint:
                 description=d["description"],
                 func=_radial_band_reward(d),
                 is_hard=d["is_hard"],
+                is_discoverable=d["is_discoverable"],
+                is_discoverable_by_questions=d.get("is_discoverable_by_questions", True),
+                is_minimal=d.get("is_minimal", False),
                 type="radial_band",
                 extractor=extractor,
                 _kwargs={
@@ -380,6 +545,9 @@ class Constraint:
                 description=d["description"],
                 func=_hinge_reward(d),
                 is_hard=d["is_hard"],
+                is_discoverable=d["is_discoverable"],
+                is_discoverable_by_questions=d.get("is_discoverable_by_questions", True),
+                is_minimal=d.get("is_minimal", False),
                 type="hinge",
                 extractor=extractor,
                 _kwargs={
@@ -401,6 +569,9 @@ class Constraint:
         cls,
         description: Optional[str] = None,
         is_hard: bool = False,
+        is_discoverable: bool = True,
+        is_discoverable_by_questions: bool = True,
+        is_minimal: bool = False,
         extractor: str = None,
         extractor_kwargs: Dict[str, Any] = None,
         none_val: float = 0,
@@ -409,6 +580,9 @@ class Constraint:
             "type": "boolean_penalize_false",
             "description": description,
             "is_hard": is_hard,
+            "is_discoverable": is_discoverable,
+            "is_discoverable_by_questions": is_discoverable_by_questions,
+            "is_minimal": is_minimal,
             "extractor": extractor,
             "extractor_kwargs": extractor_kwargs,
             "none_val": none_val,
@@ -419,6 +593,9 @@ class Constraint:
         cls,
         description: Optional[str] = None,
         is_hard: bool = False,
+        is_discoverable: bool = True,
+        is_discoverable_by_questions: bool = True,
+        is_minimal: bool = False,
         extractor: str = None,
         extractor_kwargs: Dict[str, Any] = None,
         none_val: float = 0,
@@ -427,6 +604,9 @@ class Constraint:
             "type": "boolean_reward_true",
             "description": description,
             "is_hard": is_hard,
+            "is_discoverable": is_discoverable,
+            "is_discoverable_by_questions": is_discoverable_by_questions,
+            "is_minimal": is_minimal,
             "extractor": extractor,
             "extractor_kwargs": extractor_kwargs,
             "none_val": none_val,
@@ -438,6 +618,9 @@ class Constraint:
         required_set: List[Any],
         description: Optional[str] = None,
         is_hard: bool = False,
+        is_discoverable: bool = True,
+        is_discoverable_by_questions: bool = True,
+        is_minimal: bool = False,
         extractor: str = None,
         extractor_kwargs: Dict[str, Any] = None,
         none_val: float = 0,
@@ -447,6 +630,9 @@ class Constraint:
             "type": "penalize_any_not_in_set",
             "description": description,
             "is_hard": is_hard,
+            "is_discoverable": is_discoverable,
+            "is_discoverable_by_questions": is_discoverable_by_questions,
+            "is_minimal": is_minimal,
             "extractor": extractor,
             "required_set": required_set,
             "extractor_kwargs": extractor_kwargs,
@@ -459,6 +645,9 @@ class Constraint:
         bad_set: List[Any],
         description: Optional[str] = None,
         is_hard: bool = False,
+        is_discoverable: bool = True,
+        is_discoverable_by_questions: bool = True,
+        is_minimal: bool = False,
         extractor: str = None,
         extractor_kwargs: Dict[str, Any] = None,
         none_val: float = 0,
@@ -467,8 +656,65 @@ class Constraint:
             "type": "penalize_any_in_set",
             "description": description,
             "is_hard": is_hard,
+            "is_discoverable": is_discoverable,
+            "is_discoverable_by_questions": is_discoverable_by_questions,
+            "is_minimal": is_minimal,
             "extractor": extractor,
             "bad_set": bad_set,
+            "extractor_kwargs": extractor_kwargs,
+            "none_val": none_val,
+        }
+
+    @classmethod
+    def create_reward_any_in_set_constraint(
+        cls,
+        good_set: List[Any],
+        description: Optional[str] = None,
+        is_hard: bool = False,
+        is_discoverable: bool = True,
+        is_discoverable_by_questions: bool = True,
+        is_minimal: bool = False,
+        extractor: str = None,
+        extractor_kwargs: Dict[str, Any] = None,
+        none_val: float = 0,
+    ) -> dict:
+        assert len(good_set) > 0
+        return {
+            "type": "reward_any_in_set",
+            "description": description,
+            "is_hard": is_hard,
+            "is_discoverable": is_discoverable,
+            "is_discoverable_by_questions": is_discoverable_by_questions,
+            "is_minimal": is_minimal,
+            "extractor": extractor,
+            "good_set": good_set,
+            "extractor_kwargs": extractor_kwargs,
+            "none_val": none_val,
+        }
+
+    @classmethod
+    def create_reward_any_not_in_set_constraint(
+        cls,
+        required_set: List[Any],
+        description: Optional[str] = None,
+        is_hard: bool = False,
+        is_discoverable: bool = True,
+        is_discoverable_by_questions: bool = True,
+        is_minimal: bool = False,
+        extractor: str = None,
+        extractor_kwargs: Dict[str, Any] = None,
+        none_val: float = 0,
+    ) -> dict:
+        assert len(required_set) > 0
+        return {
+            "type": "reward_any_not_in_set",
+            "description": description,
+            "is_hard": is_hard,
+            "is_discoverable": is_discoverable,
+            "is_discoverable_by_questions": is_discoverable_by_questions,
+            "is_minimal": is_minimal,
+            "extractor": extractor,
+            "required_set": required_set,
             "extractor_kwargs": extractor_kwargs,
             "none_val": none_val,
         }
@@ -480,6 +726,9 @@ class Constraint:
         bad_set: List[Any],
         description: Optional[str] = None,
         is_hard: bool = False,
+        is_discoverable: bool = True,
+        is_discoverable_by_questions: bool = True,
+        is_minimal: bool = False,
         extractor: str = None,
         extractor_kwargs: Dict[str, Any] = None,
         none_val: float = 0,
@@ -488,11 +737,38 @@ class Constraint:
             "type": "good_set_bad_set",
             "description": description,
             "is_hard": is_hard,
+            "is_discoverable": is_discoverable,
+            "is_discoverable_by_questions": is_discoverable_by_questions,
+            "is_minimal": is_minimal,
             "extractor": extractor,
             "good_set": good_set,
             "bad_set": bad_set,
             "extractor_kwargs": extractor_kwargs,
             "none_val": none_val,
+        }
+
+    @classmethod
+    def create_multiset_jaccard_constraint(
+        cls,
+        true_set: List[Any],
+        description: Optional[str] = None,
+        is_hard: bool = False,
+        is_discoverable: bool = True,
+        is_discoverable_by_questions: bool = True,
+        is_minimal: bool = False,
+        extractor: str = None,
+        extractor_kwargs: Dict[str, Any] = None,
+    ) -> dict:
+        return {
+            "type": "multiset_jaccard",
+            "description": description,
+            "is_hard": is_hard,
+            "is_discoverable": is_discoverable,
+            "is_discoverable_by_questions": is_discoverable_by_questions,
+            "is_minimal": is_minimal,
+            "extractor": extractor,
+            "true_set": true_set,
+            "extractor_kwargs": extractor_kwargs,
         }
 
     @classmethod
@@ -503,6 +779,9 @@ class Constraint:
         sigma: float,
         description: Optional[str] = None,
         is_hard: bool = False,
+        is_discoverable: bool = True,
+        is_discoverable_by_questions: bool = True,
+        is_minimal: bool = False,
         extractor: str = None,
         extractor_kwargs: Dict[str, Any] = None,
         none_val: float = 0,
@@ -516,6 +795,9 @@ class Constraint:
             "sigma": sigma,
             "description": description,
             "is_hard": is_hard,
+            "is_discoverable": is_discoverable,
+            "is_discoverable_by_questions": is_discoverable_by_questions,
+            "is_minimal": is_minimal,
             "extractor": extractor,
             "extractor_kwargs": extractor_kwargs,
             "none_val": none_val,
@@ -532,6 +814,9 @@ class Constraint:
         max_val: float = None,
         description: Optional[str] = None,
         is_hard: bool = False,
+        is_discoverable: bool = True,
+        is_discoverable_by_questions: bool = True,
+        is_minimal: bool = False,
         extractor: str = None,
         extractor_kwargs: Dict[str, Any] = None,
         none_val: float = 0,
@@ -553,6 +838,9 @@ class Constraint:
             "max_val": max_val if max_val is not None else max(lower_val, upper_val),
             "description": description,
             "is_hard": is_hard,
+            "is_discoverable": is_discoverable,
+            "is_discoverable_by_questions": is_discoverable_by_questions,
+            "is_minimal": is_minimal,
             "extractor": extractor,
             "extractor_kwargs": extractor_kwargs,
             "none_val": none_val,
@@ -572,9 +860,13 @@ def linear_reward(
     If enforce_hard is True, then the reward function is -1 if any hard constraint is violated.
     Otherwise, the hard constraints are just treated as linear terms.
 
+    Note: All weights should be positive when passed to this function. The function will
+    automatically negate weights for penalty constraints (boolean_penalize_false,
+    penalize_any_not_in_set, penalize_any_in_set).
+
     Args:
         constraints (List[Constraint]): The constraints to use for the reward function.
-        weights (List[float]): The weights to use for the reward function.
+        weights (List[float]): The weights to use for the reward function (should all be positive).
         enforce_hard (bool): Whether to enforce hard constraints.
         raise_errors (bool): Whether to raise errors if the solution is invalid.
 
@@ -586,12 +878,40 @@ def linear_reward(
             float: the maximum possible score (unconstrained)
             Dict[str, float]: the score for each constraint
     """
-    if weights is not None:
-        assert np.all(weights >= 0), "Weights must be non-negative"
-        assert np.all(weights <= 1), "Weights must be less than or equal to 1"
-        assert np.isclose(np.sum(weights), 1), "Weights must sum to 1"
+    # If no constraints are provided, default to fully valid and full score
+    if constraints is None or len(constraints) == 0:
+        metadata = {
+            "constraint_info": {},
+            "weights": weights,
+            "violated_constraints": [],
+        }
+        return True, 1.0, 1.0, 1.0, metadata
 
-    results = {i: constraint(y) for i, constraint in enumerate(constraints)}
+    # Apply sign correction: negate weights for penalty constraints
+    # Penalty constraint types: boolean_penalize_false, penalize_any_not_in_set, penalize_any_in_set
+    penalty_types = {
+        "boolean_penalize_false",
+        "penalize_any_not_in_set",
+        "penalize_any_in_set",
+    }
+    if weights is not None:
+        adjusted_weights = np.array(
+            [
+                -w if constraints[i].type in penalty_types else w
+                for i, w in enumerate(weights)
+            ]
+        )
+    else:
+        adjusted_weights = None
+
+    results = {}
+    for i, constraint in enumerate(constraints):
+        try:
+            results[i] = constraint(y)
+        except Exception as e:
+            if raise_errors:
+                raise Exception(f"Error when evaluating constraint {constraint.description}: {e}")
+            results[i] = constraint.worst_case_value
 
     # Collect detailed messages from extractors
     detailed_messages = []
@@ -606,16 +926,23 @@ def linear_reward(
 
     metadata = {
         "constraint_info": {
-            constraints[i].description: (results[i], detailed_messages[i])
+            constraints[i].description: (results[i], detailed_messages[i], constraints[i].oracle_value, constraints[i].worst_case_value)
             for i in range(len(constraints))
         },
         "weights": weights,
-        "violated_constraints": [
-            constraint.description
-            for i, constraint in enumerate(constraints)
-            if constraint.is_hard and results[i] == -1
-        ],
+        "violated_constraints": [],
     }
+
+    def _is_violation(c: Constraint, val: float) -> bool:
+        if c.type in [
+            "boolean_penalize_false",
+            "penalize_any_not_in_set",
+            "penalize_any_in_set",
+        ]:
+            return val > 0
+        # treat negative values as violations for reward-style
+        return val < 0
+
     if enforce_hard:
         soft_constraint_indices = [
             i for i, constraint in enumerate(constraints) if not constraint.is_hard
@@ -626,15 +953,16 @@ def linear_reward(
             )
             score = sum(
                 weight * results[i]
-                for weight, i in zip(weights, soft_constraint_indices)
+                for weight, i in zip(adjusted_weights, soft_constraint_indices)
             )
+            # Since all weights are now positive (after adjustment), we can use oracle/worst_case directly
             max_unconstrained_score = sum(
                 weight * constraints[i].oracle_value
-                for weight, i in zip(weights, soft_constraint_indices)
+                for weight, i in zip(adjusted_weights, soft_constraint_indices)
             )
             min_unconstrained_score = sum(
                 weight * constraints[i].worst_case_value
-                for weight, i in zip(weights, soft_constraint_indices)
+                for weight, i in zip(adjusted_weights, soft_constraint_indices)
             )
         else:
             assert len(soft_constraint_indices) == 0
@@ -643,7 +971,7 @@ def linear_reward(
             min_unconstrained_score = None
 
         for i, constraint in enumerate(constraints):
-            if constraint.is_hard and results[i] == -1:
+            if constraint.is_hard and _is_violation(constraint, results[i]):
                 if raise_errors:
                     detailed_msg = (
                         detailed_messages[i] or "No detailed message available"
@@ -652,6 +980,7 @@ def linear_reward(
                         f"Failed hard constraint: {constraint.description}.\nDetails: {detailed_msg}"
                     )
                 score = float("-inf")
+                metadata["violated_constraints"].append(constraint.description)
     else:
         if weights is not None:
             assert len(weights) == len(constraints), (
@@ -659,15 +988,16 @@ def linear_reward(
             )
             score = sum(
                 weight * results[i]
-                for weight, i in zip(weights, range(len(constraints)))
+                for weight, i in zip(adjusted_weights, range(len(constraints)))
             )
+            # Since all weights are now positive (after adjustment), we can use oracle/worst_case directly
             max_unconstrained_score = sum(
                 weight * constraints[i].oracle_value
-                for weight, i in zip(weights, range(len(constraints)))
+                for weight, i in zip(adjusted_weights, range(len(constraints)))
             )
             min_unconstrained_score = sum(
                 weight * constraints[i].worst_case_value
-                for weight, i in zip(weights, range(len(constraints)))
+                for weight, i in zip(adjusted_weights, range(len(constraints)))
             )
         else:
             assert len(constraints) == 0
@@ -740,7 +1070,9 @@ def pairwise_win_rate(A: List[List[int]], B: List[List[int]]) -> float:
     return total_wins / total_pairs
 
 
-def likert_to_win_rate(comparison_likert_scores: List[str], return_total: bool = False) -> float:
+def likert_to_win_rate(
+    comparison_likert_scores: List[str], return_total: bool = False
+) -> float:
     """
     Convert a list of comparison likert scores ("A much more", "A slightly more", "Neutral", "B slightly more", "B much more") to P(A wins).
 

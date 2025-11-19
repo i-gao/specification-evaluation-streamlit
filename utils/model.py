@@ -220,6 +220,9 @@ def init_langchain_model(model_name: str, **kwargs):
     """
     from langchain.chat_models import init_chat_model
 
+    # remove None values
+    kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
     # Extract API key from kwargs for helper functions
     api_key = kwargs.get("api_key")
 
@@ -753,10 +756,14 @@ class LangChainModel(Model):
 
         # Ensure content is a string
         try:
+            ids, contents = [], []
             for m in stub:
                 if isinstance(m.content, list):
                     texts = [c["text"] for c in m.content if c["type"] == "text"]
-                    stub = self._update_messages(ids=[m.id], content=["\n".join(texts)])
+                    ids.append(m.id)
+                    contents.append("\n".join(texts))
+            self._update_messages(ids=ids, content=contents)
+            stub = self.state[og_len:]
         except Exception as e:
             print(f"Error cleaning message content: {e}")
 
@@ -767,10 +774,11 @@ class LangChainModel(Model):
                 if isinstance(m, AIMessage)
                 and m.content == "Sorry, need more steps to process this request."
             ]
-            stub = self._update_messages(
+            self._update_messages(
                 ids=_ids,
                 content=[self._out_of_steps_msg for _ in _ids],
             )
+            stub = self.state[og_len:]
 
         if self._add_thinking_tag:
             # This only affects the state, not the returned stub
@@ -790,6 +798,7 @@ class LangChainModel(Model):
                     and not m.content.startswith(self._thinking_tokens[0])
                 ],
             )
+            stub = self.state[og_len:]
 
         # Modify the state (but not the returned stub)
         if not self._multiturn_memory:
@@ -836,6 +845,51 @@ class LangChainModel(Model):
     def _get_msg_id_by_content(self, content: str) -> List[str]:
         """Get the ids of the messages with the given content"""
         return [m.id for m in self.state if m.content == content]
+
+    def insert_message(self, role: str, content: str, persist_state: bool = True):
+        """
+        Insert a single message into the current conversation state.
+
+        Args:
+            role: One of "system", "user", "assistant", or "tool"
+            content: Message text content
+            persist_state: If True, appends the message to the graph state; if False, no-op to state but returns the constructed message
+
+        Returns:
+            The created LangChain BaseMessage
+        """
+        from langchain_core.messages import (
+            SystemMessage,
+            HumanMessage,
+            AIMessage,
+            ToolMessage,
+        )
+
+        role = role.lower().strip()
+        if role == "system":
+            msg = SystemMessage(content=content)
+        elif role == "user":
+            msg = HumanMessage(content=content)
+        elif role == "assistant":
+            msg = AIMessage(content=content)
+        elif role == "tool":
+            # Tool messages usually require tool_call_id; we insert bare content if not provided
+            msg = ToolMessage(content=content, tool_call_id="manual")
+        else:
+            raise ValueError(
+                "role must be one of 'system', 'user', 'assistant', or 'tool'"
+            )
+
+        print(msg)
+
+        if persist_state:
+            self.graph.update_state(
+                {"configurable": {"thread_id": self.thread_id}},
+                {"messages": [msg]},
+            )
+            self._raw_state += [msg]
+
+        return msg
 
 
 def get_token_usage(

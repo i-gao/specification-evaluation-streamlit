@@ -2,21 +2,7 @@
 # Each function takes a meal_plan as input and returns a tuple (value, detailed_message)
 # where value is the value needed for the constraint and detailed_message describes the result
 
-DAYS_OF_THE_WEEK = [
-    "sunday",
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-]
-MEALS_OF_THE_DAY = [
-    "breakfast",
-    "lunch",
-    "snack",
-    "dinner",
-]
+from data.meal_planning.db import DAYS_OF_THE_WEEK, MEALS_OF_THE_DAY
 
 """
 Assume a meal plan is a dictionary with the following structure:
@@ -125,6 +111,38 @@ def something_is_eaten(meal_plan, day, meal):
     return False, f"No servings consumed at {day.capitalize()} {meal}"
 
 
+def all_non_blocked_meals_filled(meal_plan, meals_considered, blocked_meals):
+    """
+    Return (List[bool], str) a list of booleans, one per non-blocked considered meal,
+    indicating if that meal has something eaten.
+    True means the meal is filled (has something eaten).
+    """
+    meal_booleans = []
+    meal_descriptions = []
+    for day in DAYS_OF_THE_WEEK:
+        for meal in meals_considered:
+            meal_key = f"{day}:{meal}"
+            # Skip blocked meals
+            if meal_key in blocked_meals:
+                continue
+            # Check if meal is filled
+            is_filled = False
+            if meal_plan[day][meal] is not None:
+                for recipe_dict in meal_plan[day][meal]:
+                    if recipe_dict["servings_consumed"] > 0:
+                        is_filled = True
+                        break
+            meal_booleans.append(is_filled)
+            meal_descriptions.append(f"{meal_key}: {is_filled}")
+
+    filled_count = sum(meal_booleans)
+    total_meals = len(meal_booleans)
+    return (
+        meal_booleans,
+        f"Non-blocked meals filled: {filled_count}/{total_meals} ({', '.join(meal_descriptions)})",
+    )
+
+
 def nothing_is_eaten(meal_plan, day, meal):
     """Return (bool, str) if meal_plan[day][meal] has no servings consumed."""
     if meal_plan[day][meal] is None:
@@ -138,19 +156,138 @@ def nothing_is_eaten(meal_plan, day, meal):
     return True, f"No servings consumed at {day.capitalize()} {meal} (as expected)"
 
 
-def meal_servings_at_least(meal_plan, day, meal, min_servings):
-    """Return (bool, str) if servings_consumed >= min_servings for any recipe at (day, meal)."""
-    if meal_plan[day][meal] is None:
-        return True, f"No meal scheduled for {day.capitalize()} {meal}"
-    for recipe_dict in meal_plan[day][meal]:
-        if recipe_dict["servings_consumed"] < min_servings:
-            return (
-                False,
-                f"Insufficient servings at {day.capitalize()} {meal}: {recipe_dict['recipe'].title} has {recipe_dict['servings_consumed']} servings (need at least {min_servings})",
-            )
+def meal_should_be_empty(meal_plan, meal_to_skip):
+    """
+    Return (List[bool], str) a list of booleans, one per day, indicating if the meal has something eaten.
+    True means violation (meal should be empty but has something).
+    """
+    violations = []
+    for day in DAYS_OF_THE_WEEK:
+        has_something = False
+        if meal_plan[day][meal_to_skip] is not None:
+            for recipe_dict in meal_plan[day][meal_to_skip]:
+                if recipe_dict["servings_consumed"] > 0:
+                    has_something = True
+                    break
+        violations.append(has_something)
+
+    violation_count = sum(violations)
     return (
-        True,
-        f"All recipes at {day.capitalize()} {meal} meet minimum serving requirement of {min_servings}",
+        violations,
+        f"Meal '{meal_to_skip}' should be empty but has something eaten on {violation_count}/{len(violations)} days",
+    )
+
+
+def cuisine_appears(meal_plan, cuisine):
+    """
+    Return (List[bool], str) a list of booleans, one per meal, indicating if the cuisine appears in that meal.
+    Best case is all True (cuisine appears in all meals).
+    """
+    meal_booleans = []
+    meal_descriptions = []
+    for day in DAYS_OF_THE_WEEK:
+        for meal in MEALS_OF_THE_DAY:
+            meal_key = f"{day}:{meal}"
+            appears = False
+            if meal_plan[day][meal] is not None:
+                for recipe_dict in meal_plan[day][meal]:
+                    if recipe_dict["servings_consumed"] > 0:
+                        if recipe_dict["recipe"].cuisine == cuisine:
+                            appears = True
+                            break
+            meal_booleans.append(appears)
+            meal_descriptions.append(f"{meal_key}: {appears}")
+
+    true_count = sum(meal_booleans)
+    total_meals = len(meal_booleans)
+    return (
+        meal_booleans,
+        f"Cuisine '{cuisine}' appears in {true_count}/{total_meals} meals: {', '.join(meal_descriptions)}",
+    )
+
+
+def food_type_appears(meal_plan, food_type):
+    """
+    Return (List[bool], str) a list of booleans, one per meal, indicating if the food type appears in that meal.
+    Best case is all True (food type appears in all meals).
+    """
+    meal_booleans = []
+    meal_descriptions = []
+    for day in DAYS_OF_THE_WEEK:
+        for meal in MEALS_OF_THE_DAY:
+            meal_key = f"{day}:{meal}"
+            appears = False
+            if meal_plan[day][meal] is not None:
+                for recipe_dict in meal_plan[day][meal]:
+                    if recipe_dict["servings_consumed"] > 0:
+                        if recipe_dict["recipe"].food_type == food_type:
+                            appears = True
+                            break
+            meal_booleans.append(appears)
+            meal_descriptions.append(f"{meal_key}: {appears}")
+
+    true_count = sum(meal_booleans)
+    total_meals = len(meal_booleans)
+    return (
+        meal_booleans,
+        f"Food type '{food_type}' appears in {true_count}/{total_meals} meals: {', '.join(meal_descriptions)}",
+    )
+
+
+def food_keyword_appears(meal_plan, keyword):
+    """
+    Return (List[bool], str) a list of booleans, one per meal, indicating if the food keyword appears in that meal.
+    Best case is all True (keyword appears in all meals).
+    """
+    meal_booleans = []
+    meal_descriptions = []
+    for day in DAYS_OF_THE_WEEK:
+        for meal in MEALS_OF_THE_DAY:
+            meal_key = f"{day}:{meal}"
+            appears = False
+            if meal_plan[day][meal] is not None:
+                for recipe_dict in meal_plan[day][meal]:
+                    if recipe_dict["servings_consumed"] > 0:
+                        if keyword.lower() in recipe_dict["recipe"].title.lower():
+                            appears = True
+                            break
+            meal_booleans.append(appears)
+            meal_descriptions.append(f"{meal_key}: {appears}")
+
+    true_count = sum(meal_booleans)
+    total_meals = len(meal_booleans)
+    return (
+        meal_booleans,
+        f"Food keyword '{keyword}' appears in {true_count}/{total_meals} meals: {', '.join(meal_descriptions)}",
+    )
+
+
+def min_star_rating(meal_plan):
+    """
+    Return (float, str) the minimum star rating across all meals in the meal plan period.
+    Returns None if no ratings are present.
+    """
+    all_ratings = []
+    for day in DAYS_OF_THE_WEEK:
+        for meal in MEALS_OF_THE_DAY:
+            if meal_plan[day][meal] is None:
+                continue
+            for recipe_dict in meal_plan[day][meal]:
+                if recipe_dict["servings_consumed"] > 0:
+                    recipe_rating = recipe_dict["recipe"].rating
+                    if recipe_rating is not None:
+                        all_ratings.append(recipe_rating)
+
+    if not all_ratings:
+        return (
+            None,
+            f"No star ratings found across the {len(DAYS_OF_THE_WEEK)}-day period",
+        )
+
+    min_rating = min(all_ratings)
+    return (
+        min_rating,
+        f"Minimum star rating across the {len(DAYS_OF_THE_WEEK)}-day period: {min_rating:.1f}",
     )
 
 
@@ -158,7 +295,7 @@ def meal_servings_at_least(meal_plan, day, meal, min_servings):
 
 
 def total_cooks(meal_plan):
-    """Return (int, str) the total number of times cooking was required in the week."""
+    """Return (int, str) the total number of times cooking was required in the meal plan period."""
     cook_count = 0
     cooked_recipes = []
     for day in DAYS_OF_THE_WEEK:
@@ -201,83 +338,29 @@ def cooking_time_under(meal_plan, day, meal, time_limit):
     )
 
 
-def recipes_avoid_equipment(meal_plan, day, meal, equipment):
-    """Return (bool, str) if equipment is NOT in the recipe equipment for any cooked recipe at (day, meal)."""
-    if meal_plan[day][meal] is None:
-        return True, f"No meal scheduled for {day.capitalize()} {meal}"
-    for recipe_dict in meal_plan[day][meal]:
-        if not recipe_dict["cook"]:  # only check cooked recipes
-            continue
-        if equipment in recipe_dict["recipe"].equipment:
-            return (
-                False,
-                f"Recipe '{recipe_dict['recipe'].title}' at {day.capitalize()} {meal} requires unavailable equipment: {equipment}",
-            )
+def all_equipment(meal_plan):
+    """
+    Return (List[str], str) all equipment from cooked recipes across the meal plan period (multiset).
+    """
+    equipment_list = []
+    for day in DAYS_OF_THE_WEEK:
+        for meal in MEALS_OF_THE_DAY:
+            if meal_plan[day][meal] is None:
+                continue
+            for recipe_dict in meal_plan[day][meal]:
+                if not recipe_dict["cook"]:  # only check cooked recipes
+                    continue
+                if recipe_dict["servings_consumed"] > 0:
+                    # Add each equipment once per serving consumed (multiset)
+                    for _ in range(recipe_dict["servings_consumed"]):
+                        equipment_list.extend(recipe_dict["recipe"].equipment)
     return (
-        True,
-        f"All cooked recipes at {day.capitalize()} {meal} avoid unavailable equipment: {equipment}",
-    )
-
-
-def recipe_star_rating(meal_plan, day, meal):
-    """Return (float, str) the minimum rating across cooked recipes at (day, meal), or (None, str) if not present."""
-    if meal_plan[day][meal] is None:
-        return None, f"No meal scheduled for {day.capitalize()} {meal}"
-    ratings = []
-    for recipe_dict in meal_plan[day][meal]:
-        if recipe_dict["cook"]:
-            ratings.append((recipe_dict["recipe"].rating, recipe_dict["recipe"].title))
-
-    if not ratings:
-        return None, f"No cooked recipes at {day.capitalize()} {meal}"
-
-    min_rating, min_recipe = min(ratings, key=lambda x: x[0])
-    return (
-        min_rating,
-        f"Lowest rated cooked recipe at {day.capitalize()} {meal}: '{min_recipe}' with {min_rating} stars",
+        equipment_list,
+        f"All equipment across the {len(DAYS_OF_THE_WEEK)}-day period: {len(set(equipment_list))} unique equipment",
     )
 
 
 ###### Concerns consumed recipes ######
-
-
-def recipes_avoid_ingredient(meal_plan, day, meal, ingredient):
-    """
-    Return (bool, str) if ingredient is NOT in a consumed recipe at (day, meal).
-    """
-    if meal_plan[day][meal] is None:
-        return True, f"No meal scheduled for {day.capitalize()} {meal}"
-    for recipe_dict in meal_plan[day][meal]:
-        if recipe_dict["servings_consumed"] == 0:
-            continue
-        for recipe_ingredient in recipe_dict["recipe"].ingredients:
-            if ingredient in recipe_ingredient:
-                return (
-                    False,
-                    f"Recipe '{recipe_dict['recipe'].title}' consumed at {day.capitalize()} {meal} contains forbidden ingredient: {ingredient}",
-                )
-    return (
-        True,
-        f"All consumed recipes at {day.capitalize()} {meal} avoid ingredient: {ingredient}",
-    )
-
-
-def recipes_include_ingredient(meal_plan, day, meal, ingredient):
-    """Return (bool, str) if ingredient is in the recipe ingredients for any consumed recipe at (day, meal)."""
-    if meal_plan[day][meal] is None:
-        return False, f"No meal scheduled for {day.capitalize()} {meal}"
-    for recipe_dict in meal_plan[day][meal]:
-        if recipe_dict["servings_consumed"] == 0:
-            continue
-        if ingredient in recipe_dict["recipe"].ingredients:
-            return (
-                True,
-                f"Recipe '{recipe_dict['recipe'].title}' consumed at {day.capitalize()} {meal} contains preferred ingredient: {ingredient}",
-            )
-    return (
-        False,
-        f"No consumed recipes at {day.capitalize()} {meal} contain preferred ingredient: {ingredient}",
-    )
 
 
 def recipes_follow_diet(meal_plan, day, meal, diet):
@@ -316,44 +399,50 @@ def recipes_avoid_intolerance(meal_plan, day, meal, intolerance):
     )
 
 
-def recipe_cuisine_equals_cuisine(meal_plan, day, meal, cuisine):
-    """Return (bool, str) if the recipe cuisine matches for any consumed recipe at (day, meal)."""
-    if meal_plan[day][meal] is None:
-        return False, f"No meal scheduled for {day.capitalize()} {meal}"
-    for recipe_dict in meal_plan[day][meal]:
-        if recipe_dict["servings_consumed"] == 0:
-            continue
-        if recipe_dict["recipe"].cuisine == cuisine:
-            return (
-                True,
-                f"Recipe '{recipe_dict['recipe'].title}' consumed at {day.capitalize()} {meal} matches preferred cuisine: {cuisine}",
-            )
+def meals_violating_diet(meal_plan, diet):
+    """
+    Return (List[str], str) all (day, meal) pairs that violate the diet requirement.
+    Each violation is represented as "day:meal" string.
+    """
+    violations = []
+    for day in DAYS_OF_THE_WEEK:
+        for meal in MEALS_OF_THE_DAY:
+            if meal_plan[day][meal] is None:
+                continue
+            for recipe_dict in meal_plan[day][meal]:
+                if recipe_dict["servings_consumed"] == 0:
+                    continue
+                if diet not in recipe_dict["recipe"].diet:
+                    violations.append(f"{day}:{meal}")
+                    break  # Only count each meal once
     return (
-        False,
-        f"No consumed recipes at {day.capitalize()} {meal} match preferred cuisine: {cuisine}",
+        violations,
+        f"Meals that violate {diet} diet: {', '.join(violations) if violations else 'none'}",
     )
 
 
-def recipe_food_type_equals_food_type(meal_plan, day, meal, food_type):
-    """Return (bool, str) if the recipe food type matches for any consumed recipe at (day, meal)."""
-    if meal_plan[day][meal] is None:
-        return False, f"No meal scheduled for {day.capitalize()} {meal}"
-    for recipe_dict in meal_plan[day][meal]:
-        if recipe_dict["servings_consumed"] == 0:
-            continue
-        if recipe_dict["recipe"].food_type == food_type:
-            return (
-                True,
-                f"Recipe '{recipe_dict['recipe'].title}' consumed at {day.capitalize()} {meal} matches preferred food type: {food_type}",
-            )
+def all_intolerances(meal_plan):
+    """
+    Return (List[str], str) all intolerances from consumed recipes across the meal plan period (multiset).
+    """
+    intolerances = []
+    for day in DAYS_OF_THE_WEEK:
+        for meal in MEALS_OF_THE_DAY:
+            if meal_plan[day][meal] is None:
+                continue
+            for recipe_dict in meal_plan[day][meal]:
+                if recipe_dict["servings_consumed"] > 0:
+                    # Add each intolerance once per serving consumed (multiset)
+                    for _ in range(recipe_dict["servings_consumed"]):
+                        intolerances.extend(recipe_dict["recipe"].intolerances)
     return (
-        False,
-        f"No consumed recipes at {day.capitalize()} {meal} match preferred food type: {food_type}",
+        intolerances,
+        f"All intolerances across the {len(DAYS_OF_THE_WEEK)}-day period: {len(set(intolerances))} unique intolerances",
     )
 
 
 def num_repeated_recipes(meal_plan):
-    """Return (int, str) the number of repeatedly consumed recipes in the week."""
+    """Return (int, str) the number of repeatedly consumed recipes in the meal plan period."""
     seen_recipes = set()
     num_repeats = 0
     repeated_recipes = []
@@ -547,19 +636,52 @@ def daily_calories(meal_plan, day):
     return total_calories, message
 
 
-def keyword_in_recipe_title(meal_plan, day, meal, keyword):
-    """Return (bool, str) if the keyword is in the recipe title for any consumed recipe at (day, meal)."""
-    if meal_plan[day][meal] is None:
-        return False, f"No meal scheduled for {day.capitalize()} {meal}"
-    for recipe_dict in meal_plan[day][meal]:
-        if recipe_dict["servings_consumed"] == 0:
-            continue
-        if keyword.lower() in recipe_dict["recipe"].title.lower():
-            return (
-                True,
-                f"Recipe '{recipe_dict['recipe'].title}' consumed at {day.capitalize()} {meal} is labeled as {keyword}",
-            )
+def all_ingredients(meal_plan):
+    """Return (List[str], str) all ingredients from consumed recipes across the meal plan period."""
+    ingredients = []
+    for day in DAYS_OF_THE_WEEK:
+        for meal in MEALS_OF_THE_DAY:
+            if meal_plan[day][meal] is None:
+                continue
+            for recipe_dict in meal_plan[day][meal]:
+                if recipe_dict["servings_consumed"] > 0:
+                    # Add each ingredient once per serving consumed (multiset)
+                    for _ in range(recipe_dict["servings_consumed"]):
+                        ingredients.extend(recipe_dict["recipe"].ingredients)
     return (
-        False,
-        f"No consumed recipes at {day.capitalize()} {meal} are labeled as {keyword}",
+        ingredients,
+        f"All ingredients across the {len(DAYS_OF_THE_WEEK)}-day period: {len(set(ingredients))} unique ingredients",
+    )
+
+
+def ingredient_appears(meal_plan, ingredient):
+    """
+    Return (List[bool], str) a list of booleans, one per meal, indicating if the ingredient appears in that meal.
+    Best case is all True (ingredient appears in all meals).
+    """
+    meal_booleans = []
+    meal_descriptions = []
+    for day in DAYS_OF_THE_WEEK:
+        for meal in MEALS_OF_THE_DAY:
+            meal_key = f"{day}:{meal}"
+            appears = False
+            if meal_plan[day][meal] is not None:
+                for recipe_dict in meal_plan[day][meal]:
+                    if recipe_dict["servings_consumed"] > 0:
+                        if any(
+                            [
+                                ingredient.lower() in i.lower()
+                                for i in recipe_dict["recipe"].ingredients
+                            ]
+                        ):
+                            appears = True
+                            break
+            meal_booleans.append(appears)
+            meal_descriptions.append(f"{meal_key}: {appears}")
+
+    true_count = sum(meal_booleans)
+    total_meals = len(meal_booleans)
+    return (
+        meal_booleans,
+        f"Ingredient '{ingredient}' appears in {true_count}/{total_meals} meals: {', '.join(meal_descriptions)}",
     )

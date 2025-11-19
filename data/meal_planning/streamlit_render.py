@@ -1,7 +1,7 @@
 from typing import List, Dict, Any, Callable
 import streamlit as st
 import uuid
-from data.meal_planning.db import RecipeDB, DAYS_OF_THE_WEEK, MEALS, Recipe
+from data.meal_planning.db import RecipeDB, DAYS_OF_THE_WEEK, MEALS_OF_THE_DAY, Recipe
 from data.meal_planning.parser import parse_meal_plan
 import random
 from evaluation.qualitative_eval import COMPARISON_LIKERT
@@ -62,7 +62,7 @@ def rank_recipes(*, final_prediction: str, y0: str, db: RecipeDB):
         predicted_recipes = [
             recipe
             for day in DAYS_OF_THE_WEEK
-            for meal in MEALS
+            for meal in MEALS_OF_THE_DAY
             for recipe in (
                 predicted[day][meal] if predicted[day][meal] is not None else []
             )
@@ -70,7 +70,7 @@ def rank_recipes(*, final_prediction: str, y0: str, db: RecipeDB):
         y0_recipes = [
             recipe
             for day in DAYS_OF_THE_WEEK
-            for meal in MEALS
+            for meal in MEALS_OF_THE_DAY
             for recipe in (y0[day][meal] if y0[day][meal] is not None else [])
         ]
         _render_carousel(
@@ -358,7 +358,7 @@ def _render_meal_plan_streamlit(
 
         with st.expander("🧾 How much food will I waste?", expanded=False):
             st.markdown(
-                _render_weekly_recipe_summary(meal_plan), unsafe_allow_html=True
+                _render_recipe_summary(meal_plan), unsafe_allow_html=True
             )
 
     _render_recipe_details_streamlit(meal_plan, unique_id)
@@ -397,7 +397,7 @@ def _render_day_details(
     table_data: List[List[str]] = []
     table_data.append(["Meal", "To Cook", "To Eat"])
 
-    for m_idx, meal in enumerate(MEALS):
+    for m_idx, meal in enumerate(MEALS_OF_THE_DAY):
         items = meal_plan[day].get(meal)
         emoji = MEAL_EMOJIS.get(meal, "🍽️")
         meal_cell = f"{emoji} {meal.capitalize()}"
@@ -458,7 +458,7 @@ def _render_recipe_details_streamlit(meal_plan: Dict[str, Any], unique_id: str) 
     for day in DAYS_OF_THE_WEEK:
         if day not in meal_plan:
             continue
-        for meal in MEALS:
+        for meal in MEALS_OF_THE_DAY:
             items = meal_plan[day].get(meal)
             if not items:
                 continue
@@ -506,7 +506,7 @@ def _render_recipe_details_streamlit(meal_plan: Dict[str, Any], unique_id: str) 
 def _render_calendar_table(meal_plan: Dict[str, Any]) -> str:
     lines: List[str] = []
     lines.append("### 🗓️ Meal Plan at a Glance")
-    lines.append("This is a summary of the meals you will be eating this week.")
+    lines.append(f"This is a summary of the meals you will be eating over the {len(DAYS_OF_THE_WEEK)}-day period.")
     lines.append("* :material/nest_eco_leaf: recipe cooked fresh at that time")
     lines.append("* :material/microwave: recipe reheated from leftovers")
     lines.append("* :material/error: invalid recipe not found in database")
@@ -519,7 +519,7 @@ def _render_calendar_table(meal_plan: Dict[str, Any]) -> str:
     lines.append(header)
     lines.append(sep)
 
-    for meal in MEALS:
+    for meal in MEALS_OF_THE_DAY:
         row_cells = [f"**{meal.capitalize()}**"]
         for day in DAYS_OF_THE_WEEK:
             titles = _get_eaten_titles_for_cell(meal_plan, day, meal)
@@ -570,7 +570,7 @@ def _render_cooking_calendar(meal_plan: Dict[str, Any]) -> str:
     lines.append(header)
     lines.append(sep)
 
-    for meal in MEALS:
+    for meal in MEALS_OF_THE_DAY:
         row_cells = [f"**{meal.capitalize()}**"]
         for day in DAYS_OF_THE_WEEK:
             items = meal_plan.get(day, {}).get(meal)
@@ -589,8 +589,8 @@ def _render_cooking_calendar(meal_plan: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _render_weekly_recipe_summary(meal_plan: Dict[str, Any]) -> str:
-    stats = _aggregate_weekly_recipe_stats(meal_plan)
+def _render_recipe_summary(meal_plan: Dict[str, Any]) -> str:
+    stats = _aggregate_recipe_stats(meal_plan)
     if not stats:
         return ""
 
@@ -599,7 +599,7 @@ def _render_weekly_recipe_summary(meal_plan: Dict[str, Any]) -> str:
     )
 
     lines: List[str] = []
-    lines.append("This summary shows how much food was wasted across the week.")
+    lines.append(f"This summary shows how much food was wasted across the {len(DAYS_OF_THE_WEEK)}-day period.")
     lines.append("")
     lines.append(
         "| Recipe | Cooked (servings) | Consumed (servings) | Wasted (servings) |"
@@ -613,13 +613,13 @@ def _render_weekly_recipe_summary(meal_plan: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _aggregate_weekly_recipe_stats(
+def _aggregate_recipe_stats(
     meal_plan: Dict[str, Any],
 ) -> Dict[str, Dict[str, float]]:
     stats: Dict[str, Dict[str, float]] = {}
     for day in DAYS_OF_THE_WEEK:
         day_plan = meal_plan.get(day, {})
-        for meal in MEALS:
+        for meal in MEALS_OF_THE_DAY:
             items = day_plan.get(meal)
             if not items:
                 continue
@@ -739,7 +739,7 @@ def _build_cook_index(meal_plan: Dict[str, Any]) -> Dict[str, List[tuple]]:
     index: Dict[str, List[tuple]] = {}
     for d_idx, day in enumerate(DAYS_OF_THE_WEEK):
         day_plan = meal_plan.get(day, {})
-        for m_idx, meal in enumerate(MEALS):
+        for m_idx, meal in enumerate(MEALS_OF_THE_DAY):
             items = day_plan.get(meal)
             if not items:
                 continue
@@ -759,7 +759,7 @@ def _find_cooked_when(
     if title not in cook_index:
         return ""
     d_idx = DAYS_OF_THE_WEEK.index(day)
-    m_idx = MEALS.index(meal)
+    m_idx = MEALS_OF_THE_DAY.index(meal)
     candidates = [
         (di, mi)
         for (di, mi) in cook_index[title]
@@ -769,7 +769,7 @@ def _find_cooked_when(
         return ""
     di, mi = sorted(candidates)[-1]
     day_label = DAYS_OF_THE_WEEK[di][:3].capitalize()
-    meal_label = MEALS[mi].capitalize()
+    meal_label = MEALS_OF_THE_DAY[mi].capitalize()
     return f"{day_label} {meal_label}"
 
 

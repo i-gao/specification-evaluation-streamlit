@@ -9,12 +9,6 @@ import streamlit as st
 from typing import List, Dict, Any
 import subprocess
 
-try:
-    subprocess.run(["playwright", "install-deps"], check=True)
-    subprocess.run(["playwright", "install"], check=True)
-except Exception:
-    pass
-
 
 @functools.lru_cache(maxsize=50)
 def _render_html(

@@ -20,6 +20,7 @@ from evaluation.app.control_flow import (
     save_session_data,
     interaction_countdown,
     brainstorm_countdown,
+    search_exploration_countdown,
 )
 import evaluation.app.authentication as authentication
 import evaluation.app.forms as forms
@@ -46,6 +47,7 @@ STYLESHEET = """
         max-width: 60vw;
         margin: 0 auto;
     }
+    body {}
 
     /* Colors */
     div[data-testid="stTextInputRootElement"] input, div[data-baseweb="select"] div, div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea {
@@ -290,6 +292,17 @@ def header():
         if not DEBUG_MODE and st.session_state.current_screen == "chat_screen":
             interaction_countdown()
 
+        # Show search exploration countdown if in search exploration stage
+        if (
+            st.session_state.current_screen == "evaluation_screen"
+            and not st.session_state.get("search_exploration_completed", True)
+            and st.session_state.get(
+                "search_exploration_instructions_acknowledged", False
+            )
+            and "search_exploration_start_time" in st.session_state
+        ):
+            search_exploration_countdown()
+
 
 def authentication_screen():
     """
@@ -486,10 +499,10 @@ def _fixed_chat_screen():
     )
     with tabs[0]:
         chat_flow(
-            collect_feedback=False,
-            show_quick_actions=True,
             show_raw_message=DEBUG_MODE,
-            autovalidate=True,
+            autovalidate=False,
+            show_response_time=True,
+            show_end_conversation_button=True,
         )
     with tabs[1]:
         components.render_specification()
@@ -531,7 +544,7 @@ def evaluation_screen():
             save_session_data(skip_grading=True)
 
     evaluation_flow(
-        chat_evaluation_form=forms.interaction_evaluation,
+        chat_evaluation_form=forms.assistant_instruments_survey,
         custom_final_specification_form=forms.custom_final_specification,
     )
 
@@ -596,7 +609,7 @@ def exit_survey_screen():
     if st.session_state.current_screen != "exit_survey_screen":
         return
 
-    exit_survey_flow()
+    exit_survey_flow(exit_survey_form=forms.assistant_ranking_exit_survey)
 
 
 def end_screen():

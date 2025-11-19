@@ -1,14 +1,10 @@
-from typing import Dict, List, Tuple, Union, Optional
-import sys
+from typing import Dict, Tuple, Optional
 
 
 from new_baselines.single_llm import SingleLLM
 from utils.misc import (
-    add_section,
-    Stopwatch,
     print_debug,
 )
-from utils.model import LangChainModel, is_openai_model, is_anthropic_model
 
 
 class BrainstormLLM(SingleLLM):
@@ -17,18 +13,36 @@ class BrainstormLLM(SingleLLM):
     into the system prompt.
     """
 
-    def generate_plan(self, initial_user_msg: str) -> str:
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._plan: Optional[str] = None
+        # Ensure our planning hook runs before the first assistant message
+        self._pre_conversation_hooks = list(getattr(self, "_pre_conversation_hooks", []))
+        self._pre_conversation_hooks.insert(0, self._generate_plan_hook)
+
+    def _generate_plan_hook(self, hook_state: Dict) -> Dict:
         """
-        Generate a plan for the conversation.
+        Pre-conversation hook to generate and cache the plan used in the system prompt.
         """
-        return self._call_agent_executor(
+        if self._plan is not None:
+            return {"plan": self._plan}
+
+        # Try to read initial user request if present (robust to invocation order)
+        initial_user_msg = None
+        conversation_history = hook_state.get("conversation_history", []) or []
+        if len(conversation_history) > 0 and getattr(conversation_history[-1], "user_msg", None):
+            initial_user_msg = conversation_history[-1].user_msg
+        if initial_user_msg is None:
+            initial_user_msg = ""
+
+        plan = self._call_agent_executor(
             *[
                 (
                     "system",
                     f"""You are a helpful assistant working with a user to complete a task.
 
 You know the following basic information about the task: 
-{self.initial_specification}
+{self.commonsense_instructions}
 User request: {initial_user_msg}
 
 Note that the request is underspecified: you should work with the user to better understand their context, preferences, and constraints. You can do this through questions and getting user feedback (e.g. by asking them to react to a proposed option). 
@@ -71,8 +85,13 @@ This summary will not be read by the user: it is only for you to reference. Writ
                 )
             ],
             persist_state=False,
-            min_react_steps=3,
+            min_react_steps=3 if len(self.actions) > 0 else 1,
         )[0]
+
+        self._plan = plan
+        if self.verbosity:
+            print_debug(f"Generated plan: {plan}", "generate_plan", color="orange")
+        return {"plan": plan}
 
     def generate_message(self, user_response: Optional[str] = None) -> Tuple[str, bool]:
         """
@@ -81,12 +100,9 @@ This summary will not be read by the user: it is only for you to reference. Writ
         Returns:
             str: The next message in the conversation
         """
-        # If this is the first turn, generate the plan, and then prepend the generate prompt with the plan
+        # If this is the first turn, use the pre-generated plan and prepend the system prompt
         if not self.has_seen_system_prompt:
-            plan = self.generate_plan(user_response)
-
-            if self.verbosity:
-                print_debug(f"Generated plan: {plan}", "generate_plan", color="orange")
+            plan = self._plan
 
             system_msg = self._get_generate_prompt(plan)
             prompt = [("system", system_msg), ("user", user_response)]
@@ -144,12 +160,16 @@ This summary will not be read by the user: it is only for you to reference. Writ
 
 class BreakItDownLLM(BrainstormLLM):
     def _get_generate_prompt(self, plan: str) -> str:
+        if self._show_prediction_fmt_instructions_in_msg:
+            fmt_instructions = f"\n\n{self.prediction_fmt_instructions}"
+        else:
+            fmt_instructions = ""
         return f"""You are a helpful assistant working with a user to complete a task.
 
 Here is the plan for the conversation:
 {plan}
-
-Work with the user, one subtask at a time. Carefully manage the user's cognitive load: try not to ask more than 2 questions in a single message. Do not send > than 2 messages in a row which only ask questions. {self.msg_fmt_instructions} When you have finished the entire task and received user confirmation, generate the string <END_CONVERSATION>. To show a user a message, do not make tool calls in that message.
+{fmt_instructions}
+Work with the user, one subtask at a time. Carefully manage the user's cognitive load: try not to ask more than 2 questions in a single message. Do not send > than 2 messages in a row which only ask questions. {self.msg_fmt_instructions} When you have finished the entire task AND received user confirmation of its completeness, generate the string <END_CONVERSATION>. To show a user a message, do not make tool calls in that message.
 
 If this is the first message, you should provide a brief explanation of the plan. (Do not repeat anything else in this message.) 
 """

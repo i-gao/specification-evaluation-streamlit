@@ -1,19 +1,12 @@
-from typing import List, Tuple, Dict, Optional, Callable, Literal, Union, Any, TypedDict
+from typing import List, Tuple, Dict, Optional, Literal, TypedDict
 from collections import defaultdict
-import string
-import json
-import sys
 
+# (unused imports removed)
 
 
 from data.dataset import Specification
-from data.actions import Action
+from data.actions import Action  # noqa: F401
 from utils.misc import (
-    add_section,
-    parse_for_answer_tags,
-    Stopwatch,
-    parse_list,
-    fuzzy_match,
     print_debug,
 )
 from dataclasses import dataclass, asdict
@@ -33,7 +26,7 @@ class UserConversationTurn:
 
     assistant_msg: str  # Message from the assistant
     user_msg: str  # Message from the user
-    token_cost: float  # Cost of the user's response in tokens
+    theoretical_cost: float  # Theoretical cost of the user's response
     runtime_cost: float  # Cost of the user's response in seconds
     remaining_budget: float  # Remaining budget after this turn
     user_rationale: Optional[str] = (
@@ -64,13 +57,6 @@ class UserAction:
 class UserSimulator:
     """
     An abstract class for an agent which simulates the behavior of \mathcal U, the user.
-
-    The user has access to:
-    - interaction budget (C): the maximum cost of the conversation
-    - actions: the set of task actions the user can take (public and private)
-    - initial_specification: the task signature
-    - prediction_fmt_instructions: instructions for formatting the output y
-        - verbosity: whether to print verbose output
     """
 
     def __init__(
@@ -79,6 +65,7 @@ class UserSimulator:
         interaction_budget: float,
         verbosity: Literal[0, 1, 2] = 0,
         lambda_cost: float = 0.0,
+        cost_type: Literal["runtime", "theoretical"] = "runtime",
         **kwargs,
     ):
         """
@@ -92,14 +79,17 @@ class UserSimulator:
             max_retries: maximum number of retries for each tool call
         """
         # Task information
-        self.actions = spec.actions
-        self.public_action_names = [action.name for action in spec.public_tools]
-        self.validity_fn = getattr(spec, "validity_fn", None)
+        self.spec = spec
+        self.actions = spec.private_tools
+        self.initial_specification = spec.initial_specification
+        self.commonsense_description = spec.commonsense_description
+        self.shared_context = spec.initial_shared_state
+        self.validity_fn = spec.validity_fn
         self.reward_fn = getattr(spec, "reward_fn", None)
-        self.fmt_instructions = spec.prediction_fmt_instructions
         self.lambda_cost = lambda_cost
         self.interaction_budget = interaction_budget
         self.verbosity = verbosity
+        self._cost_type = cost_type
 
         # State tracking
         self.conversation_history: List[UserConversationTurn] = []
@@ -115,13 +105,24 @@ class UserSimulator:
         Returns:
             float: The total cost of the conversation
         """
-        return sum(
-            [
-                turn.runtime_cost
-                for turn in self.conversation_history
-                if turn.runtime_cost is not None
-            ]
-        )
+        if self._cost_type == "runtime":
+            return sum(
+                [
+                    turn.runtime_cost
+                    for turn in self.conversation_history
+                    if turn.runtime_cost is not None
+                ]
+            )
+        elif self._cost_type == "theoretical":
+            return sum(
+                [
+                    turn.theoretical_cost
+                    for turn in self.conversation_history
+                    if turn.theoretical_cost is not None
+                ]
+            )
+        else:
+            raise ValueError(f"Invalid cost type: {self._cost_type}")
 
     @property
     def remaining_budget(self) -> float:
@@ -166,26 +167,21 @@ class UserSimulator:
 
     ######## MAIN METHODS ##########
 
-    def initial_message(self) -> Tuple[str, float]:
-        """
-        Generate the initial user message and its cost, to start the conversation.
-        Returns:
-            Tuple[str, float]: The user's initial message and its cost in seconds
-        Raises:
-            NotImplementedError: If the subclass does not implement this method
-        """
-        raise NotImplementedError(
-            "Subclasses must implement initial_message() for user-first conversations."
-        )
-
     def grade(self, yhat: str) -> Tuple[bool, float, dict]:
         """
         Given a single yhat, grades it using the reward function.
         """
         try:
-            s, d = self.score(yhat=yhat)
+            # Use the full feature set for the final, true grade
+            full_feature_ids = [c.id for c in getattr(self.spec, "features", [])]
+            assert self.reward_fn is not None, "Reward function is not set"
+            s, d = self.reward_fn(
+                yhat=yhat,
+                raise_errors=False,
+                feature_set=list(full_feature_ids),
+            )
             b = not (s == float("-inf"))
-        except Exception as e:
+        except Exception:
             b, d = self.validate(yhat=yhat)
             s = None
         return b, s, d
@@ -206,25 +202,6 @@ class UserSimulator:
         b, d = self.validity_fn(yhat=yhat, raise_errors=False)
         return b, d
 
-    def score(self, yhat: str) -> Tuple[float, dict]:
-        """
-        Given a single yhat, scores it using the reward function.
-
-        Args:
-            yhat: The response to score
-
-        Returns:
-            Tuple[float, dict]: A tuple containing:
-                - float: Score (-inf if invalid)
-                - dict: Evaluation metadata
-        """
-        assert self.reward_fn is not None, "Reward function is not set"
-
-        s, d = self.reward_fn(yhat=yhat, raise_errors=False)
-
-        cost_term = self.lambda_cost * self.total_cost
-        return s - cost_term, d
-
     def reset(self) -> None:
         """
         Reset the user simulator to its initial state.
@@ -232,7 +209,7 @@ class UserSimulator:
         self.conversation_history = []
         self.action_history = defaultdict(list)
 
-    def __call__(self, assistant_msg: str) -> Tuple[str, float]:
+    def __call__(self, assistant_msg: str = None) -> Tuple[str, float]:
         """
         Process a message from the assistant and generate a response.
 
@@ -247,16 +224,11 @@ class UserSimulator:
         Raises:
             BudgetExceeded: If the interaction budget is exceeded
         """
+        # Enforce budget internally only when costing by user time
         if self.remaining_budget <= 0:
             raise BudgetExceeded()
 
-        response, token_cost, runtime_cost = self._respond(assistant_msg)
-
-        # build the rationale
-        rationale = ""
-        for action in self.action_history[self.turn_count]:
-            rationale += f"Thought: {action.content}\n"
-            rationale += f"Actions: {action.actions}\n\n"
+        response, theoretical_cost, runtime_cost = self._respond(assistant_msg)
 
         if self.verbosity:
             print_debug(
@@ -269,9 +241,9 @@ class UserSimulator:
             UserConversationTurn(
                 assistant_msg=assistant_msg,
                 user_msg=response,
-                token_cost=token_cost,
+                theoretical_cost=theoretical_cost,
                 runtime_cost=runtime_cost,
-                user_rationale=rationale,
+                user_rationale=None,
                 remaining_budget=self.remaining_budget - runtime_cost,
             )
         )  # This will be appended even if the user runs out of budget
@@ -300,63 +272,6 @@ class UserSimulator:
         raise NotImplementedError("Subclasses must implement this method")
 
     ######## HELPER METHODS ##########
-
-    def _fmt_conversation_history(
-        self, assistant_msg: Optional[str] = None, max_turns: int = 10
-    ) -> str:
-        """
-        Format the conversation history as a string, including
-        optionally the next assistant message.
-
-        Args:
-            assistant_msg: Optional next message from the assistant to include
-            max_turns: Maximum number of turns to include.
-                Will show max_turns -2 of initial turns, plus the most recent two turns.
-        Returns:
-            str: A formatted string of the conversation history
-        """
-        if len(self.conversation_history) == 0 and assistant_msg is None:
-            return "No previous conversation history."
-
-        lines = []
-        n = len(self.conversation_history)
-        if n <= max_turns:
-            first_part = self.conversation_history
-            last_part = []
-        else:
-            # Avoid overlap/duplication
-            first_part = self.conversation_history[: max_turns - 2]
-            last_part = self.conversation_history[-2:]
-
-        # Insert omission line after the first part
-        for turn in first_part:
-            if turn.assistant_msg is not None:
-                lines.append(
-                    add_section("[HUMAN MESSAGE]", turn.assistant_msg, style="divider")
-                )
-            if turn.user_msg is not None:
-                lines.append(
-                    add_section("[YOUR RESPONSE]", turn.user_msg, style="divider")
-                )
-        if len(last_part) > 0:
-            lines.append("... middle of conversation omitted for brevity ...")
-            for turn in last_part:
-                if turn.assistant_msg is not None:
-                    lines.append(
-                        add_section(
-                            "[HUMAN MESSAGE]", turn.assistant_msg, style="divider"
-                        )
-                    )
-                if turn.user_msg is not None:
-                    lines.append(
-                        add_section("[YOUR RESPONSE]", turn.user_msg, style="divider")
-                    )
-
-        if assistant_msg is not None:
-            lines.append(
-                add_section(f"[(NEW!) HUMAN MESSAGE]", assistant_msg, style="divider")
-            )
-        return "\n\n".join(lines)
 
     def get_simulator_system_message(self, assistant_msg: str) -> str:
         """

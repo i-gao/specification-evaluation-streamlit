@@ -1,0 +1,3647 @@
+[
+  {
+    "demographic_information": {
+      "weight": 90.84586845503304,
+      "height": 175.14513726687358,
+      "age": 43,
+      "sex": "male",
+      "activity_level": "lightly active",
+      "goal": "maintain",
+      "target_calories": 2101.8346134358044,
+      "meals_considered": [
+        "lunch",
+        "snack",
+        "dinner"
+      ],
+      "household_size": 1
+    },
+    "constraints": [
+      {
+        "type": "boolean_penalize_false",
+        "description": "All recipes must be cooked before they are consumed",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "check_recipes_eaten_after_cooked",
+        "extractor_kwargs": null,
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "The total number of servings consumed of a recipe across the entire plan must be <= the total number of servings cooked of the recipe",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "check_servings_consumed_lt_cooked_total",
+        "extractor_kwargs": null,
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "Nothing should be eaten on Monday lunch because of busy schedule",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "nothing_is_eaten",
+        "extractor_kwargs": {
+          "day": "monday",
+          "meal": "lunch"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "All non-blocked meals must be filled",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_non_blocked_meals_filled",
+        "extractor_kwargs": {
+          "meals_considered": [
+            "lunch",
+            "snack",
+            "dinner"
+          ],
+          "blocked_meals": [
+            "monday:lunch"
+          ]
+        },
+        "bad_set": [
+          false
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "The meal plan should never include breakfast because the client doesn't eat this meal.",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "meal_should_be_empty",
+        "extractor_kwargs": {
+          "meal_to_skip": "breakfast"
+        },
+        "bad_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain bell peppers because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "bell peppers"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain pork because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "pork"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain lard because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "lard"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain alcohol because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "alcohol"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain fructose because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "fructose"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain passion fruit because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "passion fruit"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain durian because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "durian"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "multiset_jaccard",
+        "description": "Must follow Ketogenic diet for all meals",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "meals_violating_diet",
+        "extractor_kwargs": {
+          "diet": "Ketogenic"
+        },
+        "true_set": []
+      },
+      {
+        "type": "radial_band",
+        "lower": 2001.8346134358044,
+        "upper": 2201.8346134358044,
+        "sigma": 100.0,
+        "description": "Aim for 2102 calories on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_calories",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 2001.8346134358044,
+        "upper": 2201.8346134358044,
+        "sigma": 100.0,
+        "description": "Aim for 2102 calories on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_calories",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 2001.8346134358044,
+        "upper": 2201.8346134358044,
+        "sigma": 100.0,
+        "description": "Aim for 2102 calories on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_calories",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "Cannot spend more time cooking & prepping for Monday dinner than the client's limit of 100 minutes",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cooking_time_under",
+        "extractor_kwargs": {
+          "day": "monday",
+          "meal": "dinner",
+          "time_limit": 100
+        },
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "Cannot spend more time cooking & prepping for Tuesday lunch than the client's limit of 40 minutes",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cooking_time_under",
+        "extractor_kwargs": {
+          "day": "tuesday",
+          "meal": "lunch",
+          "time_limit": 40
+        },
+        "none_val": 0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Cannot use equipment 'Wire Rack' for any meal",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_equipment",
+        "bad_set": [
+          "Wire Rack"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "radial_band",
+        "lower": 236.456394011528,
+        "upper": 341.54812468331824,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 236.5 to 341.5 grams of carbs on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_carbohydrate",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 236.456394011528,
+        "upper": 341.54812468331824,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 236.5 to 341.5 grams of carbs on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_carbohydrate",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 236.456394011528,
+        "upper": 341.54812468331824,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 236.5 to 341.5 grams of carbs on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_carbohydrate",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 46.70743585412899,
+        "upper": 81.73801274472572,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 46.7 to 81.7 grams of fats on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_total_fat",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 46.70743585412899,
+        "upper": 81.73801274472572,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 46.7 to 81.7 grams of fats on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_total_fat",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 46.70743585412899,
+        "upper": 81.73801274472572,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 46.7 to 81.7 grams of fats on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_total_fat",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 52.545865335895115,
+        "upper": 183.91052867563286,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 52.5 to 183.9 grams of protein on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_protein",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 52.545865335895115,
+        "upper": 183.91052867563286,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 52.5 to 183.9 grams of protein on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_protein",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 52.545865335895115,
+        "upper": 183.91052867563286,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 52.5 to 183.9 grams of protein on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_protein",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 25.0,
+        "upper": 30.0,
+        "sigma": 5.0,
+        "description": "Healthy fiber intake: aim for 25.0 to 30.0 grams of fiber on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_fiber",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 25.0,
+        "upper": 30.0,
+        "sigma": 5.0,
+        "description": "Healthy fiber intake: aim for 25.0 to 30.0 grams of fiber on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_fiber",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 25.0,
+        "upper": 30.0,
+        "sigma": 5.0,
+        "description": "Healthy fiber intake: aim for 25.0 to 30.0 grams of fiber on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_fiber",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: bean",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "bean"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: ketchup",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "ketchup"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: eggplant",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "eggplant"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: fish",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "fish"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: lobster",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "lobster"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: salt",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "salt"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: cheese",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "cheese"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: oyster",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "oyster"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: vinegar",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "vinegar"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: garlic",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "garlic"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: cauliflower",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "cauliflower"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: potato",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "potato"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: coconut",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "coconut"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: blackberry",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "blackberry"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: peanut butter",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "peanut butter"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include cuisine: Cajun and Creole",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cuisine_appears",
+        "extractor_kwargs": {
+          "cuisine": "Cajun and Creole"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include cuisine: Swedish",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cuisine_appears",
+        "extractor_kwargs": {
+          "cuisine": "Swedish"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include cuisine: Polish",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cuisine_appears",
+        "extractor_kwargs": {
+          "cuisine": "Polish"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include cuisine: Brazilian",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cuisine_appears",
+        "extractor_kwargs": {
+          "cuisine": "Brazilian"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include cuisine: German",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cuisine_appears",
+        "extractor_kwargs": {
+          "cuisine": "German"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "hinge",
+        "lower": 3.9,
+        "upper": 5.0,
+        "lower_val": 0,
+        "upper_val": 1,
+        "min_val": -1,
+        "max_val": 1,
+        "description": "All recipes must have a rating of at least 3.9 stars",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "min_star_rating",
+        "extractor_kwargs": {},
+        "none_val": 0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include food: waffles",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "food_keyword_appears",
+        "extractor_kwargs": {
+          "keyword": "waffles"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include food: cake",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "food_keyword_appears",
+        "extractor_kwargs": {
+          "keyword": "cake"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include food: quiche",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "food_keyword_appears",
+        "extractor_kwargs": {
+          "keyword": "quiche"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      }
+    ],
+    "all_weights": [
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      0.9490866466183364,
+      0.9490866466183364,
+      0.9490866466183364,
+      0.9490866466183364,
+      0.9490866466183364,
+      0.9490866466183364,
+      0.9490866466183364,
+      999999.0,
+      0.3910719784958364,
+      0.3910719784958364,
+      0.3910719784958364,
+      999999.0,
+      999999.0,
+      999999.0,
+      0.24460022752377852,
+      0.24460022752377852,
+      0.24460022752377852,
+      0.7467347287972798,
+      0.7467347287972798,
+      0.7467347287972798,
+      0.26837710307246077,
+      0.26837710307246077,
+      0.26837710307246077,
+      0.7437572271008684,
+      0.7437572271008684,
+      0.7437572271008684,
+      0.9298349191636748,
+      0.9298349191636748,
+      0.9298349191636748,
+      0.9298349191636748,
+      0.9298349191636748,
+      0.9298349191636748,
+      0.9298349191636748,
+      0.9298349191636748,
+      0.9298349191636748,
+      0.9298349191636748,
+      0.9298349191636748,
+      0.9298349191636748,
+      0.9298349191636748,
+      0.9298349191636748,
+      0.9298349191636748,
+      0.7634577762206378,
+      0.7634577762206378,
+      0.7634577762206378,
+      0.7634577762206378,
+      0.7634577762206378,
+      0.6123408300407894,
+      0.2035747829980914,
+      0.2035747829980914,
+      0.2035747829980914
+    ]
+  },
+  {
+    "demographic_information": {
+      "weight": 91.00391579255333,
+      "height": 175.1436213577981,
+      "age": 33,
+      "sex": "male",
+      "activity_level": "sedentary",
+      "goal": "maintain",
+      "target_calories": 1960.7146987689102,
+      "meals_considered": [
+        "breakfast",
+        "lunch",
+        "dinner"
+      ],
+      "household_size": 1
+    },
+    "constraints": [
+      {
+        "type": "boolean_penalize_false",
+        "description": "All recipes must be cooked before they are consumed",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "check_recipes_eaten_after_cooked",
+        "extractor_kwargs": null,
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "The total number of servings consumed of a recipe across the entire plan must be <= the total number of servings cooked of the recipe",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "check_servings_consumed_lt_cooked_total",
+        "extractor_kwargs": null,
+        "none_val": 0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "All considered meals must be filled",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_non_blocked_meals_filled",
+        "extractor_kwargs": {
+          "meals_considered": [
+            "breakfast",
+            "lunch",
+            "dinner"
+          ],
+          "blocked_meals": []
+        },
+        "bad_set": [
+          false
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "The meal plan should never include snack because the client doesn't eat this meal.",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "meal_should_be_empty",
+        "extractor_kwargs": {
+          "meal_to_skip": "snack"
+        },
+        "bad_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain tofu because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "tofu"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain zucchini because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "zucchini"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain passion fruit because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "passion fruit"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain durian because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "durian"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Must avoid seafood for all meals",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "all_intolerances",
+        "bad_set": [
+          "Seafood"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "radial_band",
+        "lower": 1860.7146987689102,
+        "upper": 2060.7146987689102,
+        "sigma": 100.0,
+        "description": "Aim for 1961 calories on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_calories",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 1860.7146987689102,
+        "upper": 2060.7146987689102,
+        "sigma": 100.0,
+        "description": "Aim for 1961 calories on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_calories",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 1860.7146987689102,
+        "upper": 2060.7146987689102,
+        "sigma": 100.0,
+        "description": "Aim for 1961 calories on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_calories",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "Cannot spend more time cooking & prepping for Sunday dinner than the client's limit of 190 minutes",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cooking_time_under",
+        "extractor_kwargs": {
+          "day": "sunday",
+          "meal": "dinner",
+          "time_limit": 190
+        },
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "Cannot spend more time cooking & prepping for Monday dinner than the client's limit of 120 minutes",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cooking_time_under",
+        "extractor_kwargs": {
+          "day": "monday",
+          "meal": "dinner",
+          "time_limit": 120
+        },
+        "none_val": 0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Cannot use equipment 'Pizza Pan' for any meal",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_equipment",
+        "bad_set": [
+          "Pizza Pan"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Cannot use equipment 'Blender' for any meal",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_equipment",
+        "bad_set": [
+          "Blender"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "radial_band",
+        "lower": 220.58040361150242,
+        "upper": 318.61613854994795,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 220.6 to 318.6 grams of carbs on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_carbohydrate",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 220.58040361150242,
+        "upper": 318.61613854994795,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 220.6 to 318.6 grams of carbs on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_carbohydrate",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 220.58040361150242,
+        "upper": 318.61613854994795,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 220.6 to 318.6 grams of carbs on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_carbohydrate",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 43.57143775042023,
+        "upper": 76.25001606323539,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 43.6 to 76.3 grams of fats on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_total_fat",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 43.57143775042023,
+        "upper": 76.25001606323539,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 43.6 to 76.3 grams of fats on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_total_fat",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 43.57143775042023,
+        "upper": 76.25001606323539,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 43.6 to 76.3 grams of fats on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_total_fat",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 49.01786746922276,
+        "upper": 171.56253614227964,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 49.0 to 171.6 grams of protein on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_protein",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 49.01786746922276,
+        "upper": 171.56253614227964,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 49.0 to 171.6 grams of protein on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_protein",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 49.01786746922276,
+        "upper": 171.56253614227964,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 49.0 to 171.6 grams of protein on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_protein",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 25.0,
+        "upper": 30.0,
+        "sigma": 5.0,
+        "description": "Healthy fiber intake: aim for 25.0 to 30.0 grams of fiber on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_fiber",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 25.0,
+        "upper": 30.0,
+        "sigma": 5.0,
+        "description": "Healthy fiber intake: aim for 25.0 to 30.0 grams of fiber on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_fiber",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 25.0,
+        "upper": 30.0,
+        "sigma": 5.0,
+        "description": "Healthy fiber intake: aim for 25.0 to 30.0 grams of fiber on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_fiber",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: mango",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "mango"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: broccoli",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "broccoli"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: pumpkin",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "pumpkin"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: pear",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "pear"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: black pepper",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "black pepper"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: pineapple",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "pineapple"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: garlic",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "garlic"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: yogurt",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "yogurt"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: corn",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "corn"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include cuisine: Cajun and Creole",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cuisine_appears",
+        "extractor_kwargs": {
+          "cuisine": "Cajun and Creole"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include cuisine: Puerto Rican",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cuisine_appears",
+        "extractor_kwargs": {
+          "cuisine": "Puerto Rican"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include cuisine: Japanese",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cuisine_appears",
+        "extractor_kwargs": {
+          "cuisine": "Japanese"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "hinge",
+        "lower": 1.2,
+        "upper": 5.0,
+        "lower_val": 0,
+        "upper_val": 1,
+        "min_val": -1,
+        "max_val": 1,
+        "description": "All recipes must have a rating of at least 1.2 stars",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "min_star_rating",
+        "extractor_kwargs": {},
+        "none_val": 0
+      }
+    ],
+    "all_weights": [
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      0.05045891463262875,
+      0.05045891463262875,
+      0.05045891463262875,
+      0.05045891463262875,
+      999999.0,
+      0.7347341273331907,
+      0.7347341273331907,
+      0.7347341273331907,
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      0.43626872804805283,
+      0.43626872804805283,
+      0.43626872804805283,
+      0.5767384858339915,
+      0.5767384858339915,
+      0.5767384858339915,
+      0.617317444422673,
+      0.617317444422673,
+      0.617317444422673,
+      0.3508633549566833,
+      0.3508633549566833,
+      0.3508633549566833,
+      0.47933351281357617,
+      0.47933351281357617,
+      0.47933351281357617,
+      0.47933351281357617,
+      0.47933351281357617,
+      0.47933351281357617,
+      0.47933351281357617,
+      0.47933351281357617,
+      0.47933351281357617,
+      0.0489708225924983,
+      0.0489708225924983,
+      0.0489708225924983,
+      0.20848136487633917
+    ]
+  },
+  {
+    "demographic_information": {
+      "weight": 76.36734686702762,
+      "height": 161.56498471777422,
+      "age": 41,
+      "sex": "female",
+      "activity_level": "very active",
+      "goal": "maintain",
+      "target_calories": 2076.760179135069,
+      "meals_considered": [
+        "breakfast",
+        "lunch",
+        "snack",
+        "dinner"
+      ],
+      "household_size": 1
+    },
+    "constraints": [
+      {
+        "type": "boolean_penalize_false",
+        "description": "All recipes must be cooked before they are consumed",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "check_recipes_eaten_after_cooked",
+        "extractor_kwargs": null,
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "The total number of servings consumed of a recipe across the entire plan must be <= the total number of servings cooked of the recipe",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "check_servings_consumed_lt_cooked_total",
+        "extractor_kwargs": null,
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "Nothing should be eaten on Sunday breakfast because of busy schedule",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "nothing_is_eaten",
+        "extractor_kwargs": {
+          "day": "sunday",
+          "meal": "breakfast"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "All non-blocked meals must be filled",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_non_blocked_meals_filled",
+        "extractor_kwargs": {
+          "meals_considered": [
+            "breakfast",
+            "lunch",
+            "snack",
+            "dinner"
+          ],
+          "blocked_meals": [
+            "sunday:breakfast"
+          ]
+        },
+        "bad_set": [
+          false
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain coconut because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "coconut"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain bananas because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "bananas"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain gelatin because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "gelatin"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain MSG because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "MSG"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain radishes because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "radishes"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain capers because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "capers"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain sauerkraut because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "sauerkraut"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain licorice because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "licorice"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain mint because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "mint"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain dill because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "dill"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain molasses because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "molasses"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Must avoid soy for all meals",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "all_intolerances",
+        "bad_set": [
+          "Soy"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Must avoid tree nut for all meals",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "all_intolerances",
+        "bad_set": [
+          "Tree Nut"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "radial_band",
+        "lower": 1976.760179135069,
+        "upper": 2176.760179135069,
+        "sigma": 100.0,
+        "description": "Aim for 2077 calories on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_calories",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 1976.760179135069,
+        "upper": 2176.760179135069,
+        "sigma": 100.0,
+        "description": "Aim for 2077 calories on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_calories",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 1976.760179135069,
+        "upper": 2176.760179135069,
+        "sigma": 100.0,
+        "description": "Aim for 2077 calories on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_calories",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "Cannot spend more time cooking & prepping for Sunday breakfast than the client's limit of 20 minutes",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cooking_time_under",
+        "extractor_kwargs": {
+          "day": "sunday",
+          "meal": "breakfast",
+          "time_limit": 20
+        },
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "Cannot spend more time cooking & prepping for Sunday lunch than the client's limit of 100 minutes",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cooking_time_under",
+        "extractor_kwargs": {
+          "day": "sunday",
+          "meal": "lunch",
+          "time_limit": 100
+        },
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "Cannot spend more time cooking & prepping for Monday lunch than the client's limit of 40 minutes",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cooking_time_under",
+        "extractor_kwargs": {
+          "day": "monday",
+          "meal": "lunch",
+          "time_limit": 40
+        },
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "Cannot spend more time cooking & prepping for Tuesday snack than the client's limit of 10 minutes",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cooking_time_under",
+        "extractor_kwargs": {
+          "day": "tuesday",
+          "meal": "snack",
+          "time_limit": 10
+        },
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "Cannot spend more time cooking & prepping for Tuesday dinner than the client's limit of 110 minutes",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cooking_time_under",
+        "extractor_kwargs": {
+          "day": "tuesday",
+          "meal": "dinner",
+          "time_limit": 110
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 233.63552015269525,
+        "upper": 337.4735291094487,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 233.6 to 337.5 grams of carbs on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_carbohydrate",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 233.63552015269525,
+        "upper": 337.4735291094487,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 233.6 to 337.5 grams of carbs on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_carbohydrate",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 233.63552015269525,
+        "upper": 337.4735291094487,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 233.6 to 337.5 grams of carbs on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_carbohydrate",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 46.15022620300154,
+        "upper": 80.76289585525268,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 46.2 to 80.8 grams of fats on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_total_fat",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 46.15022620300154,
+        "upper": 80.76289585525268,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 46.2 to 80.8 grams of fats on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_total_fat",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 46.15022620300154,
+        "upper": 80.76289585525268,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 46.2 to 80.8 grams of fats on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_total_fat",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 51.91900447837673,
+        "upper": 181.71651567431852,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 51.9 to 181.7 grams of protein on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_protein",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 51.91900447837673,
+        "upper": 181.71651567431852,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 51.9 to 181.7 grams of protein on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_protein",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 51.91900447837673,
+        "upper": 181.71651567431852,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 51.9 to 181.7 grams of protein on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_protein",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 25.0,
+        "upper": 30.0,
+        "sigma": 5.0,
+        "description": "Healthy fiber intake: aim for 25.0 to 30.0 grams of fiber on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_fiber",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 25.0,
+        "upper": 30.0,
+        "sigma": 5.0,
+        "description": "Healthy fiber intake: aim for 25.0 to 30.0 grams of fiber on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_fiber",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 25.0,
+        "upper": 30.0,
+        "sigma": 5.0,
+        "description": "Healthy fiber intake: aim for 25.0 to 30.0 grams of fiber on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_fiber",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: mango",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "mango"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: lemon",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "lemon"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: eggplant",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "eggplant"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: pasta",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "pasta"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: pork",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "pork"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: butter",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "butter"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: orange",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "orange"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: fish",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "fish"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: pumpkin",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "pumpkin"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: lime",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "lime"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: raspberry",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "raspberry"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: salt",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "salt"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: strawberry",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "strawberry"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: mustard",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "mustard"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: pineapple",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "pineapple"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: plum",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "plum"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: oats",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "oats"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: blackberry",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "blackberry"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include cuisine: Puerto Rican",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cuisine_appears",
+        "extractor_kwargs": {
+          "cuisine": "Puerto Rican"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include cuisine: Chinese",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cuisine_appears",
+        "extractor_kwargs": {
+          "cuisine": "Chinese"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include cuisine: Russian",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cuisine_appears",
+        "extractor_kwargs": {
+          "cuisine": "Russian"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "hinge",
+        "lower": 2.5,
+        "upper": 5.0,
+        "lower_val": 0,
+        "upper_val": 1,
+        "min_val": -1,
+        "max_val": 1,
+        "description": "All recipes must have a rating of at least 2.5 stars",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "min_star_rating",
+        "extractor_kwargs": {},
+        "none_val": 0
+      },
+      {
+        "type": "hinge",
+        "lower": 5,
+        "upper": 12,
+        "lower_val": 0,
+        "upper_val": -1,
+        "min_val": -1,
+        "max_val": 0,
+        "description": "Penalty for cooking more than 5 times total",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "total_cooks",
+        "extractor_kwargs": null,
+        "none_val": 0
+      }
+    ],
+    "all_weights": [
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      0.5697938857711394,
+      0.5697938857711394,
+      0.5697938857711394,
+      0.5697938857711394,
+      0.5697938857711394,
+      0.5697938857711394,
+      0.5697938857711394,
+      0.5697938857711394,
+      0.5697938857711394,
+      0.5697938857711394,
+      0.5697938857711394,
+      999999.0,
+      999999.0,
+      0.9951027867745931,
+      0.9951027867745931,
+      0.9951027867745931,
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      0.6395404326753286,
+      0.6395404326753286,
+      0.6395404326753286,
+      0.14951899949421943,
+      0.14951899949421943,
+      0.14951899949421943,
+      0.3340573082475944,
+      0.3340573082475944,
+      0.3340573082475944,
+      0.36770510988143534,
+      0.36770510988143534,
+      0.36770510988143534,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.6337478146153137,
+      0.7278828843865176,
+      0.7278828843865176,
+      0.7278828843865176,
+      0.8848535007602615,
+      999999.0
+    ]
+  },
+  {
+    "demographic_information": {
+      "weight": 77.63904554496982,
+      "height": 161.30349094366926,
+      "age": 67,
+      "sex": "female",
+      "activity_level": "sedentary",
+      "goal": "gain",
+      "target_calories": 1875.1294690978234,
+      "meals_considered": [
+        "lunch",
+        "dinner"
+      ],
+      "household_size": 1
+    },
+    "constraints": [
+      {
+        "type": "boolean_penalize_false",
+        "description": "All recipes must be cooked before they are consumed",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "check_recipes_eaten_after_cooked",
+        "extractor_kwargs": null,
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "The total number of servings consumed of a recipe across the entire plan must be <= the total number of servings cooked of the recipe",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "check_servings_consumed_lt_cooked_total",
+        "extractor_kwargs": null,
+        "none_val": 0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "All considered meals must be filled",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_non_blocked_meals_filled",
+        "extractor_kwargs": {
+          "meals_considered": [
+            "lunch",
+            "dinner"
+          ],
+          "blocked_meals": []
+        },
+        "bad_set": [
+          false
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "The meal plan should never include breakfast because the client doesn't eat this meal.",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "meal_should_be_empty",
+        "extractor_kwargs": {
+          "meal_to_skip": "breakfast"
+        },
+        "bad_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "The meal plan should never include snack because the client doesn't eat this meal.",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "meal_should_be_empty",
+        "extractor_kwargs": {
+          "meal_to_skip": "snack"
+        },
+        "bad_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain cilantro because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "cilantro"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain mushrooms because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "mushrooms"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain olives because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "olives"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain tofu because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "tofu"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain beef because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "beef"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain passion fruit because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "passion fruit"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain durian because of strong food dislikes",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "durian"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Must avoid gluten for all meals",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "all_intolerances",
+        "bad_set": [
+          "Gluten"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Must avoid tree nut for all meals",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "all_intolerances",
+        "bad_set": [
+          "Tree Nut"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "radial_band",
+        "lower": 1775.1294690978234,
+        "upper": 1975.1294690978234,
+        "sigma": 100.0,
+        "description": "Aim for 1875 calories on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_calories",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 1775.1294690978234,
+        "upper": 1975.1294690978234,
+        "sigma": 100.0,
+        "description": "Aim for 1875 calories on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_calories",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 1775.1294690978234,
+        "upper": 1975.1294690978234,
+        "sigma": 100.0,
+        "description": "Aim for 1875 calories on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_calories",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "Cannot spend more time cooking & prepping for Monday dinner than the client's limit of 110 minutes",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cooking_time_under",
+        "extractor_kwargs": {
+          "day": "monday",
+          "meal": "dinner",
+          "time_limit": 110
+        },
+        "none_val": 0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Cannot use equipment 'Rolling Pin' for any meal",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_equipment",
+        "bad_set": [
+          "Rolling Pin"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "radial_band",
+        "lower": 210.95206527350513,
+        "upper": 304.7085387283963,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 211.0 to 304.7 grams of carbs on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_carbohydrate",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 210.95206527350513,
+        "upper": 304.7085387283963,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 211.0 to 304.7 grams of carbs on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_carbohydrate",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 210.95206527350513,
+        "upper": 304.7085387283963,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 211.0 to 304.7 grams of carbs on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_carbohydrate",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 41.669543757729414,
+        "upper": 72.92170157602646,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 41.7 to 72.9 grams of fats on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_total_fat",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 41.669543757729414,
+        "upper": 72.92170157602646,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 41.7 to 72.9 grams of fats on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_total_fat",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 41.669543757729414,
+        "upper": 72.92170157602646,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 41.7 to 72.9 grams of fats on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_total_fat",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 46.87823672744559,
+        "upper": 164.07382854605953,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 46.9 to 164.1 grams of protein on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_protein",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 46.87823672744559,
+        "upper": 164.07382854605953,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 46.9 to 164.1 grams of protein on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_protein",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 46.87823672744559,
+        "upper": 164.07382854605953,
+        "sigma": 10.0,
+        "description": "Healthy macronutrient range: aim for 46.9 to 164.1 grams of protein on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_protein",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 25.0,
+        "upper": 30.0,
+        "sigma": 5.0,
+        "description": "Healthy fiber intake: aim for 25.0 to 30.0 grams of fiber on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_fiber",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 25.0,
+        "upper": 30.0,
+        "sigma": 5.0,
+        "description": "Healthy fiber intake: aim for 25.0 to 30.0 grams of fiber on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_fiber",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 25.0,
+        "upper": 30.0,
+        "sigma": 5.0,
+        "description": "Healthy fiber intake: aim for 25.0 to 30.0 grams of fiber on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_fiber",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: bell pepper",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "bell pepper"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: mango",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "mango"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: sweet potato",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "sweet potato"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: lettuce",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "lettuce"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: soy sauce",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "soy sauce"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: beef",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "beef"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: ginger",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "ginger"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: milk",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "milk"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: cheese",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "cheese"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: eggs",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "eggs"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: oyster",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "oyster"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: banana",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "banana"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: vinegar",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "vinegar"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: cauliflower",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "cauliflower"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: pita",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "pita"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: apple",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "apple"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: peanut butter",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "peanut butter"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: squash",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "squash"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include ingredient: peach",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "ingredient_appears",
+        "extractor_kwargs": {
+          "ingredient": "peach"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include cuisine: Belgian",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cuisine_appears",
+        "extractor_kwargs": {
+          "cuisine": "Belgian"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include cuisine: Filipino",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cuisine_appears",
+        "extractor_kwargs": {
+          "cuisine": "Filipino"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include cuisine: Jamaican",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cuisine_appears",
+        "extractor_kwargs": {
+          "cuisine": "Jamaican"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include cuisine: Soul Food",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cuisine_appears",
+        "extractor_kwargs": {
+          "cuisine": "Soul Food"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "reward_any_in_set",
+        "description": "Prefer to include cuisine: Israeli",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cuisine_appears",
+        "extractor_kwargs": {
+          "cuisine": "Israeli"
+        },
+        "good_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "hinge",
+        "lower": 4.4,
+        "upper": 5.0,
+        "lower_val": 0,
+        "upper_val": 1,
+        "min_val": -1,
+        "max_val": 1,
+        "description": "All recipes must have a rating of at least 4.4 stars",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "min_star_rating",
+        "extractor_kwargs": {},
+        "none_val": 0
+      }
+    ],
+    "all_weights": [
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      0.03556636349299602,
+      0.03556636349299602,
+      0.03556636349299602,
+      0.03556636349299602,
+      0.03556636349299602,
+      0.03556636349299602,
+      0.03556636349299602,
+      999999.0,
+      999999.0,
+      0.7234854902696618,
+      0.7234854902696618,
+      0.7234854902696618,
+      999999.0,
+      999999.0,
+      0.842667299062667,
+      0.842667299062667,
+      0.842667299062667,
+      0.5148552382737732,
+      0.5148552382737732,
+      0.5148552382737732,
+      0.040232866719181914,
+      0.040232866719181914,
+      0.040232866719181914,
+      0.9386601679402308,
+      0.9386601679402308,
+      0.9386601679402308,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.6429557132598108,
+      0.7613891378831643,
+      0.7613891378831643,
+      0.7613891378831643,
+      0.7613891378831643,
+      0.7613891378831643,
+      0.948875462318227
+    ]
+  },
+  {
+    "demographic_information": {
+      "weight": 90.5981692471691,
+      "height": 175.64056450299344,
+      "age": 24,
+      "sex": "male",
+      "activity_level": "sedentary",
+      "goal": "maintain",
+      "target_calories": 2008.7567424541899,
+      "meals_considered": [
+        "breakfast",
+        "lunch",
+        "dinner"
+      ],
+      "household_size": 1
+    },
+    "constraints": [
+      {
+        "type": "boolean_penalize_false",
+        "description": "All recipes must be cooked before they are consumed",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "check_recipes_eaten_after_cooked",
+        "extractor_kwargs": null,
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "The total number of servings consumed of a recipe across the entire plan must be <= the total number of servings cooked of the recipe",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "check_servings_consumed_lt_cooked_total",
+        "extractor_kwargs": null,
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "Nothing should be eaten on Monday lunch because of busy schedule",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "nothing_is_eaten",
+        "extractor_kwargs": {
+          "day": "monday",
+          "meal": "lunch"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "Nothing should be eaten on Tuesday breakfast because of busy schedule",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "nothing_is_eaten",
+        "extractor_kwargs": {
+          "day": "tuesday",
+          "meal": "breakfast"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "All non-blocked meals must be filled",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "all_non_blocked_meals_filled",
+        "extractor_kwargs": {
+          "meals_considered": [
+            "breakfast",
+            "lunch",
+            "dinner"
+          ],
+          "blocked_meals": [
+            "monday:lunch",
+            "tuesday:breakfast"
+          ]
+        },
+        "bad_set": [
+          false
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "The meal plan should never include snack because the client doesn't eat this meal.",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "meal_should_be_empty",
+        "extractor_kwargs": {
+          "meal_to_skip": "snack"
+        },
+        "bad_set": [
+          true
+        ],
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain animal rennet because of food allergies",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "animal rennet"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain okra because of food allergies",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "okra"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain licorice because of food allergies",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "licorice"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain tamarind because of food allergies",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "tamarind"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Recipes cannot contain squash because of food allergies",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "all_ingredients",
+        "bad_set": [
+          "squash"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "penalize_any_in_set",
+        "description": "Must avoid peanut for all meals",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": true,
+        "extractor": "all_intolerances",
+        "bad_set": [
+          "Peanut"
+        ],
+        "extractor_kwargs": {},
+        "none_val": 0.0
+      },
+      {
+        "type": "radial_band",
+        "lower": 1908.7567424541899,
+        "upper": 2108.75674245419,
+        "sigma": 100.0,
+        "description": "Aim for 2009 calories on Sunday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_calories",
+        "extractor_kwargs": {
+          "day": "sunday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 1908.7567424541899,
+        "upper": 2108.75674245419,
+        "sigma": 100.0,
+        "description": "Aim for 2009 calories on Monday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_calories",
+        "extractor_kwargs": {
+          "day": "monday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "radial_band",
+        "lower": 1908.7567424541899,
+        "upper": 2108.75674245419,
+        "sigma": 100.0,
+        "description": "Aim for 2009 calories on Tuesday",
+        "is_hard": false,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "daily_calories",
+        "extractor_kwargs": {
+          "day": "tuesday"
+        },
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "Cannot spend more time cooking & prepping for Monday lunch than the client's limit of 90 minutes",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cooking_time_under",
+        "extractor_kwargs": {
+          "day": "monday",
+          "meal": "lunch",
+          "time_limit": 90
+        },
+        "none_val": 0
+      },
+      {
+        "type": "boolean_penalize_false",
+        "description": "Cannot spend more time cooking & prepping for Tuesday breakfast than the client's limit of 30 minutes",
+        "is_hard": true,
+        "is_discoverable": true,
+        "is_minimal": false,
+        "extractor": "cooking_time_under",
+        "extractor_kwargs": {
+          "day": "tuesday",
+          "meal": "breakfast",
+          "time_limit": 30
+        },
+        "none_val": 0
+      }
+    ],
+    "all_weights": [
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      999999.0,
+      0.8090267683176191,
+      0.8090267683176191,
+      0.8090267683176191,
+      999999.0,
+      999999.0
+    ]
+  }
+]

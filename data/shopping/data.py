@@ -4,16 +4,17 @@ import os
 from langchain_core.tools import tool
 import pandas as pd
 import json
-from PIL import Image
 from data.dataset import (
     SpecificationCollection,
     FixedSpecification,
     CustomSpecification,
+    LinearFixedSpecification,
 )
 from data.actions import Action, get_jupyter_actions
 from collections import Counter
 import inflect
 from data.reward import linear_reward
+import math
 from utils.misc import (
     hash,
     add_section,
@@ -22,10 +23,13 @@ from utils.misc import (
 )
 from utils.streamlit_types import FormElement
 from data.reward import Constraint
-from data.shopping.reward_utils.helpers import soft_jaccard, clip_score
+from data.shopping.reward_utils.helpers import clip_score
 import data.shopping.streamlit_render as renderer
 import streamlit as st
 from typing import Callable  # noqa: F401
+
+# extractors used in local helper below
+import data.shopping.extractors as extractors
 
 from data.shopping.db import Catalog
 
@@ -65,14 +69,13 @@ COMMONSENSE_DESCRIPTION = "Recommend products from the given catalog. All produc
 
 PREDICTION_FMT_INSTRUCTIONS = "Return the article_ids of the products to recommend to the customer, separated by commas and wrapped in <cart></cart>, e.g.: '<cart>123456,123457,123458</cart>'."
 
-MSG_FMT_INSTRUCTIONS = "Communicate with the user in language. To render a widget description of a single product, including a picture of the product, you can mention its article_id and wrap it in <item></item>, e.g.: '<item>123456</item>'. This will append a widget describing the product at the end of your message. You should always do this by default."
+MSG_FMT_INSTRUCTIONS = "Communicate with the user in language. Always mention the article_id's of products and wrap these in <item></item>, e.g.: '<item>123456</item>'. This will append a widget describing the product at the end of your message so the user can view the product. You should always do this by default."
 
 
 def render_fixed_task_explanation():
     """Render the fixed task explanation for shopping."""
     st.markdown(FIXED_INSTRUCTIONS)
     st.markdown(COMMONSENSE_DESCRIPTION)
-
 
 
 class ShoppingDataset(SpecificationCollection):
@@ -247,44 +250,25 @@ class ShoppingDataset(SpecificationCollection):
         for ix in indexes:
             intent = self._intents[ix]
             customer_info, items_df = load_transaction_data(ix)
-            ystar = ",".join(items_df["article_id"].astype(str).tolist())
-            budget = round(items_df["price"].sum(), -1)
+            ystar = (
+                "<cart>"
+                + ",".join(items_df["article_id"].astype(str).tolist())
+                + "</cart>"
+            )
+            budget = math.ceil(items_df["price"].sum() / 10) * 10
 
-            signature = f"The task is to help the customer who is shopping identify the best products to buy. The customer's intent is: ``{intent}``. Their budget is {budget}."
+            signature = f"You are a customer shopping on H&M's website. You want the assistant to recommend products matching your needs.\n**Your shopping intent**: ``{intent}``."
             product_type_counts = items_df["product_type_name"].value_counts()
-            signature += (
-                " They are looking to buy the following products: "
-                + ", ".join([f"{k} ({v})" for k, v in product_type_counts.items()])
+            p_eng = inflect.engine()
+            phr = ", ".join(
+                [
+                    f"{int(v)} {p_eng.plural(str(k), int(v))}"
+                    for k, v in product_type_counts.items()
+                ]
             )
+            signature += "\n**Products you want to buy**: " + phr
 
-            theta = add_section(
-                "Desired attributes",
-                format_items(
-                    items_df,
-                    FEATURES_OF_INTEREST,
-                    self._catalog.column_descriptions["catalog"],
-                ).replace("\n\n", "\n<chunk>\n"),
-            )
-            theta += "\n<chunk>\n" + add_section(
-                "Customer information", format_customer_info(customer_info)
-            )
-
-            initial_constraints = [
-                Constraint.create_boolean_penalize_false_constraint(
-                    description=f"Total cost must not exceed \${budget}",
-                    extractor="total_cost",
-                    extractor_kwargs={
-                        "catalog": self._catalog,
-                        "budget": budget,
-                    },
-                    is_hard=True,
-                )
-            ]
-            initial_constraints = [
-                Constraint.from_dict(c, extractor_lookup=self._extractor_lookup)
-                for c in initial_constraints
-            ]
-
+            # Build LinearFixedSpecification features and weights
             if self._persist_docker_container and self._docker_image is not None:
                 from llm_sandbox import SandboxSession
 
@@ -301,28 +285,46 @@ class ShoppingDataset(SpecificationCollection):
                 root_dir=os.path.join(DATASET_ROOT, "assets"),
             )
 
-            spec = FixedSpecification(
+            # Build all constraints (hard + soft) via helper
+            features_dicts = _build_shopping_constraints(
+                items_df, self._catalog, FEATURES_OF_INTEREST, budget=budget
+            )
+
+            features: List[Constraint] = [
+                Constraint.from_dict(fd, extractor_lookup=self._extractor_lookup)
+                for fd in features_dicts
+            ]
+
+            # Weights: hard constraints get strong penalty; soft weights via helper based on consistency in true cart
+            # All weights should be positive; linear_reward will handle sign correction for penalty constraints
+            HARD_PENALTY = 999999.0
+            importance = _compute_shopping_feature_importances(
+                items_df, self._catalog, features
+            )
+            # All weights should be positive (absolute value)
+            weights: List[float] = []
+            for c, imp in zip(features, importance):
+                if c.is_hard:
+                    weights.append(HARD_PENALTY)
+                else:
+                    weights.append(
+                        abs(float(imp))
+                    )  # Use absolute value, sign handled by linear_reward
+
+            spec = LinearFixedSpecification(
                 dataset_name=self.dataset_name,
                 index=f"fixed_{ix}",
-                full_specification=theta,
                 initial_specification=signature,
                 commonsense_description=COMMONSENSE_DESCRIPTION,
-                validity_fn=validity_fn,
-                validity_kwargs={
-                    "hard_constraints": initial_constraints,
-                    "catalog": self._catalog,
-                },
+                features=features,
+                weights=weights,
+                parse_solutions_fn=_parse_shopping_solutions,
+                parse_solutions_and_options_fn=_parse_shopping_solutions_and_options,
+                parse_y_fn=lambda yhat, raise_errors: _parse_y_fn(yhat, self._catalog, raise_errors),
                 validity_fn_tool_name="check_shopping_cart_validity",
                 validity_fn_tool_description="Check if the shopping cart is valid and within budget",
-                reward_fn=reward_fn,
-                reward_kwargs={
-                    "true_products": items_df,
-                    "catalog": self._catalog,
-                    "features_of_interest": FEATURES_OF_INTEREST,
-                    "budget": budget,
-                },
                 reward_fn_tool_name="score_shopping_cart",
-                reward_fn_tool_description="Score the shopping cart based on product matching",
+                reward_fn_tool_description="Score the shopping cart based on feature matches",
                 ystar=ystar,
                 # metric_name=None,  # Not provided
                 # baseline_scores=None,  # Not provided
@@ -333,6 +335,7 @@ class ShoppingDataset(SpecificationCollection):
                 ),
                 prediction_fmt_instructions=PREDICTION_FMT_INSTRUCTIONS,
                 render_msg_fn=output_to_streamlit,
+                render_msg_fn_txt=output_to_txt,
                 render_msg_kwargs=["db"],
                 db=self._catalog,
                 name=f"shopping_{ix}",
@@ -400,6 +403,7 @@ class ShoppingDataset(SpecificationCollection):
                 dataset_name=self.dataset_name,
                 index=f"custom_{ix}",
                 initial_specification=f"Buy {prompt_as_str} from H&M tailored for the person you have in mind. You can assume that all products are available in all sizes.",
+                current_specification=f"Buy {prompt_as_str} from H&M tailored for the person you have in mind. You can assume that all products are available in all sizes.",
                 commonsense_description=COMMONSENSE_DESCRIPTION,
                 user_specification_form_initial=self._create_user_specification_form_initial(
                     custom_intent
@@ -426,9 +430,7 @@ class ShoppingDataset(SpecificationCollection):
                 actions=actions,
                 msg_fmt_instructions=MSG_FMT_INSTRUCTIONS,
                 prediction_fmt_instructions=PREDICTION_FMT_INSTRUCTIONS,
-                render_msg_fn=lambda msg, db: output_to_streamlit(
-                    msg, db
-                ),
+                render_msg_fn=lambda msg, db: output_to_streamlit(msg, db),
                 render_msg_kwargs=["db"],
                 db=self._catalog,
                 render_comparison_fn=output_to_streamlit_comparison,
@@ -615,131 +617,9 @@ def format_items(
         ]
     )
 
-
-def reward_fn(
-    predicted_products: str,
-    true_products: pd.DataFrame,
-    features_of_interest: List[str],
-    catalog: Catalog,
-    budget: int,
-    raise_errors: bool = False,
-) -> Tuple[float, dict]:
-    """
-    Reward function for the shopping dataset.
-    Returns:
-        - score: float in [0, 100]
-        - info: dict
-            - optimal_matching: list of tuples (predicted_article_id, true_article_id)
-    """
-
-    predicted_products = parse_for_answer_tags(predicted_products, keyword="cart")
-    if predicted_products is None:
-        if raise_errors:
-            raise ValueError(
-                "Could not parse the predicted products. Make sure to wrap the article_ids in <cart></cart> tags."
-            )
-        return float("-inf"), {"error": "Could not parse the predicted products"}
-
-    predicted_products = set(predicted_products.split(","))
-    if len(predicted_products) == 0:
-        if raise_errors:
-            raise ValueError("No predicted products")
-        return float("-inf"), {"error": "No predicted products"}
-
-    if raise_errors:
-        for p in predicted_products:
-            try:
-                int(p)
-            except ValueError:
-                raise ValueError(
-                    f"Invalid predicted product: '{p}'. Make sure to return the article_ids of the products to recommend to the customer, separated by commas, e.g.: '123456,123457,123458'."
-                )
-
-    if predicted_products == set(true_products["article_id"].astype(str).tolist()):
-        return 100.0, {"parsed_yhat": predicted_products}
-
-    try:
-        predicted_series = [
-            (
-                catalog.get_row_by_article_id(p),
-                catalog.get_image_by_article_id(p),
-            )
-            for p in predicted_products
-        ]
-    except ValueError as e:
-        if raise_errors:
-            raise e
-        return float("-inf"), {"error": str(e)}
-
-    true_series = [
-        (
-            true_products.iloc[i],
-            catalog.get_image_by_article_id(true_products.iloc[i]["article_id"]),
-        )
-        for i in range(len(true_products))
-    ]
-
-    def sim_fn(x, y):
-        return product_match(x, y, features_of_interest)
-
-    score, optimal_matching, sim_matrix = soft_jaccard(
-        predicted_series, true_series, sim_fn
-    )
-    optimal_matching = [
-        (predicted_series[i][0].article_id, true_series[j][0].article_id)
-        for i, j in optimal_matching
-    ]
-
-    return (
-        score * 100,  # scale to 0-100
-        {
-            "optimal_matching": optimal_matching,
-            "parsed_yhat": predicted_products,
-            "sim_matrix": sim_matrix,
-        },
-    )
-
-
-def product_match(
-    predicted_product: Tuple[pd.Series, Image.Image],
-    true_product: Tuple[pd.Series, Image.Image],
-    features_of_interest: List[str],
-) -> float:
-    """
-    Compute the % of features of interest that match between the predicted and true products.
-    """
-    if predicted_product[0] is None or true_product[0] is None:
-        return 0
-    if "article_id" not in features_of_interest:
-        features_of_interest.append("article_id")
-    if "prod_name" not in features_of_interest:
-        features_of_interest.append("prod_name")
-
-    predicted_series, predicted_image = predicted_product
-    true_series, true_image = true_product
-
-    feature_score = np.mean(
-        [
-            predicted_series[feature] == true_series[feature]
-            for feature in features_of_interest
-        ]
-    )
-
-    if (
-        VISUAL_SCORE_WEIGHT > 0
-        and predicted_image is not None
-        and true_image is not None
-    ):
-        # only compute if we're going to need it
-        visual_score = clip_score(
-            predicted_image,
-            true_image,
-        )
-    else:
-        visual_score = 0
-
-    return (
-        feature_score * (1 - VISUAL_SCORE_WEIGHT) + visual_score * VISUAL_SCORE_WEIGHT
+    """Legacy reward function is disabled. Use LinearFixedSpecification instead."""
+    raise NotImplementedError(
+        "Legacy reward_fn disabled; use LinearFixedSpecification for scoring."
     )
 
 
@@ -779,6 +659,48 @@ def get_actions(catalog: Catalog, true_products: pd.DataFrame) -> List[Action]:
             name="Describe how close",
         )
     ]
+
+
+def output_to_txt(
+    msg: str,
+    db: Catalog,
+    render_cart: bool = True,
+    render_items: bool = True,
+) -> str:
+    """
+    Returns the rendered message in a text format.
+    All items in <item> tags and all products in <cart> tags are rendered as JSONs from the catalog.
+    """
+    predicted_products = (
+        parse_for_answer_tags(
+            msg, keyword="cart", return_none_if_not_found=True, return_all=True
+        )
+        or []
+    )
+    mentioned_products = (
+        parse_for_answer_tags(
+            msg, keyword="item", return_all=True, return_none_if_not_found=True
+        )
+        or []
+    )
+    all_products = [p.split(",") for p in predicted_products + mentioned_products]
+    all_products = [p for sublist in all_products for p in sublist]
+    all_products = [int(p.strip()) for p in all_products if p.strip().isdigit()]
+    all_products = list(dict.fromkeys(all_products))
+    all_products_jsons = []
+    for p in all_products:
+        try:
+            all_products_jsons.append(db.get_row_by_article_id(p).to_dict())
+        except ValueError:
+            all_products_jsons.append(
+                {"article_id": p, "name": "Invalid product (not in catalog)"}
+            )
+    out = (
+        msg
+        + "\n\n------- Information about mentioned items ----------\n\n"
+        + str(all_products_jsons)
+    )
+    return out
 
 
 def output_to_streamlit(
@@ -1013,3 +935,581 @@ def validity_fn(
         raise_errors=raise_errors,
     )
     return is_valid, metadata
+
+
+# ------------------------
+# Local helper to build soft features (descriptions + extractors)
+# ------------------------
+
+
+def _build_shopping_constraints(
+    true_products: pd.DataFrame,
+    catalog: Catalog,
+    features_of_interest: List[str],
+    budget: Optional[float] = None,
+) -> List[dict]:
+    """
+    Build all shopping constraints (hard + soft) for a fixed spec instance.
+
+    Hard constraints (type=boolean_penalize_false):
+    - Budget: "Total cost must not exceed $B" (extractor: total_cost)
+    - Catalog validity: "All items must exist in the catalog" (extractor: all_ids_valid)
+    - Item count: "Cart must contain exactly N items" (extractor: num_items_equals)
+
+    Soft constraints (preference features) and their constraint types:
+    - Column overlaps (per feature_of_interest): type=multiset_jaccard
+      extractor=column_values (pred column values), true_set=true column values (multiset)
+    - Exact article overlap: type=multiset_jaccard
+      extractor=identity_cart, true_set=true article_ids
+    - Neckline / sleeve / dress length / material / fit / closure / leg style / gender / age:
+      type=multiset_jaccard over tag multisets (concatenated tags per product)
+      extractor=*_tags functions, true_set=true tag list
+    - Hood presence / elasticity / sustainability:
+      type=multiset_jaccard over flag multisets (0/1 per product)
+      extractor=per_item_*_flags, true_set=true flag list
+    - Product type count coverage: type=multiset_jaccard
+      extractor=product_type_values, true_set=true product_type_name values (multiset)
+
+    Notes:
+    - multiset_jaccard computes Jaccard similarity between true and predicted multisets.
+    - Hard constraints use penalize semantics and are enforced by validity.
+    """
+    specs: List[dict] = []
+
+    # Hard constraints first
+    if budget is not None:
+        specs.append(
+            {
+                "type": "boolean_penalize_false",
+                "description": f"Total cost must not exceed ${budget}",
+                "is_hard": True,
+                "is_discoverable": True,
+                "is_minimal": False,
+                "extractor": "total_cost",
+                "extractor_kwargs": {"catalog": catalog, "budget": budget},
+                "none_val": 0,
+            }
+        )
+    specs.append(
+        {
+            "type": "boolean_penalize_false",
+            "description": "All items must exist in the catalog",
+            "is_hard": True,
+            "is_discoverable": True,
+            "is_minimal": True,
+            "extractor": "all_ids_valid",
+            "extractor_kwargs": {"catalog": catalog},
+            "none_val": 0,
+        }
+    )
+
+    # Column-overlap features with target lists
+    # Use helper functions from extractors module
+    def _values(col: str, unique: bool = True) -> List[str]:
+        return extractors._unique_values(true_products, col, unique=unique)
+
+    _format_list = extractors._format_list
+
+    for col in features_of_interest:
+        # Build true_set as multiset (all values with duplicates)
+        true_set = _values(col, unique=False)
+        specs.append(
+            {
+                "type": "multiset_jaccard",
+                "description": f"Desired {col}: {_format_list(_values(col, unique=False))}",
+                "is_hard": (col in ["index_name", "product_type_name"]),
+                "is_discoverable": True,
+                "is_minimal": (col in ["product_type_name"]),
+                "extractor": "column_values",
+                "extractor_kwargs": {
+                    "catalog": catalog,
+                    "column": col,
+                },
+                "true_set": true_set,
+            }
+        )
+
+    # Use helper function from extractors module
+    def _derive_union_tags_df(keyword_map, applicable_fn=None) -> List[str]:
+        return extractors._derive_union_tags_df(
+            true_products, keyword_map, applicable_fn=applicable_fn
+        )
+
+    target_article_ids = (
+        true_products["article_id"].astype(str).tolist()
+        if "article_id" in true_products
+        else []
+    )
+    # Only derive neckline/sleeve tags for upper or full body garments
+    target_neckline = _derive_union_tags_df(
+        extractors._NECKLINE_KEYWORDS, applicable_fn=extractors._is_upper_or_full
+    )
+    target_sleeve = _derive_union_tags_df(
+        extractors._SLEEVE_LENGTH_KEYWORDS, applicable_fn=extractors._is_upper_or_full
+    )
+    # Only derive dress length for dresses/skirts
+    target_dress_len = _derive_union_tags_df(
+        extractors._DRESS_LENGTH_KEYWORDS, applicable_fn=extractors._is_dress_or_skirt
+    )
+    target_material = _derive_union_tags_df(extractors._MATERIAL_KEYWORDS)
+    target_fit = _derive_union_tags_df(extractors._FIT_KEYWORDS)
+    target_closure = _derive_union_tags_df(extractors._CLOSURE_KEYWORDS)
+    target_leg = _derive_union_tags_df(
+        extractors._LEG_STYLE_KEYWORDS, applicable_fn=extractors._is_lower_or_full
+    )
+    target_gender = _derive_union_tags_df(extractors._GENDER_KEYWORDS)
+    target_sport = _derive_union_tags_df(extractors._SPORT_KEYWORDS)
+
+    # Age tags need custom derivation logic
+    def _derive_age_tags_df() -> List[str]:
+        """
+        Derive age tags per product and return as a list of tag strings.
+        Each product's age tag is determined by priority: baby (specific) > kid > adult.
+        """
+        tags = []
+        for _, row in true_products.iterrows():
+            text = extractors._row_text(row)
+            # Check for explicit baby sizes first (most specific - actual baby products)
+            # But exclude "baby/children" which should be treated as kid
+            if "baby/children" not in text and extractors._any_in(
+                text, extractors._AGE_KEYWORDS["baby"]
+            ):
+                tags.append("baby")
+            # Then check for kid (includes baby/children, children, kids, young boy/girl)
+            elif extractors._any_in(text, extractors._AGE_KEYWORDS["kid"]):
+                tags.append("kid")
+            # Then check for adult (but only if no baby/kid indicators)
+            elif extractors._any_in(text, extractors._AGE_KEYWORDS["adult"]):
+                tags.append("adult")
+            # Default: try to infer from context
+            elif "menswear" in text or "ladieswear" in text or "womenswear" in text:
+                tags.append("adult")
+        return tags
+
+    target_age = _derive_age_tags_df()
+
+    # Use helper function from extractors module
+    def _fraction_true_df(flag_fn) -> float:
+        return extractors._fraction_true_df(true_products, flag_fn)
+
+    winter_frac = _fraction_true_df(
+        lambda r: (
+            any(w in extractors._row_text(r) for w in extractors._WARM_KEYWORDS)
+            or (
+                "outerwear" in str(r.get("section_name", "")).lower()
+                or "outer" in str(r.get("section_name", "")).lower()
+            )
+        )
+        and not any(c in extractors._row_text(r) for c in extractors._COLD_KEYWORDS)
+    )
+    summer_frac = _fraction_true_df(
+        lambda r: any(c in extractors._row_text(r) for c in extractors._COLD_KEYWORDS)
+        and not any(w in extractors._row_text(r) for w in extractors._WARM_KEYWORDS)
+    )
+    hood_frac = _fraction_true_df(
+        lambda r: (
+            "hood" in extractors._row_text(r) or "hooded" in extractors._row_text(r)
+        )
+    )
+    elastic_frac = _fraction_true_df(
+        lambda r: any(
+            k in extractors._row_text(r)
+            for k in ["elastic", "elastication", "stretch", "spandex"]
+        )
+    )
+    sustainable_frac = _fraction_true_df(
+        lambda r: (
+            "organic" in extractors._row_text(r)
+            or "recycled" in extractors._row_text(r)
+        )
+    )
+
+    # Derived soft features (conditionally include only if applicable)
+    def _append_if(
+        desc: str,
+        extractor_name: str,
+        ekw: Dict[str, Any],
+        true_set: List[str],
+        cond: bool,
+    ):
+        if not cond:
+            return
+        specs.append(
+            {
+                "type": "multiset_jaccard",
+                "description": desc,
+                "is_hard": False,
+                "is_discoverable": True,
+                "is_minimal": False,
+                "extractor": extractor_name,
+                "extractor_kwargs": ekw,
+                "true_set": true_set,
+            }
+        )
+
+    specs.append(
+        {
+            "type": "boolean_penalize_false",
+            "description": f"Cart must contain exactly {len(true_products)} items",
+            "is_hard": True,
+            "is_discoverable": True,
+            "is_minimal": True,
+            "extractor": "num_items_equals",
+            "extractor_kwargs": {"true_products": true_products},
+            "none_val": 0,
+        }
+    )
+    if len(target_article_ids) > 0:
+        specs.append(
+            {
+                "type": "multiset_jaccard",
+                "description": "Prefer specific items from catalog",
+                "is_hard": False,
+                "is_discoverable": False,
+                "is_minimal": False,
+                "extractor": "identity_cart",
+                "extractor_kwargs": {},
+                "true_set": [int(x) for x in target_article_ids],
+            }
+        )
+    _append_if(
+        f"Desired neckline: {_format_list(target_neckline)}",
+        "neckline_tags",
+        {"catalog": catalog},
+        target_neckline,
+        len(target_neckline) > 0,
+    )
+    _append_if(
+        f"Desired sleeve length: {_format_list(target_sleeve)}",
+        "sleeve_length_tags",
+        {"catalog": catalog},
+        target_sleeve,
+        len(target_sleeve) > 0,
+    )
+    _append_if(
+        f"Desired dress/skirt length: {_format_list(target_dress_len)}",
+        "dress_length_tags",
+        {"catalog": catalog},
+        target_dress_len,
+        len(target_dress_len) > 0,
+    )
+    if winter_frac == 1.0:
+        specs.append(
+            {
+                "type": "penalize_any_not_in_set",
+                "description": "Penalize any non-winter-friendly items",
+                "is_hard": False,
+                "is_discoverable": True,
+                "is_minimal": False,
+                "extractor": "per_item_winter_flags",
+                "extractor_kwargs": {"catalog": catalog},
+                "required_set": [1],
+                "none_val": 0.0,
+            }
+        )
+    _append_if(
+        f"Desired material: {_format_list(target_material)}",
+        "material_tags",
+        {"catalog": catalog},
+        target_material,
+        len(target_material) > 0,
+    )
+    _append_if(
+        f"Desired fit: {_format_list(target_fit)}",
+        "fit_tags",
+        {"catalog": catalog},
+        target_fit,
+        len(target_fit) > 0,
+    )
+    _append_if(
+        f"Desired closure: {_format_list(target_closure)}",
+        "closure_tags",
+        {"catalog": catalog},
+        target_closure,
+        len(target_closure) > 0,
+    )
+    # Build true multisets for fraction-based constraints (flags as 0/1)
+    true_hood_flags = [
+        1
+        if ("hood" in extractors._row_text(r) or "hooded" in extractors._row_text(r))
+        else 0
+        for _, r in true_products.iterrows()
+    ]
+    true_elastic_flags = [
+        1
+        if any(
+            k in extractors._row_text(r)
+            for k in ["elastic", "elastication", "stretch", "spandex"]
+        )
+        else 0
+        for _, r in true_products.iterrows()
+    ]
+    true_sustainable_flags = [
+        1
+        if (
+            "organic" in extractors._row_text(r)
+            or "recycled" in extractors._row_text(r)
+        )
+        else 0
+        for _, r in true_products.iterrows()
+    ]
+
+    _append_if(
+        f"Hooded items: {int(hood_frac * len(true_products))} / {len(true_products)}",
+        "per_item_hood_flags",
+        {"catalog": catalog},
+        true_hood_flags,
+        hood_frac > 0.0,
+    )
+    _append_if(
+        f"Elastic/stretch items: {int(elastic_frac * len(true_products))} / {len(true_products)}",
+        "per_item_elasticity_flags",
+        {"catalog": catalog},
+        true_elastic_flags,
+        elastic_frac > 0.0,
+    )
+    _append_if(
+        f"Sustainable (organic/recycled) items: {int(sustainable_frac * len(true_products))} / {len(true_products)}",
+        "per_item_sustainability_flags",
+        {"catalog": catalog},
+        true_sustainable_flags,
+        sustainable_frac > 0.0,
+    )
+    if summer_frac == 1.0:
+        specs.append(
+            {
+                "type": "penalize_any_not_in_set",
+                "description": "Penalize any non-summer-friendly items",
+                "is_hard": False,
+                "is_discoverable": True,
+                "is_minimal": False,
+                "extractor": "per_item_summer_flags",
+                "extractor_kwargs": {"catalog": catalog},
+                "required_set": [1],
+                "none_val": 0.0,
+            }
+        )
+    _append_if(
+        f"Desired leg style: {_format_list(target_leg)}",
+        "leg_style_tags",
+        {"catalog": catalog},
+        target_leg,
+        len(target_leg) > 0,
+    )
+    _append_if(
+        f"Desired gender: {_format_list(target_gender)}",
+        "gender_tags",
+        {"catalog": catalog},
+        target_gender,
+        len(target_gender) > 0,
+    )
+    _append_if(
+        f"Desired age: {_format_list(target_age)}",
+        "age_tags",
+        {"catalog": catalog},
+        target_age,
+        len(target_age) > 0,
+    )
+    _append_if(
+        f"Desired sport: {_format_list(target_sport)}",
+        "sport_tags",
+        {"catalog": catalog},
+        target_sport,
+        len(target_sport) > 0,
+    )
+
+    return specs
+
+
+def _compute_shopping_feature_importances(
+    true_products: pd.DataFrame, catalog: Catalog, features: List[Constraint]
+) -> List[float]:
+    """
+    Compute per-feature importances based on consistency in the true cart.
+    Higher when the true cart is more unanimous/consistent for that attribute.
+
+    Rules:
+    - Column value rewards (multiset_jaccard/column_values): 1 / #unique values in true column
+    - Article-id reward (multiset_jaccard/identity_cart): 1 / #true items
+    - Product type coverage (multiset_jaccard/product_type_values): 1 / #unique product_type_name
+    - Tag overlaps (multiset_jaccard/*_tags): 1 / #distinct true tags (after concatenation)
+    - Presence-like flags (multiset_jaccard/per_item_*_flags): |2·p - 1| where p is true fraction
+    - Unanimity-based penalize_any_not_in_set (winter/summer/sport): 1.0
+    - Hard constraints: 1.0 (ignored later by hard penalty)
+    """
+
+    def _unique_count(col: str) -> int:
+        if col in true_products:
+            return int(true_products[col].dropna().astype(str).nunique())
+        return 0
+
+    def _tag_consistency(keyword_map) -> float:
+        # Use concatenated tags to match multiset_jaccard behavior
+        tags = set()
+        for _, row in true_products.iterrows():
+            tag_str = extractors._derive_tags_concatenated(
+                extractors._row_text(row), keyword_map
+            )
+            if tag_str:
+                tags.add(tag_str)
+        k = max(1, len(tags))
+        return 1.0 / float(k)
+
+    def _fraction_flag(flag_fn) -> float:
+        vals = []
+        for _, r in true_products.iterrows():
+            vals.append(1 if flag_fn(r) else 0)
+        if not vals:
+            return 0.0
+        p = sum(vals) / len(vals)
+        return abs(2 * p - 1)
+
+    imps: List[float] = []
+    for c in features:
+        if c.is_hard:
+            imps.append(1.0)
+            continue
+        ename = getattr(c.extractor, "__name__", "")
+        ctype = getattr(c, "type", "")
+        imp = 0.5
+        if ctype == "multiset_jaccard" and ename == "column_values":
+            col = (getattr(c, "extractor_kwargs", {}) or {}).get("column")
+            k = _unique_count(col) if col is not None else 0
+            imp = 1.0 / float(max(1, k))
+        elif ctype == "multiset_jaccard" and ename == "identity_cart":
+            imp = 1.0 / float(max(1, len(true_products)))
+        elif ctype == "multiset_jaccard" and ename == "product_type_values":
+            k = _unique_count("product_type_name")
+            imp = 1.0 / float(max(1, k))
+        elif ctype == "multiset_jaccard" and ename == "neckline_tags":
+            imp = _tag_consistency(extractors._NECKLINE_KEYWORDS)
+        elif ctype == "multiset_jaccard" and ename == "sleeve_length_tags":
+            imp = _tag_consistency(extractors._SLEEVE_LENGTH_KEYWORDS)
+        elif ctype == "multiset_jaccard" and ename == "dress_length_tags":
+            imp = _tag_consistency(extractors._DRESS_LENGTH_KEYWORDS)
+        elif ctype == "multiset_jaccard" and ename == "material_tags":
+            imp = _tag_consistency(extractors._MATERIAL_KEYWORDS)
+        elif ctype == "multiset_jaccard" and ename == "fit_tags":
+            imp = _tag_consistency(extractors._FIT_KEYWORDS)
+        elif ctype == "multiset_jaccard" and ename == "closure_tags":
+            imp = _tag_consistency(extractors._CLOSURE_KEYWORDS)
+        elif ctype == "multiset_jaccard" and ename == "leg_style_tags":
+            imp = _tag_consistency(extractors._LEG_STYLE_KEYWORDS)
+        elif ctype == "multiset_jaccard" and ename == "gender_tags":
+            imp = _tag_consistency(extractors._GENDER_KEYWORDS)
+        elif ctype == "multiset_jaccard" and ename == "age_tags":
+            # Age tags are single values per product, so use unique count
+            true_age_set = set()
+            for _, row in true_products.iterrows():
+                text = extractors._row_text(row)
+                if "baby/children" not in text and extractors._any_in(
+                    text, extractors._AGE_KEYWORDS["baby"]
+                ):
+                    true_age_set.add("baby")
+                elif extractors._any_in(text, extractors._AGE_KEYWORDS["kid"]):
+                    true_age_set.add("kid")
+                elif extractors._any_in(text, extractors._AGE_KEYWORDS["adult"]):
+                    true_age_set.add("adult")
+                elif "menswear" in text or "ladieswear" in text or "womenswear" in text:
+                    true_age_set.add("adult")
+            k = max(1, len(true_age_set))
+            imp = 1.0 / float(k)
+        elif ctype == "multiset_jaccard" and ename == "per_item_hood_flags":
+            imp = _fraction_flag(
+                lambda r: (
+                    "hood" in extractors._row_text(r)
+                    or "hooded" in extractors._row_text(r)
+                )
+            )
+        elif ctype == "multiset_jaccard" and ename == "per_item_elasticity_flags":
+            imp = _fraction_flag(
+                lambda r: any(
+                    k in extractors._row_text(r)
+                    for k in ["elastic", "elastication", "stretch", "spandex"]
+                )
+            )
+        elif ctype == "multiset_jaccard" and ename == "per_item_sustainability_flags":
+            imp = _fraction_flag(
+                lambda r: (
+                    "organic" in extractors._row_text(r)
+                    or "recycled" in extractors._row_text(r)
+                )
+            )
+        elif ctype == "penalize_any_not_in_set":
+            imp = 1.0
+        imps.append(float(max(1e-6, imp)))
+    return imps
+
+
+def _parse_shopping_solutions(msg: str, **kwargs) -> List[str]:
+    """
+    Extract complete shopping cart solutions from a message (does not include individual item mentions).
+    Treat <cart>...</cart> as a solution.
+    """
+    ys: List[str] = []
+    cart = parse_for_answer_tags(msg, keyword="cart", return_none_if_not_found=True)
+    if cart:
+        ys.append(f"<cart>{cart}</cart>")
+    # dedup while preserving order
+    return list(dict.fromkeys(ys))
+
+
+def _parse_shopping_solutions_and_options(msg: str, **kwargs) -> List[str]:
+    """
+    Extract both complete shopping cart solutions and individual item mentions from a message.
+    Treat <cart>...</cart> as a solution and each <item>...</item> group as a solution, but replace the tags with <cart>.
+    """
+    ys: List[str] = []
+    cart = parse_for_answer_tags(msg, keyword="cart", return_none_if_not_found=True)
+    if cart:
+        ys.append(f"<cart>{cart}</cart>")
+    items = parse_for_answer_tags(
+        msg, keyword="item", return_all=True, return_none_if_not_found=True
+    )
+    if items:
+        for group in items:
+            ys.append(f"<cart>{group}</cart>")
+    # dedup while preserving order
+    return list(dict.fromkeys(ys))
+
+
+def _parse_y_fn(yhat: str, catalog: Catalog, raise_errors: bool = False) -> Any:
+    """
+    Parse the solution attempt.
+    """
+    try:
+        # Check if all article IDs are valid
+        shopping_cart = parse_for_answer_tags(
+            yhat, keyword="cart", return_none_if_not_found=True
+        )
+        if shopping_cart is None:
+            if raise_errors:
+                raise ValueError("Could not parse the shopping cart")
+            return None
+
+        article_ids = [
+            int(id.strip()) for id in shopping_cart.split(",") if id.strip().isdigit()
+        ]
+        if not article_ids:
+            if raise_errors:
+                raise ValueError("No valid catalog IDs found")
+            return None
+
+        # Check each article ID exists in catalog
+        invalid_ids = []
+        for article_id in article_ids:
+            try:
+                catalog.get_row_by_article_id(article_id)
+            except ValueError:
+                invalid_ids.append(str(article_id))
+
+        if invalid_ids:
+            if raise_errors:
+                raise ValueError(f"Invalid catalog IDs: {', '.join(invalid_ids)}")
+            return None
+    except Exception as e:
+        if raise_errors:
+            raise e
+        return None
+
+    return article_ids

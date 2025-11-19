@@ -7,6 +7,8 @@ from evaluation.qualitative_eval import (
     ASSISTANT_INSTRUMENTS,
     INSTRUMENT_LIKERT,
 )
+from data import get_spec
+import evaluation.app.components as components
 
 """
 This file contains code to generate the form interfaces.
@@ -20,8 +22,6 @@ Functions take in:
 
 Note that the form will always show unless on_completion modifies the result of should_show.
 """
-
-
 
 
 def presurvey(
@@ -86,7 +86,9 @@ def brainstorming(
         return
 
     with st.form(key="brainstorming_form"):
-        st.write("Reflect on the task. How will you decide if the assistant's solution is good? What requirements, likes, and dislikes do you have?")
+        st.write(
+            "Reflect on the task. How will you decide if the assistant's solution is good? What requirements, likes, and dislikes do you have?"
+        )
         notes = st.text_area("Write your thoughts here", height=250)
 
         submitted = st.form_submit_button("Continue to presurvey", type="primary")
@@ -97,6 +99,7 @@ def brainstorming(
                 return
             if on_completion is not None:
                 on_completion(form_values)
+
 
 def message_feedback(
     should_show: Callable = None,
@@ -237,7 +240,7 @@ def comparison_scoring(
                 on_completion(score_answers)
 
 
-def interaction_evaluation(
+def assistant_instruments_survey(
     should_show: Callable = None,
     validate: Callable = None,
     on_completion: Callable = None,
@@ -250,6 +253,19 @@ def interaction_evaluation(
 
     form_results = {}
     with st.form(key="interaction_evaluation_form"):
+        # post-interaction specification
+        form_results["must_haves"] = st.text_area(
+            "Think about the task. What are your **must-haves** or **must-not-haves** for a good recommendation?",
+            height=120,
+        )
+        form_results["nice_to_haves"] = st.text_area(
+            "Think about the task. What are your **nice-to-haves** or **nice-to-not-haves** for a good recommendation?",
+            height=120,
+        )
+
+        st.write("Answer the following questions about the assistant.")
+
+        # assistant instruments
         flat_instruments = [
             item for sublist in ASSISTANT_INSTRUMENTS.values() for item in sublist
         ]
@@ -260,10 +276,6 @@ def interaction_evaluation(
                 instrument,
                 options=["-"] + INSTRUMENT_LIKERT,
             )
-
-        form_results["comments"] = st.text_area(
-            "(Optional) Additional comments",
-        )
 
         if st.form_submit_button("Submit", type="primary"):
             valid = validate is None or validate(form_results)
@@ -276,9 +288,9 @@ def interaction_evaluation(
 
 def final_prediction_evaluation(
     *,
-    likert_label: str = 'How much do you agree with this statement: "I would rather accept this solution as is than continue my search with the assistant for 10 more minutes."',
+    likert_label: str = 'How much do you agree with this statement: "I would rather accept the assistant\'s solution as is than continue my search for 5 more minutes."',
     stars_label: str = "Rate the overall quality.",
-    text_area_label: str = "If you were to continue working the assistant for 10 more minutes, what would you want to change?",
+    text_area_label: str = "If you were to continue working the assistant for 5 more minutes, what would you want to change?",
     submit_key: str = "custom_eval_second_page_form",
 ):
     """
@@ -293,8 +305,14 @@ def final_prediction_evaluation(
 
     form_elements = [
         FormElement(
-            input_type="stars",
-            label=stars_label,
+            input_type="text_area",
+            label="Think about the task. What are your **must-haves** or **must-not-haves** for a good recommendation?",
+            height=120,
+        ),
+        FormElement(
+            input_type="text_area",
+            label="Think about the task. What are your **nice-to-haves** or **nice-to-not-haves** for a good recommendation?",
+            height=120,
         ),
         FormElement(
             input_type="radio",
@@ -330,3 +348,138 @@ def final_prediction_evaluation(
             return True, feedback
 
     return False, None
+
+
+def assistant_ranking_exit_survey(
+    should_show: Callable = None,
+    validate: Callable = None,
+    on_completion: Callable = None,
+):
+    """
+    Exit survey form that shows all conversations and asks the user to rank
+    which assistant they preferred (Assistant 1, 2, 3, etc. based on number of rounds).
+    Also asks for a paragraph explanation.
+    """
+    if should_show is not None and not should_show():
+        return
+
+    # Get message history - each entry is [config_dict, messages_list]
+    message_history = st.session_state.get("message_history", [])
+
+    if len(message_history) == 0:
+        st.warning("No conversation history found. Cannot display ranking survey.")
+        if on_completion is not None:
+            on_completion({})
+        return
+
+    num_rounds = len(message_history)
+
+    with st.form(key="assistant_ranking_exit_survey_form"):
+        st.markdown("## Assistant Ranking Survey")
+        st.markdown(
+            f"You interacted with {num_rounds} assistant(s) across {num_rounds} round(s). "
+            "Please review each conversation below and then rank which assistant you preferred."
+        )
+
+        # Store the original spec to restore later
+        original_spec = st.session_state.get("spec", None)
+
+        # Display each conversation
+        for round_idx, (config_dict, messages) in enumerate(message_history):
+            assistant_num = round_idx + 1
+            dataset_name = config_dict.get("dataset_name", "unknown")
+            spec_index = config_dict.get("spec_index", 0)
+            dataset_kwargs = config_dict.get("dataset_kwargs", {})
+
+            with st.expander(
+                f"**Assistant {assistant_num}** - Round {assistant_num} ({dataset_name})",
+                expanded=(round_idx == 0),
+            ):
+                # Temporarily load and set the spec for this conversation
+                temp_spec = None
+                try:
+                    temp_spec = get_spec(
+                        dataset_name,
+                        spec_index,
+                        **dataset_kwargs,
+                        allow_multimodal_actions=True,
+                    )
+                    st.session_state.spec = temp_spec
+                except Exception as e:
+                    st.error(
+                        f"Error loading spec for Assistant {assistant_num}: {str(e)}"
+                    )
+                    # Restore original spec before continuing
+                    st.session_state.spec = original_spec
+                    # Still try to display messages even if spec loading failed
+                    st.markdown(
+                        "*Note: Messages may not render correctly due to spec loading error.*"
+                    )
+
+                # Display the conversation
+                if temp_spec is not None:
+                    with st.container(border=True, height=400):
+                        components.chat_conversation(
+                            messages,
+                            show_quick_actions=False,
+                            show_raw_message=False,
+                            autovalidate=False,
+                            autoscore=False,
+                            show_response_time=True,
+                            empty_message_text=f"No messages recorded for Assistant {assistant_num}.",
+                        )
+                else:
+                    # Fallback: display raw messages if spec couldn't be loaded
+                    with st.container(border=True, height=400):
+                        for msg in messages:
+                            if msg.get("content") is not None:
+                                with st.chat_message(msg.get("role", "user")):
+                                    st.markdown(msg.get("content", ""))
+
+        # Restore original spec
+        st.session_state.spec = original_spec
+
+        st.markdown("---")
+
+        # Complete ranking question (A > B > C style)
+        ranking = st.multiselect(
+            "Rank the assistants from MOST to LEAST preferred:",
+            [i for i in range(num_rounds)],
+            format_func=lambda x: f"Assistant {x + 1}",
+        )
+
+        # Paragraph explanation
+        explanation = st.text_area(
+            "Please write a paragraph explaining your ranking:",
+            height=150,
+            placeholder="Explain what made you rank the assistants in this order.",
+        )
+
+        form_values = {
+            "ranking": ranking,
+            "explanation": explanation,
+            "num_rounds": num_rounds,
+        }
+
+        if st.form_submit_button("Submit", type="primary"):
+            # Default validation: ensure all assistants are ranked and explanation is provided
+            if validate is None:
+                valid = (
+                    len(form_values["ranking"]) == num_rounds
+                    and form_values["explanation"].strip() != ""
+                )
+            else:
+                valid = validate(form_values)
+
+            if not valid:
+                if len(form_values["ranking"]) != num_rounds:
+                    st.error(
+                        f"Please rank all {num_rounds} assistant(s) from most to least preferred"
+                    )
+                else:
+                    st.error(
+                        "Please fill in all fields correctly (rank all assistants and write an explanation)"
+                    )
+                return
+            if on_completion is not None:
+                on_completion(form_values)

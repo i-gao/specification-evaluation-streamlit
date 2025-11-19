@@ -15,7 +15,18 @@ def parse_travel_plan(
     """
     Parse a travel plan from a JSON string.
     """
-    plan = parse_json(yhat)
+    from utils.misc import parse_for_answer_tags
+    
+    # First try to parse from <travel_plan> tags
+    travel_plan_content = parse_for_answer_tags(
+        yhat, keyword="travel_plan", return_none_if_not_found=True
+    )
+    if travel_plan_content:
+        plan = parse_json(travel_plan_content)
+    else:
+        # Fall back to parsing JSON directly (for backward compatibility)
+        plan = parse_json(yhat)
+    
     if plan is None:
         print(f"Error parsing travel plan: {yhat}")
         return None

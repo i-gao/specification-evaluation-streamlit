@@ -36,7 +36,6 @@ def render_eval(
         people_number=people_number,
         dest=dest,
     )
-    print(ranking_done)
     if not ranking_done:
         return False, None
 
@@ -843,11 +842,12 @@ def _render_restaurant_button(item: Dict[str, Any], day_num: str) -> None:
             unsafe_allow_html=True,
         )
 
+    unique_id = str(uuid.uuid4())[:8]
     st.button(
         item["title"],
         on_click=_show_restaurant_dialog,
         args=(item["data"], item["meal_type"]),
-        key=f"restaurant_{item['data'].get('name', 'unknown')}_{day_num}",
+        key=f"restaurant_{item['data'].get('name', 'unknown')}_{day_num}_{unique_id}",
         use_container_width=True,
     )
 
@@ -862,11 +862,12 @@ def _render_attraction_button(item: Dict[str, Any], day_num: str) -> None:
             unsafe_allow_html=True,
         )
 
+    unique_id = str(uuid.uuid4())[:8]
     st.button(
         item["title"],
         on_click=_show_attraction_dialog,
         args=(item["data"],),
-        key=f"attraction_{item['data'].get('name', 'unknown')}_{day_num}",
+        key=f"attraction_{item['data'].get('name', 'unknown')}_{day_num}_{unique_id}",
         use_container_width=True,
     )
 
@@ -881,11 +882,12 @@ def _render_accommodation_button(item: Dict[str, Any], day_num: str) -> None:
             unsafe_allow_html=True,
         )
 
+    unique_id = str(uuid.uuid4())[:8]
     st.button(
         item["title"],
         on_click=_show_accommodation_dialog,
         args=(item["data"],),
-        key=f"accommodation_{item['data'].get('name', 'unknown')}_{day_num}",
+        key=f"accommodation_{item['data'].get('name', 'unknown')}_{day_num}_{unique_id}",
         use_container_width=True,
     )
 

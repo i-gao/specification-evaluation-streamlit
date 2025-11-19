@@ -194,6 +194,8 @@ def parse_json(json_str, return_start_end=False):
     Parse a JSON string, returning None if it fails.
     If return_start_end is True, also returns a tuple of (start, end) of the JSON string.
     """
+    if not isinstance(json_str, str):
+        json_str = str(json_str)
     if json_str is None:
         if return_start_end:
             return None, None

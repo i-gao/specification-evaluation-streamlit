@@ -14,11 +14,11 @@ ASSISTANT_DESCRIPTIONS = [
 ]
 FEELINGS = ["heard", "ignored", "in control", "out of control", "curious", "shut out"]
 ASSISTANT_INSTRUMENTS = {
-    "technical_competence": [
-        "The assistant seemed highly competent at the task.",
-        "Working with the assistant was more efficient than using a web browser to solve the task myself.",
-        "It took the assistant multiple tries before executing the task correctly.",
-    ],
+    # "technical_competence": [
+    #     "The assistant seemed highly competent at the task.",
+    #     "Working with the assistant was more efficient than using a web browser to solve the task myself.",
+    #     "It took the assistant multiple tries before executing the task correctly.",
+    # ],
     "transparency": [
         "The assistant was honest about what it could or couldn't do.",
         "The assistant kept me updated on what it was trying throughout the conversation.",

@@ -1,18 +1,15 @@
 # from datasets import load_dataset
 import numpy as np
 from typing import List, Tuple, Optional, Dict, Any
-import dill
+from dataclasses import asdict
 import os
 import streamlit as st
-
-
-# import sys
 import json
 
 from data.reward import Constraint, linear_reward
 from data.dataset import (
     SpecificationCollection,
-    FixedSpecification,
+    LinearFixedSpecification,
     CustomSpecification,
 )
 from utils.misc import (
@@ -26,7 +23,7 @@ from utils.streamlit_types import FormElement
 from data.meal_planning.db import (
     RecipeDB,
     DAYS_OF_THE_WEEK,
-    MEALS,
+    MEALS_OF_THE_DAY,
     DIETS,
     INTOLERANCES,
 )
@@ -48,10 +45,11 @@ Ideas for future work:
 - Harder version: cooking for more than 1 person
 """
 
-DEV_FRAC = 0.1
+DEV_FRAC = 0.8
 DATASET_ROOT = os.path.dirname(os.path.abspath(__file__))
 PREDICTION_FMT_INSTRUCTIONS = (
-    """Return the meal plan as a JSON string with the following structure:
+    """The meal plan is returned as a JSON string wrapped in <meal_plan></meal_plan> tags with the following structure:
+<meal_plan>
 {
     "sunday": {
         "breakfast": [
@@ -65,33 +63,52 @@ PREDICTION_FMT_INSTRUCTIONS = (
     },
     ...
 }
+</meal_plan>
 """.strip()
-    + f"\nThe outer keys are the days of the week (choose from {DAYS_OF_THE_WEEK}), and the inner keys are the meals of the day (choose from {MEALS}; note that 'snack' occurs before 'dinner')."
+    + f"\nThe outer keys are the days of the week (selected from {DAYS_OF_THE_WEEK}), and the inner keys are the meals of the day (selected from {MEALS_OF_THE_DAY}; note that 'snack' occurs before 'dinner')."
     + """Each meal slot contains an (ordered) list of actions:
-    1. One kind of action is to cook a recipe: the dict should set `action` to "cook" and `recipe_title` to the title of a recipe from the database. The database specifies how many servings each cook action makes. Assume the client will refrigerate all servings, and that leftovers do not expire. Note that if you cook, you do not automatically eat: you must add a separate "eat" action to the meal plan.
-    2. Another kind of action is to eat a recipe: the dict should set `action` to "eat" and `recipe_title` to the title of a recipe from the database. Recipes can only be eaten if they have been cooked. Make sure not to eat more servings than the recipe makes.
-Note that you do not always have to cook and eat each recipe at the same time: you may cook the recipe at one meal, and then eat it at another meal. 
+    1. One kind of action is to cook a recipe: the `action` field is set to "cook" and `recipe_title` is set to the title of a recipe from the database. The database specifies how many servings each cook action makes. It is assumed that servings are refrigerated, and that leftovers do not expire. Note that cooking does not automatically include eating: a separate "eat" action must be added to the meal plan.
+    2. Another kind of action is to eat a recipe: the `action` field is set to "eat" and `recipe_title` is set to the title of a recipe from the database. Recipes can only be eaten if they have been cooked. The number of servings eaten must not exceed the number of servings made by the recipe.
+Note that recipes do not need to be cooked and eaten at the same time: a recipe may be cooked at one meal, and then eaten at another meal. 
 
-You can cook multiple recipes at each mealtime (e.g. a drink, a main course, and a dessert); the total cooking time will be the max of the total time for each recipe.
+If a slot in the meal plan is left empty or if the slot is omitted entirely, it means that no recipe is cooked or eaten for that meal. The two are exchangeable.
 """.strip()
 )
 
-MSG_FMT_INSTRUCTIONS = """To render a description of a single recipe to the user, you can mention its recipe_title and wrap it in <recipe></recipe>, e.g.: '<recipe>Chicken Parmesan</recipe>'. You should wrap all recipes you mention by default."""
+MSG_FMT_INSTRUCTIONS = """Always wrap recipe titles in <recipe></recipe>, e.g.: '<recipe>Chicken Parmesan</recipe>'. This will append a widget describing the recipe at the end of your message so the user can view the recipe. You should always do this by default."""
 
-COMMONSENSE_DESCRIPTION = """A meal plan goes through every meal slot of the day and specifies what (if anything) to cook, as well as what (and how many servings) to eat. One may cook something and then eat it that meal, or cook something and eat the remaining servings in a later meal (to be reheated later). Meal plans must uses recipes from the provided AllRecipes catalog. Using other recipes is not allowed. Meal plans must carefully track how many servings each recipe makes and ensure that no more than that number of servings are consumed throughout the week. Recipes cannot be halved / doubled etc: they make exactly the listed number of servings. Servings can only be consumed in integer amounts; you cannot eat 1.5 servings of a recipe. Recipes can be cooked more than once. When cooking multiple recipes, the total cooking times are additive."""
+def get_commonsense_description():
+    """Get the commonsense description, dynamically using the number of days."""
+    days_str = ", ".join([d.capitalize() for d in DAYS_OF_THE_WEEK])
+    last_day = DAYS_OF_THE_WEEK[-1].capitalize()
+    return f"""A meal plan goes through every meal slot of the day and specifies what (if anything) is cooked, as well as what (and how many servings) is eaten. Recipes may be cooked and then eaten in the same meal, or cooked and the remaining servings eaten in a later meal (to be reheated later). Meal plans must carefully track how many servings each recipe makes and ensure that no more than that number of servings are consumed throughout the {len(DAYS_OF_THE_WEEK)}-day period. Recipes cannot be halved or doubled: they make exactly the listed number of servings. Servings can only be consumed in integer amounts; 1.5 servings of a recipe cannot be consumed. Recipes can be cooked more than once. 
+Multiple recipes can be cooked at each mealtime (e.g. a drink, a main course, and a dessert); the total cooking time will be the sum of the total times for each recipe. 
+
+If a slot in the meal plan is left empty or if the slot is omitted entirely, it means that no recipe is cooked or eaten for that meal. The two are exchangeable.
+
+The meal plan covers {days_str}. All servings leftover at the end of {last_day} will be wasted.
+
+The environment provides a Jupyter notebook and a CSV of recipes from AllRecipes.com. Meal plans must use recipes from the provided AllRecipes catalog. Using other recipes is not allowed. """
+
+COMMONSENSE_DESCRIPTION = get_commonsense_description()
 
 
-CUSTOM_INSTRUCTIONS = """
+def get_custom_instructions():
+    """Get custom instructions, dynamically using the number of days."""
+    days_str = ", ".join([d.capitalize() for d in DAYS_OF_THE_WEEK])
+    return f"""
 ### What you need to prompt the assistant to do
-In this task, **your goal is to get the assistant to write you a perfect meal prep plan that you can actually follow this coming week.** A meal plan is a week-long calendar that specifies what to eat for every meal of the day. The plan also specifies when to cook each recipe.
+In this task, **your goal is to get the assistant to write you a perfect meal prep plan that you can actually follow for the next {len(DAYS_OF_THE_WEEK)} days ({days_str}).** A meal plan is a {len(DAYS_OF_THE_WEEK)}-day calendar that specifies what to eat for every meal of the day. The plan also specifies when to cook each recipe.
 
 The plan must work with your schedule, dietary restrictions, and preferences.
 """
 
+CUSTOM_INSTRUCTIONS = get_custom_instructions()
+
 
 def render_fixed_task_explanation():
     """Render the fixed task explanation for meal planning."""
-    st.markdown(COMMONSENSE_DESCRIPTION)
+    st.markdown(get_commonsense_description())
 
 
 def render_custom_task_explanation():
@@ -123,7 +140,8 @@ class MealPlanningDataset(SpecificationCollection):
 
     @property
     def dataset_description(self) -> str:
-        return "Work with the assistant to **write a personal meal plan for the next week** using real recipes from AllRecipes.com."
+        days_str = ", ".join([d.capitalize() for d in DAYS_OF_THE_WEEK])
+        return f"Work with the assistant to **write a personal meal plan for the next {len(DAYS_OF_THE_WEEK)} days ({days_str})** using real recipes from AllRecipes.com."
 
     @property
     def assets_file_id(self) -> str:
@@ -194,7 +212,11 @@ class MealPlanningDataset(SpecificationCollection):
         self._auto_patch_eat_before_cook = auto_patch_eat_before_cook
 
         # Load all the fixed spec profiles
-        profiles = dill.load(open(f"{DATASET_ROOT}/assets/profiles.pkl", "rb"))
+        with open(f"{DATASET_ROOT}/assets/profiles.json", "r") as f:
+            profiles = json.load(f)
+        # Convert all_weights lists back to numpy arrays
+        for profile in profiles:
+            profile["all_weights"] = np.array(profile["all_weights"])
         profiles = subset_data(profiles, DEV_FRAC, 1.0, dev)
         self._profiles = profiles
         self.fixed_length = len(self._profiles)
@@ -211,13 +233,11 @@ class MealPlanningDataset(SpecificationCollection):
             if callable(func)
         }
 
-        # Load some ystars
-        try:
-            self._ystars = json.load(open(f"{DATASET_ROOT}/assets/manual_ystars.json"))
-        except Exception:
-            self._ystars = {}
-
-        self._y0_mapping = json.load(open(f"{DATASET_ROOT}/assets/y0_mapping.json"))
+        # No ystars
+        self._ystars = {}
+        y0_mapping_raw = json.load(open(f"{DATASET_ROOT}/assets/y0_mapping.json"))
+        # Filter y0s to only include days in DAYS_OF_THE_WEEK
+        self._y0_mapping = self._filter_y0_mapping(y0_mapping_raw)
 
         # Load the recipes database to get column information
         self._recipe_db = RecipeDB()
@@ -235,9 +255,47 @@ class MealPlanningDataset(SpecificationCollection):
         if custom_indexes is not None:
             self.load_custom_specs(indexes=custom_indexes)
 
+    def _filter_y0_mapping(self, y0_mapping: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Filter y0 meal plans to only include days in DAYS_OF_THE_WEEK.
+        This ensures y0s match the current day configuration.
+        """
+        filtered_mapping = {}
+        for key, y0_value in y0_mapping.items():
+            if y0_value is None:
+                filtered_mapping[key] = None
+                continue
+            
+            # Parse the y0 if it's a string
+            if isinstance(y0_value, str):
+                try:
+                    y0_dict = json.loads(y0_value)
+                except (json.JSONDecodeError, TypeError):
+                    filtered_mapping[key] = y0_value
+                    continue
+            elif isinstance(y0_value, dict):
+                y0_dict = y0_value
+            else:
+                filtered_mapping[key] = y0_value
+                continue
+            
+            # Filter to only include days in DAYS_OF_THE_WEEK
+            filtered_y0 = {
+                day.lower(): y0_dict.get(day.lower(), y0_dict.get(day, {}))
+                for day in DAYS_OF_THE_WEEK
+            }
+            
+            # Convert back to string if original was string
+            if isinstance(y0_value, str):
+                filtered_mapping[key] = json.dumps(filtered_y0)
+            else:
+                filtered_mapping[key] = filtered_y0
+        
+        return filtered_mapping
+
     def _load_fixed_specs(
         self, indexes: Optional[List[int]] = None
-    ) -> Dict[int, FixedSpecification]:
+    ) -> Dict[int, LinearFixedSpecification]:
         if indexes is None:
             return {}
 
@@ -247,18 +305,15 @@ class MealPlanningDataset(SpecificationCollection):
             profile = self._profiles[ix]
 
             dem = profile["demographic_information"]
-            signature = f"The task is to write out a one-week meal plan. The week starts on Sunday and ends on Saturday. The client only eats {' and '.join(dem['meals_considered'])} each day. The meal plan should designate what to eat and when to cook. Format the plan as a JSON.\n\nTo help you, the environment provides a Jupyter notebook and a CSV of recipes. All foods in the meal plan must correspond to a recipe from the given CSV."
-            signature += "\n\n" + add_section(
-                "Constraints (must be satisfied)", profile["hard_description"]
-            )
-            signature += "\n\n" + add_section(
-                "Client information",
+            days_str = ", ".join([d.capitalize() for d in DAYS_OF_THE_WEEK])
+            signature = f"The task is to write out a {len(DAYS_OF_THE_WEEK)}-day meal plan ({days_str}). The client only eats {' and '.join(dem['meals_considered'])} each day."
+            signature += "\n\nDemographic information: " + (
                 f"Sex: {dem['sex']}\n"
                 + f"Weight: {dem['weight']} kg\n"
                 + f"Height: {dem['height']} cm\n"
                 + f"Age: {dem['age']}\n"
                 + f"Activity level: {dem['activity_level']}\n"
-                + f"Goal: {dem['goal']} weight",
+                + f"Goal: {dem['goal']} weight"
             )
 
             # constraints & theta
@@ -266,13 +321,6 @@ class MealPlanningDataset(SpecificationCollection):
                 Constraint.from_dict(c, extractor_lookup=self._extractor_lookup)
                 for c in profile["constraints"]
             ]
-            hard_constraints = [c for c in constraints if c.is_hard]
-            soft_constraints = [c for c in constraints if not c.is_hard]
-
-            theta = add_section(
-                "Preferences (most important to least important)",
-                profile["soft_description"].replace("\n", "\n<chunk>\n"),
-            )
 
             # actions
             if self._persist_docker_container and self._docker_image is not None:
@@ -291,30 +339,47 @@ class MealPlanningDataset(SpecificationCollection):
                 root_dir=os.path.join(DATASET_ROOT, "assets"),
             )
 
+            # Use all_weights from profile (hard constraints get 99999, soft get random weights)
+            # All weights should be positive; linear_reward will handle sign correction for penalty constraints
+            if "all_weights" in profile and len(profile["all_weights"]) == len(
+                constraints
+            ):
+                weights = [
+                    abs(float(w)) for w in profile["all_weights"]
+                ]  # Use absolute value
+            else:
+                raise ValueError(
+                    f"Profile must contain 'all_weights' with length matching constraints. "
+                    f"Found {len(profile.get('all_weights', []))} weights for {len(constraints)} constraints."
+                )
+
+            # Create parse_y_fn wrapper that captures recipe_db and auto_patch_eat_before_cook
+            def parse_meal_plan_wrapper(
+                yhat: str, raise_errors: bool = False
+            ) -> Optional[Any]:
+                """Parse meal plan from string."""
+                return parse_meal_plan(
+                    yhat,
+                    self._recipe_db,
+                    raise_errors=raise_errors,
+                    auto_patch_eat_before_cook=self._auto_patch_eat_before_cook,
+                )
+
             # specification
-            spec = FixedSpecification(
+            spec = LinearFixedSpecification(
                 dataset_name=self.dataset_name,
                 index=f"fixed_{ix}",
-                full_specification=theta,
                 initial_specification=signature,
-                commonsense_description=COMMONSENSE_DESCRIPTION,
-                validity_fn=validity_fn,
-                validity_kwargs={
-                    "hard_constraints": hard_constraints,
-                    "recipe_db": self._recipe_db,
-                    "auto_patch_eat_before_cook": self._auto_patch_eat_before_cook,
-                },
-                # validity_fn_tool_name=None,  # Not provided
-                # validity_fn_tool_description=None,  # Not provided
-                reward_fn=reward_fn,
-                reward_kwargs={
-                    "soft_constraints": soft_constraints,
-                    "weights": profile["weights"],
-                    "recipe_db": self._recipe_db,
-                    "auto_patch_eat_before_cook": self._auto_patch_eat_before_cook,
-                },
-                # reward_fn_tool_name=None,  # Not provided
-                # reward_fn_tool_description=None,  # Not provided
+                commonsense_description=get_commonsense_description(),
+                features=constraints,
+                weights=weights,
+                parse_y_fn=parse_meal_plan_wrapper,
+                parse_solutions_fn=parse_meal_plan_solutions,
+                parse_solutions_and_options_fn=parse_meal_plan_solutions_and_options,
+                validity_fn_tool_name="check_meal_plan_validity",
+                validity_fn_tool_description="Check if the meal plan satisfies all hard constraints",
+                reward_fn_tool_name="score_meal_plan",
+                reward_fn_tool_description="Score the meal plan based on preference constraints",
                 ystar=self._ystars.get(str(ix), None),
                 # metric_name=None,  # Not provided
                 # baseline_scores=None,  # Not provided
@@ -323,6 +388,7 @@ class MealPlanningDataset(SpecificationCollection):
                 msg_fmt_instructions=MSG_FMT_INSTRUCTIONS,
                 prediction_fmt_instructions=PREDICTION_FMT_INSTRUCTIONS,
                 render_msg_fn=output_to_streamlit,
+                render_msg_fn_txt=output_to_txt,
                 render_msg_kwargs=["db", "auto_patch_eat_before_cook"],
                 name=f"meal_planning_{ix}",
                 db=self._recipe_db,
@@ -375,7 +441,7 @@ class MealPlanningDataset(SpecificationCollection):
                     is_hard=True,
                 ),
                 Constraint.create_boolean_penalize_false_constraint(
-                    description="The total number of servings consumed of a recipe across the week must be <= the total number of servings cooked of the recipe",
+                    description=f"The total number of servings consumed of a recipe across the {len(DAYS_OF_THE_WEEK)}-day period must be <= the total number of servings cooked of the recipe",
                     extractor="check_servings_consumed_lt_cooked_total",
                     is_hard=True,
                 ),
@@ -384,12 +450,14 @@ class MealPlanningDataset(SpecificationCollection):
                 Constraint.from_dict(c, extractor_lookup=self._extractor_lookup)
                 for c in constraints
             ]
+            initial_specification = f"Generate a meal plan for yourself for the next {len(DAYS_OF_THE_WEEK)} days ({', '.join([d.capitalize() for d in DAYS_OF_THE_WEEK])}). Only plan for 1 person (yourself)."
 
             spec = CustomSpecification(
                 dataset_name=self.dataset_name,
                 index=f"custom_{ix}",
-                initial_specification="Generate a meal plan for yourself for the next week. Only plan for 1 person (yourself).",
-                commonsense_description=COMMONSENSE_DESCRIPTION,
+                initial_specification=initial_specification,
+                current_specification=initial_specification,
+                commonsense_description=get_commonsense_description(),
                 user_specification_form_initial=[],
                 user_specification_form_final=self._create_user_specification_form_final(),
                 user_specification_callback=user_specification_callback,
@@ -413,6 +481,7 @@ class MealPlanningDataset(SpecificationCollection):
                 msg_fmt_instructions=MSG_FMT_INSTRUCTIONS,
                 prediction_fmt_instructions=PREDICTION_FMT_INSTRUCTIONS,
                 render_msg_fn=output_to_streamlit,
+                render_msg_fn_txt=output_to_txt,
                 render_msg_kwargs=["db", "auto_patch_eat_before_cook"],
                 db=self._recipe_db,
                 auto_patch_eat_before_cook=self._auto_patch_eat_before_cook,
@@ -474,7 +543,7 @@ class MealPlanningDataset(SpecificationCollection):
             ),
             FormElement(
                 input_type="radio",
-                label="Which meal plan are you more likely to follow next week: A or B?",
+                label=f"Which meal plan are you more likely to follow for the next {len(DAYS_OF_THE_WEEK)} days: A or B?",
                 options=["A", "neutral", "B"],
                 required=True,
             ),
@@ -574,7 +643,7 @@ class MealPlanningDataset(SpecificationCollection):
 
         st.markdown("### What you need to prompt the assistant to do")
         st.markdown(
-            "In this task, **your goal is to get the assistant to write you a perfect meal prep plan that you can actually follow this coming week.** A meal plan is a week-long calendar that specifies what to eat for every meal of the day. The plan also specifies when to cook each recipe."
+            f"In this task, **your goal is to get the assistant to write you a perfect meal prep plan that you can actually follow for the next {len(DAYS_OF_THE_WEEK)} days ({', '.join([d.capitalize() for d in DAYS_OF_THE_WEEK])}).** A meal plan is a {len(DAYS_OF_THE_WEEK)}-day calendar that specifies what to eat for every meal of the day. The plan also specifies when to cook each recipe."
         )
 
         with st.container(border=True):
@@ -635,15 +704,15 @@ class MealPlanningDataset(SpecificationCollection):
         #             "lunch": [
         #                 {
         #                     "action": "cook",
-        #                     "recipe_title": "Roasted Pork Bánh Mì (Vietnamese Sandwich)",
+        #                     "recipe_title": "Vietnamese Pork And Five Spice",
         #                 },
         #                 {
         #                     "action": "eat",
-        #                     "recipe_title": "Roasted Pork Bánh Mì (Vietnamese Sandwich)",
+        #                     "recipe_title": "Vietnamese Pork And Five Spice",
         #                 },
         #                 {
         #                     "action": "eat",
-        #                     "recipe_title": "Roasted Pork Bánh Mì (Vietnamese Sandwich)",
+        #                     "recipe_title": "Vietnamese Pork And Five Spice",
         #                 },
         #             ],
         #         },
@@ -667,15 +736,15 @@ class MealPlanningDataset(SpecificationCollection):
                     "lunch": [
                         {
                             "action": "cook",
-                            "recipe_title": "Roasted Pork Bánh Mì (Vietnamese Sandwich)",
+                            "recipe_title": "Vietnamese Pork And Five Spice",
                         },
                         {
                             "action": "eat",
-                            "recipe_title": "Roasted Pork Bánh Mì (Vietnamese Sandwich)",
+                            "recipe_title": "Vietnamese Pork And Five Spice",
                         },
                         {
                             "action": "eat",
-                            "recipe_title": "Roasted Pork Bánh Mì (Vietnamese Sandwich)",
+                            "recipe_title": "Vietnamese Pork And Five Spice",
                         },
                     ],
                 },
@@ -892,6 +961,11 @@ def user_specification_callback(
     else:
         y0 = y0_mapping.get("normal")
 
+    # Wrap y0 in tags if it exists
+    if y0 is not None:
+        y0_str = json.dumps(y0) if isinstance(y0, dict) else y0
+        y0 = f"<meal_plan>{y0_str}</meal_plan>"
+
     # Return updates for the specification object
     return {
         "validity_kwargs": validity_kwargs,
@@ -992,6 +1066,67 @@ def reward_fn(
     )
 
 
+def parse_meal_plan_solutions(msg: str) -> List[str]:
+    """Parse complete meal plan solutions from string (does not include individual recipe mentions)."""
+    to_return = []
+    # First try to parse from <meal_plan> tags
+    meal_plan_content = parse_for_answer_tags(
+        msg, keyword="meal_plan", return_none_if_not_found=True
+    )
+    if meal_plan_content:
+        js = parse_json(meal_plan_content)
+        if js is not None and len(js) > 0:
+            to_return.append(json.dumps(js))
+    else:
+        # Fall back to parsing JSON directly (for backward compatibility)
+        js = parse_json(msg)
+        if js is not None and len(js) > 0:
+            to_return.append(json.dumps(js))
+    return to_return
+
+
+def parse_meal_plan_solutions_and_options(msg: str) -> List[str]:
+    """Parse both complete meal plan solutions and individual recipe mentions from string."""
+    to_return = []
+    # First try to parse from <meal_plan> tags
+    meal_plan_content = parse_for_answer_tags(
+        msg, keyword="meal_plan", return_none_if_not_found=True
+    )
+    if meal_plan_content:
+        js = parse_json(meal_plan_content)
+        if js is not None and len(js) > 0:
+            to_return.append(json.dumps(js))
+
+    # Parse recipe mentions
+    mentioned_recipes = parse_for_answer_tags(
+        msg, keyword="recipe", return_all=True, return_none_if_not_found=True
+    )
+    if mentioned_recipes is not None:
+        mentioned_recipes = [
+            recipe.strip()
+            for mentions in mentioned_recipes
+            for recipe in mentions.split(",")
+            if recipe.strip()
+        ]
+        mentioned_recipes = list(dict.fromkeys(mentioned_recipes))
+        # in order to compare recipes, create an empty meal plan except for one meal with the recipe
+        for recipe in mentioned_recipes:
+            to_return.append(
+                json.dumps(
+                    {
+                        day: {
+                            "breakfast": [
+                                {"action": "cook", "recipe_title": recipe},
+                                {"action": "eat", "recipe_title": recipe},
+                            ]
+                        }
+                        for day in DAYS_OF_THE_WEEK
+                    }
+                )
+            )
+    return to_return
+
+
 def output_to_streamlit(
     msg: str, db: RecipeDB, auto_patch_eat_before_cook: bool = False
 ) -> None:
@@ -1011,7 +1146,6 @@ def output_to_streamlit(
             if recipe.strip()
         ]
         mentioned_recipes = list(dict.fromkeys(mentioned_recipes))
-
 
     if not js and not mentioned_recipes:
         st.write(msg)
@@ -1059,6 +1193,70 @@ def output_to_streamlit(
         st.markdown("---")
         with st.expander("Recipes mentioned in message", expanded=True):
             renderer.render_recipe_mentions(mentioned_recipes, db)
+
+
+def output_to_txt(
+    msg: str,
+    db: RecipeDB,
+    auto_patch_eat_before_cook: bool = False,
+) -> str:
+    """
+    Returns the rendered message in a text format.
+    All recipes in <recipe> tags are rendered as JSONs from the database.
+    """
+    mentioned_recipes = parse_for_answer_tags(
+        msg, keyword="recipe", return_all=True, return_none_if_not_found=True
+    )
+    if mentioned_recipes is not None:
+        mentioned_recipes = [
+            recipe.strip()
+            for mentions in mentioned_recipes
+            for recipe in mentions.split(",")
+            if recipe.strip()
+        ]
+        mentioned_recipes = list(dict.fromkeys(mentioned_recipes))
+    else:
+        return msg
+
+    all_recipes_jsons = []
+    for recipe_name in mentioned_recipes:
+        try:
+            recipe = db.get_recipe_by_name(recipe_name)
+            if recipe is not None:
+                # Convert Recipe dataclass to dict
+                recipe_dict = asdict(recipe)
+                recipe_dict = {
+                    "title": recipe_dict["title"],
+                    "ingredients": recipe_dict["ingredients"],
+                    "cuisine": recipe_dict["cuisine"],
+                    "total_time": recipe_dict["total_time"],
+                    "num_servings": recipe_dict["num_servings"],
+                    "rating": recipe_dict["rating"],
+                    "num_reviews": recipe_dict["num_reviews"],
+                    "calories": recipe_dict["calories"],
+                    "protein": recipe_dict["protein"],
+                    "total_fat": recipe_dict["total_fat"],
+                    "total_carbohydrate": recipe_dict["total_carbohydrate"],
+                    "diet": recipe_dict["diet"],
+                    "intolerances": recipe_dict["intolerances"],
+                    "equipment": recipe_dict["equipment"],
+                    "food_type": recipe_dict["food_type"],
+                }
+                all_recipes_jsons.append(recipe_dict)
+            else:
+                all_recipes_jsons.append(
+                    {"title": recipe_name, "name": "Invalid recipe (not in database)"}
+                )
+        except Exception as e:
+            all_recipes_jsons.append(
+                {"title": recipe_name, "error": f"Error retrieving recipe: {str(e)}"}
+            )
+
+    out = msg
+    if all_recipes_jsons:
+        out += "\n\n------- Information about mentioned recipes ----------\n\n"
+        out += str(all_recipes_jsons)
+    return out
 
 
 def output_to_streamlit_comparison(

@@ -6,7 +6,6 @@ from user_simulator.user import UserSimulator
 from new_baselines.policy import InteractionPolicy
 from utils.misc import _clean_for_json
 
-from evaluation.save_hooks import DEFAULT_SAVE_HOOKS, run_hook
 from data.dataset import Specification
 
 END_REASONS = Literal["budget_exhausted", "policy_end", "user_end", "unknown"]
@@ -29,8 +28,6 @@ def _check_config(config: dict):
         "seed",
         "user_first",
         "interaction_budget",
-        "include_initial_specification",
-        "include_fmt_instructions",
     }
     for key in required_keys:
         if key not in config:
@@ -58,7 +55,7 @@ class Turn:
     user_actions: List[Dict[str, Any]]
     user_rationale: Optional[str] = None
     intermediate_grade: Optional[Grade] = None
-    user_token_cost: Optional[float] = None
+    user_theoretical_cost: Optional[float] = None
     user_runtime_cost: Optional[float] = None
     assistant_token_cost: Optional[float] = None
     assistant_runtime_cost: Optional[float] = None
@@ -106,7 +103,6 @@ def save_interaction(
     final_prediction: str = None,
     final_grade: Grade = None,
     grader: UserSimulator = None,
-    save_hooks: List[str] = DEFAULT_SAVE_HOOKS,
     skip_grading: bool = False,
     spec: Specification = None,
     connection=None,
@@ -136,15 +132,21 @@ def save_interaction(
     if spec is not None:
         spec_information = {
             "initial_specification": spec.initial_specification,
+            "commonsense_description": spec.commonsense_description,
             "prediction_fmt_instructions": spec.prediction_fmt_instructions,
             "msg_fmt_instructions": spec.msg_fmt_instructions,
             "dataset_name": spec.dataset_name,
             "index": spec.index,
             "dataset_kwargs": config.get("dataset_kwargs", {}),
+            "full_specification": spec.full_specification,
         }
         action = next((a for a in spec.actions if a.fn.name == "ls_files"), None)
         if action is not None:
             spec_information["ls_output"] = str(action.fn.func())
+        if hasattr(spec, "features"):
+            spec_information["features"] = [f.description for f in spec.features]
+        if hasattr(spec, "ystar"):
+            spec_information["ystar"] = spec.ystar
 
     # Check that the grader is provided
     def _grade(prediction: str) -> Grade:
@@ -210,14 +212,14 @@ def save_interaction(
         (
             user_msg,
             user_rationale,
-            user_token_cost,
+            user_theoretical_cost,
             user_runtime_cost,
             remaining_budget,
         ) = (
             (
                 user_conversation_history[i]["user_msg"],
                 user_conversation_history[i]["user_rationale"],
-                user_conversation_history[i]["token_cost"],
+                user_conversation_history[i]["theoretical_cost"],
                 user_conversation_history[i]["runtime_cost"],
                 user_conversation_history[i]["remaining_budget"],
             )
@@ -251,7 +253,7 @@ def save_interaction(
             user_msg=user_msg,
             user_actions=user_actions,
             user_rationale=user_rationale,
-            user_token_cost=user_token_cost,
+            user_theoretical_cost=user_theoretical_cost,
             user_runtime_cost=user_runtime_cost,
             assistant_runtime_cost=assistant_runtime_cost,
             remaining_budget=remaining_budget,
@@ -277,14 +279,6 @@ def save_interaction(
     kwargs["policy_checkpoint_file"] = (
         policy.checkpoint_file if policy is not None else None
     )
-
-    # Save hooks
-    for hook in save_hooks:
-        try:
-            interaction.hook_results[hook] = run_hook(hook, interaction)
-        except Exception as e:
-            print(f"Error running hook {hook}: {e}")
-            pass
 
     out = {**asdict(interaction), **kwargs}
     out = _clean_for_json(out)
@@ -392,7 +386,7 @@ def _convert_to_dataclass(data: Dict[str, Any], target_class: type) -> Any:
 
 def load_interaction(
     path: str,
-    connection = None,
+    connection=None,
 ) -> Interaction:
     """
     Load the results of an interaction evaluation from a file as an Interaction object.

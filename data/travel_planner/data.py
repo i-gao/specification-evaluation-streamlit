@@ -1,25 +1,30 @@
 from datasets import load_from_disk
 from typing import List, Tuple, Dict, Any, Optional
 import os
-import sys
 import json
 from langchain_core.tools import tool
 import random
 
 from data.dataset import (
     SpecificationCollection,
-    FixedSpecification,
+    LinearFixedSpecification,
     CustomSpecification,
 )
+from data.reward import Constraint
 from data.travel_planner.db import TravelDB
 from data.actions import Action, get_jupyter_actions
 
-from utils.misc import get_recursive, parse_json, add_section, replace_tags_with_link
+from utils.misc import parse_json, replace_tags_with_link
 from utils.streamlit_types import FormElement, form_element_to_streamlit
 import streamlit as st
 import data.travel_planner.streamlit_render as renderer
 from data.travel_planner.parser import parse_travel_plan
 
+from data.travel_planner.reward_utils.tp_utils.func import get_valid_name_city
+from data.travel_planner.reward import (
+    create_hard_constraints,
+    create_soft_constraints,
+)
 from data.travel_planner.reward_utils.evaluation.commonsense_constraint import (
     evaluation as commonsense_eval,
 )
@@ -30,12 +35,28 @@ from data.travel_planner.reward_utils.evaluation.preferences import (
     evaluation as preferences_eval,
     compute_linear_reward,
 )
-from data.travel_planner.reward_utils.tp_utils.func import get_valid_name_city
+from data.travel_planner.reward_utils.evaluation.hard_constraint import get_total_cost
 
 
-COMMONSENSE_DESCRIPTION = "A travel plan is a day-by-day plan which specifies, for each day, the restaurants to eat at for breakfast / lunch / dinner, the attractions to visit, and the accommodation to stay at, along with how to get to the destination city on the first day and back to the origin city on the last day. Transportation (driving / flying) cannot be split into multiple legs. All entries in the travel plan must come from the database."
+COMMONSENSE_DESCRIPTION = "A travel plan is a day-by-day plan which specifies, for each day, the restaurants to eat at for breakfast / lunch / dinner, the attractions to visit, and the accommodation to stay at, along with how to get to the destination city on the first day and back to the origin city on the last day. Transportation (driving / flying) cannot be split into multiple legs. You should only specify meals and attractions in the destination cities, not the origin city (the user will eat at home). All entries in the travel plan must come from the database. The sandbox environment provides a Jupyter notebook and CSV files containing the available options. All items in the itinerary must correspond to entries from the given CSV files, or from the get_driving_options tool. The total cost of the trip will be computed based on the accommodation, travel, and meals selected. Note that meal costs will be multiplied by the number of people traveling. Every city the user gives you will have entries in the database."
 
-PREDICTION_FMT_INSTRUCTIONS = """Format the response as a JSON array of dictionaries, where each dictionary represents one day's itinerary. Each dictionary must include the following fields:
+PREDICTION_FMT_INSTRUCTIONS = """Format the response as a JSON array of dictionaries wrapped in <travel_plan></travel_plan> tags, where each dictionary represents one day's itinerary. Each dictionary must include the following fields:
+
+<travel_plan>
+[
+  {
+    "days": 1,
+    "current_city": "Peoria",
+    "transportation": "-",
+    "breakfast": "-",
+    "attraction": "-",
+    "lunch": "-",
+    "dinner": "-",
+    "accommodation": "-"
+  },
+  ...
+]
+</travel_plan>
 
 Required Fields:
    - days: Day number (integer)
@@ -59,7 +80,7 @@ Required Fields:
 All items in the itinerary must exactly match names from the database.  Remove any "$" symbols from costs.
 """
 
-MSG_FMT_INSTRUCTIONS = """To render a description of a single restaurant, attraction, or accommodation to the user, you can mention its name and wrap it in <travel></travel>, e.g.: '<travel>Restaurant Name, City</travel>' or '<travel>Attraction Name, City</travel>' or '<travel>Hotel Name, City</travel>'. Do not put <travel></travel> tags inside the JSON of a full travel plan.
+MSG_FMT_INSTRUCTIONS = """Always wrap restaurant names, attraction names, and accommodation names in <travel></travel>, e.g.: '<travel>Restaurant Name, City</travel>' or '<travel>Attraction Name, City</travel>' or '<travel>Hotel Name, City</travel>'. This will append a widget describing the restaurant, attraction, or accommodation at the end of your message so the user can view it. Do not put <travel></travel> tags inside the JSON of a full travel plan.
 """
 
 PREFERENCE_KEYS_TO_TEXT = {
@@ -124,7 +145,7 @@ FILE_DESCRIPTIONS = [
             "city": "City of the accommodation",
             "name": "Name of the accommodation",
             "room_type": "Type of room, one of ['Shared room', 'Entire home/apt', 'Private room']",
-            "price": "Price of the accommodation",
+            "price": "Price of the accommodation per night",
             "minimum_nights": "If this accommodation is booked, it must be booked for at least this number of nights",
             "num_reviews": "Number of reviews of the accommodation",
             "house_rules": "House rules of the accommodation",
@@ -377,6 +398,15 @@ class TravelPlannerDataset(SpecificationCollection):
         self._travel_db = TravelDB()
         self._persist_docker_container = persist_docker_container
 
+        # Import extractors and build lookup
+        import data.travel_planner.extractors as extractors_mod
+
+        self._extractor_lookup = {
+            name: func
+            for name, func in extractors_mod.__dict__.items()
+            if callable(func)
+        }
+
         # All subclasses must have these attributes set
         self._finish_init()
 
@@ -387,7 +417,7 @@ class TravelPlannerDataset(SpecificationCollection):
 
     def _load_fixed_specs(
         self, indexes: Optional[List[int]] = None
-    ) -> Dict[int, FixedSpecification]:
+    ) -> Dict[int, LinearFixedSpecification]:
         if indexes is None:
             return {}
 
@@ -405,48 +435,10 @@ class TravelPlannerDataset(SpecificationCollection):
             )
             task["preferences"] = json.loads(task["preferences"])
             task["preference_weights"] = json.loads(task["preference_weights"])
+            task["date"] = eval(task["date"])
 
-            # Extract constraints
-            constraints = []
-            for key in CONSTRAINT_KEYS_TO_TEXT.keys():
-                if key == "days":
-                    continue
-                v = get_recursive(task, key)
-                if v is not None:
-                    if isinstance(v, list):
-                        v = ", ".join(v)
-                    constraints.append(CONSTRAINT_KEYS_TO_TEXT[key].format(**{"v": v}))
-
-            # Build a list of (key, value, weight) for sorting
-            preferences_with_weights = []
-            for k, v in task["preferences"].items():
-                if v is None:
-                    continue
-                weight = task["preference_weights"].get(k, 0)
-                preferences_with_weights.append((k, v, weight))
-            # Sort by weight descending
-            preferences_with_weights.sort(key=lambda x: x[2], reverse=True)
-
-            preference_str = ""
-            for k, v, _ in preferences_with_weights:
-                if isinstance(v, (list, dict)) and len(v) == 0:
-                    continue
-                preference_str += f"- {PREFERENCE_KEYS_TO_TEXT[k]}: {v}.\n"
-
-            # Create theta (explicit knowledge) - includes basic task description and hard constraints
-            signature = (
-                f"The task is to produce a day-by-day travel itinerary to {task['dest']} using only the options found in the database. A good itinerary satisfies all of our constraints, and satisfies as many preferences as possible.\n\nTo help you, the sandbox environment provides a Jupyter notebook and CSV files containing the available options. All items in the itinerary must correspond to entries from the given CSV files, or from the get_driving_options tool.\n\n"
-                + add_section(
-                    "Constraints (must be satisfied)",
-                    f"- The trip should visit {task['visiting_city_number']} cities (i.e. {task['dest']}) and last for {task['days']} days.\n"
-                    + f"- For transportation, the trip should start on the first day from our origin city of {task['org']} and end back at {task['org']} on the last day.\n"
-                    + "\n- ".join(constraints),
-                )
-            )
-            theta = add_section(
-                "Preferences (most important to least important)",
-                preference_str.replace("\n", "\n<chunk>\n"),
-            )
+            # Create initial_specification (simple task description)
+            signature = f"The task is to produce a day-by-day travel itinerary to {task['dest']} from the origin city of {task['org']} over the dates {task['date'][0]} to {task['date'][-1]} for {task['people_number']} people."
 
             if self._persist_docker_container and self._docker_image is not None:
                 from llm_sandbox import SandboxSession
@@ -465,40 +457,83 @@ class TravelPlannerDataset(SpecificationCollection):
                 root_dir=os.path.join(DATASET_ROOT, "assets"),
             )
 
-            ystar = task["annotated_plan"]
-            spec = FixedSpecification(
+            # Create hard and soft constraints (returns dictionaries)
+            hard_constraints_dicts = create_hard_constraints(task)
+            soft_constraints_dicts, soft_weights = create_soft_constraints(
+                task, task["preference_weights"]
+            )
+
+            # Convert dictionaries to Constraint objects using extractor lookup
+            hard_constraints = [
+                Constraint.from_dict(c, extractor_lookup=self._extractor_lookup)
+                for c in hard_constraints_dicts
+            ]
+            soft_constraints = [
+                Constraint.from_dict(c, extractor_lookup=self._extractor_lookup)
+                for c in soft_constraints_dicts
+            ]
+
+            # Combine all constraints and weights
+            # All weights should be positive; linear_reward will handle sign correction for penalty constraints
+            all_constraints = hard_constraints + soft_constraints
+            all_weights = [99999] * len(hard_constraints) + [
+                abs(w) for w in soft_weights
+            ]
+
+            # Create parse_y_fn wrapper
+            def parse_travel_plan_wrapper(
+                yhat: str, raise_errors: bool = False
+            ) -> Optional[Any]:
+                """Parse travel plan from string."""
+                out = parse_travel_plan(yhat)
+                if out is None:
+                    if raise_errors:
+                        raise ValueError(
+                            "Could not parse the travel plan. Wrap the JSON travel plan in <travel_plan></travel_plan> tags."
+                        )
+                    return None
+                return out
+
+            ystar = json.dumps(task["annotated_plan"])
+            # Wrap ystar in tags
+            ystar = f"<travel_plan>{ystar}</travel_plan>"
+            spec = LinearFixedSpecification(
                 dataset_name=self.dataset_name,
                 index=f"fixed_{ix}",
-                full_specification=theta,
                 initial_specification=signature,
                 commonsense_description=COMMONSENSE_DESCRIPTION,
-                validity_fn=validity_fn,
-                validity_kwargs={
-                    "query_data": task,
-                },
+                features=all_constraints,
+                weights=all_weights,
+                parse_y_fn=parse_travel_plan_wrapper,
                 validity_fn_tool_name="check_travel_plan_validity",
                 validity_fn_tool_description="Check if the travel plan is valid and within budget",
-                reward_fn=reward_fn,
-                reward_kwargs={
-                    "query_data": task,
-                    "weights": task["preference_weights"],
-                },
                 reward_fn_tool_name="score_travel_plan",
-                reward_fn_tool_description="Score the travel plan based on preferences",
+                reward_fn_tool_description="Score the travel plan based on preference constraints",
                 ystar=ystar,
+                parse_solutions_fn=lambda msg: parse_travel_plan_solutions(
+                    msg, self._travel_db, task["dest"]
+                ),
+                parse_solutions_and_options_fn=lambda msg: parse_travel_plan_solutions_and_options(
+                    msg, self._travel_db, task["dest"]
+                ),
                 # metric_name=None,  # Not provided
                 # baseline_scores=None,  # Not provided
                 render_task_explanation=render_fixed_task_explanation,
-                actions=actions + get_driving_actions(task["driving_info"]),
+                actions=actions
+                + get_driving_actions(task["driving_info"])
+                + get_compute_cost_action(task.get("people_number", 1), task["days"]),
                 msg_fmt_instructions=MSG_FMT_INSTRUCTIONS,
                 prediction_fmt_instructions=PREDICTION_FMT_INSTRUCTIONS,
                 render_msg_fn=output_to_streamlit,
+                render_msg_fn_txt=output_to_txt,
                 render_msg_kwargs=["db", "people_number"],
                 name=f"travel_planner_{task['level']}_{task['org']}_{task['dest']}",
                 state_files=[filename],
                 files_to_clean=[filename],
                 container_ids=[container_id],
                 user_expertise_form=self._create_user_expertise_form(),
+                db=self._travel_db,
+                people_number=task.get("people_number", 1),
             )
             specs[ix] = spec
         return specs
@@ -567,8 +602,10 @@ class TravelPlannerDataset(SpecificationCollection):
             )
 
             # Create custom specification
+            initial_specification = f"Plan a trip from {task['org']} to {task['dest']} over {task['days']} days from {task['date'][0]} to {task['date'][-1]}, with a budget of ${task['budget']}"
             spec = CustomSpecification(
-                initial_specification=f"Plan a trip from {task['org']} to {task['dest']} over {task['days']} days from {task['date'][0]} to {task['date'][-1]}, with a budget of ${task['budget']}",
+                initial_specification=initial_specification,
+                current_specification=initial_specification,
                 commonsense_description=COMMONSENSE_DESCRIPTION,
                 user_specification_form_initial=[],
                 user_specification_form_final=self._create_user_specification_form_final(),
@@ -585,12 +622,15 @@ class TravelPlannerDataset(SpecificationCollection):
                 people_number=1,
                 validity_fn_tool_name="check_travel_plan_validity",
                 validity_fn_tool_description="Check if the travel plan is valid and within budget",
-                y0=fixed_task["annotated_plan"],
+                y0=f"<travel_plan>{json.dumps(fixed_task['annotated_plan']) if isinstance(fixed_task['annotated_plan'], dict) else fixed_task['annotated_plan']}</travel_plan>",
                 render_task_explanation=self._render_custom_task_explanation,
-                actions=actions + get_driving_actions(task["driving_info"]),
+                actions=actions
+                + get_driving_actions(task["driving_info"])
+                + get_compute_cost_action(task.get("people_number", 1), task["days"]),
                 msg_fmt_instructions=MSG_FMT_INSTRUCTIONS,
                 prediction_fmt_instructions=PREDICTION_FMT_INSTRUCTIONS,
                 render_msg_fn=output_to_streamlit,
+                render_msg_fn_txt=output_to_txt,
                 render_comparison_fn=output_to_streamlit_comparison,
                 render_msg_kwargs=["db", "people_number"],
                 name=f"custom_travel_planner_{ix}",
@@ -604,7 +644,7 @@ class TravelPlannerDataset(SpecificationCollection):
                 ),
                 render_evaluation_kwargs={
                     "people_number": 1,
-                    "y0": fixed_task["annotated_plan"],
+                    "y0": f"<travel_plan>{json.dumps(fixed_task['annotated_plan']) if isinstance(fixed_task['annotated_plan'], dict) else fixed_task['annotated_plan']}</travel_plan>",
                     "dest": task["dest"],
                 },
                 dataset_name=self.dataset_name,
@@ -632,7 +672,7 @@ class TravelPlannerDataset(SpecificationCollection):
                     "attraction": "-",
                     "lunch": "-",
                     "dinner": "Bazille, Rockford",
-                    "accommodation": "Pure luxury one bdrm + sofa bed on Central Park, Rockford",
+                    "accommodation": "Pure luxury one bdrm + sofa bed on park",
                 },
                 {
                     "days": 2,
@@ -642,7 +682,7 @@ class TravelPlannerDataset(SpecificationCollection):
                     "attraction": "Burpee Museum of Natural History, Rockford;Midway Village Museum, Rockford;Discovery Center Museum, Rockford;",
                     "lunch": "Poke Express, Rockford",
                     "dinner": "Al-Sham Palace, Rockford",
-                    "accommodation": "Pure luxury one bdrm + sofa bed on Central Park, Rockford",
+                    "accommodation": "Pure luxury one bdrm + sofa bed on park",
                 },
                 {
                     "days": 3,
@@ -695,7 +735,7 @@ class TravelPlannerDataset(SpecificationCollection):
                     "attraction": "-",
                     "lunch": "-",
                     "dinner": "Made-up restaurant, Rockford",
-                    "accommodation": "Pure luxury one bdrm + sofa bed on Central Park, Rockford",
+                    "accommodation": "Pure luxury one bdrm + sofa bed on park",
                 },
                 {
                     "days": 2,
@@ -705,7 +745,7 @@ class TravelPlannerDataset(SpecificationCollection):
                     "attraction": "Burpee Museum of Natural History, Rockford;Midway Village Museum, Rockford;Discovery Center Museum, Rockford;",
                     "lunch": "Poke Express, Rockford",
                     "dinner": "Al-Sham Palace, Rockford",
-                    "accommodation": "Pure luxury one bdrm + sofa bed on Central Park, Rockford",
+                    "accommodation": "Pure luxury one bdrm + sofa bed on park",
                 },
                 {
                     "days": 3,
@@ -720,7 +760,7 @@ class TravelPlannerDataset(SpecificationCollection):
             ]
 
             st.info(
-                f":red[:material/close: *Example:* This is an invalid plan because it uses a made-up restaurant, designated by the :material/error: icon]"
+                ":red[:material/close: *Example:* This is an invalid plan because it uses a made-up restaurant, designated by the :material/error: icon]"
             )
             st.markdown("### 🗓️ Itinerary at a glance")
             st.markdown("This is a quick overview of your daily schedule.")
@@ -750,7 +790,7 @@ class TravelPlannerDataset(SpecificationCollection):
                     "attraction": "-",
                     "lunch": "-",
                     "dinner": "Bazille, Rockford",
-                    "accommodation": "Pure luxury one bdrm + sofa bed on Central Park, Rockford",
+                    "accommodation": "Pure luxury one bdrm + sofa bed on park",
                 },
                 {
                     "days": 2,
@@ -760,7 +800,7 @@ class TravelPlannerDataset(SpecificationCollection):
                     "attraction": "Burpee Museum of Natural History, Rockford;Midway Village Museum, Rockford;Discovery Center Museum, Rockford;",
                     "lunch": "Poke Express, Rockford",
                     "dinner": "Al-Sham Palace, Rockford",
-                    "accommodation": "Pure luxury one bdrm + sofa bed on Central Park, Rockford",
+                    "accommodation": "Pure luxury one bdrm + sofa bed on park",
                 },
                 {
                     "days": 3,
@@ -810,7 +850,7 @@ class TravelPlannerDataset(SpecificationCollection):
                     "attraction": "-",
                     "lunch": "-",
                     "dinner": "Bazille, Rockford",
-                    "accommodation": "Pure luxury one bdrm + sofa bed on Central Park, Rockford",
+                    "accommodation": "Pure luxury one bdrm + sofa bed on park",
                 },
                 {
                     "days": 2,
@@ -834,7 +874,7 @@ class TravelPlannerDataset(SpecificationCollection):
                 },
             ]
             st.info(
-                f":red[:material/close: *Example:* This is an invalid plan because it does not specify an accommodation for the second day.]"
+                ":red[:material/close: *Example:* This is an invalid plan because it does not specify an accommodation for the second day.]"
             )
             st.markdown("### 🗓️ Itinerary at a glance")
             st.markdown("This is a quick overview of your daily schedule.")
@@ -879,6 +919,92 @@ def get_driving_actions(refs: Dict[str, str]) -> List[Action]:
             is_public=True,
             is_human=False,
             name="Get driving options",
+        )
+    ]
+
+
+def get_compute_cost_action(people_number: int, days: int) -> List[Action]:
+    """
+    Get action for computing the total cost of a travel plan.
+
+    Args:
+        people_number: Number of people in the travel party
+        days: Number of days in the trip
+    """
+
+    @tool(parse_docstring=True)
+    def compute_travel_plan_cost(travel_plan: str) -> str:
+        """
+        Compute the total cost of a travel plan.
+
+        Format the response as a JSON array of dictionaries wrapped in <travel_plan></travel_plan> tags, where each dictionary represents one day's itinerary. Each dictionary must include the following fields:
+
+        <travel_plan>
+        [
+          {
+            "days": 1,
+            "current_city": "Peoria",
+            "transportation": "-",
+            "breakfast": "-",
+            "attraction": "-",
+            "lunch": "-",
+            "dinner": "-",
+            "accommodation": "-"
+          },
+          ...
+        ]
+        </travel_plan>
+
+        Required Fields:
+        - days: Day number (integer)
+        - current_city: Current city or travel route
+            * For single-city days: Just the city name (e.g., "Peoria")
+            * For travel days: Use format "from A to B" (e.g., "from Dallas to Peoria")
+            * Must match destination in transportation field when traveling
+        - transportation: Travel details or "-" if no travel
+            * For flights: Include "Flight Number: [number], from [city] to [city], Departure Time: [time], Arrival Time: [time]"
+            * For other transport: Describe route and mode (e.g., "Self-driving, from Miami(Florida) to Punta Gorda(Florida), duration: 2 hours 42 mins, distance: 292 km, cost: 14")
+        - breakfast: Restaurant name and city, or "-" if skipping
+            * Format: "Restaurant Name, City" (e.g., "Tandoor Ka Zaika, Peoria")
+        - lunch: "Restaurant Name, City", or "-" if skipping
+        - dinner: "Restaurant Name, City", or "-" if skipping
+        - attraction: List of attractions, or "-" if skipping
+            * Format each attraction as "Name, City" (e.g., "Peoria Historical Society, Peoria")
+            * Separate multiple attractions with semicolons (e.g., "Peoria Historical Society, Peoria;Glen Oak Park, Peoria;")
+        - accommodation: "Hotel/lodging name, City", or "-" if skipping
+            * Format: "Hotel/lodging name, City" (e.g., "Bushwick Music Mansion, Peoria")
+
+        All items in the itinerary must exactly match names from the database. Remove any "$" symbols from costs.
+
+        Args:
+            travel_plan: A travel plan as a JSON string
+
+        Returns:
+            A string describing the total cost of the travel plan, including breakdown by category if available.
+        """
+        try:
+            # Parse the travel plan
+            parsed_plan = parse_travel_plan(travel_plan)
+            if parsed_plan is None:
+                return "Error: Could not parse the travel plan. Please provide a valid travel plan in JSON format."
+
+            # Prepare question dict for get_total_cost
+            question = {"days": days, "people_number": people_number}
+
+            # Compute total cost
+            total_cost = get_total_cost(question, parsed_plan)
+
+            # Format response
+            return f"The total cost of this travel plan is ${total_cost:.2f} for {people_number} people over {days} days."
+        except Exception as e:
+            return f"Error computing travel plan cost: {str(e)}"
+
+    return [
+        Action(
+            fn=compute_travel_plan_cost,
+            is_public=True,
+            is_human=False,
+            name="Compute travel plan cost",
         )
     ]
 
@@ -1009,6 +1135,7 @@ def reward_fn(
         score, min_unconstrained_score, max_unconstrained_score = compute_linear_reward(
             weights, preferences_info
         )
+        print(score, min_unconstrained_score, max_unconstrained_score)
         score = (score - min_unconstrained_score) / (
             max_unconstrained_score - min_unconstrained_score
         )
@@ -1086,7 +1213,8 @@ def output_to_streamlit(
     if js is None or start_end is None:
         # No travel plan, just render the message with travel mentions
         st.markdown(
-            replace_tags_with_link(msg, "travel", f"#{unique_id}"), unsafe_allow_html=True,
+            replace_tags_with_link(msg, "travel", f"#{unique_id}"),
+            unsafe_allow_html=True,
         )
         if mentioned_travel:
             with st.expander("Travel items mentioned in message", expanded=True):
@@ -1113,6 +1241,133 @@ def output_to_streamlit(
         st.markdown("---")
         with st.expander("Travel items mentioned in message", expanded=True):
             renderer.render_travel_mentions(mentioned_travel, db)
+
+
+from utils.misc import parse_for_answer_tags
+
+
+def parse_travel_plan_solutions(msg: str, db: TravelDB, dest: str) -> List[str]:
+    """Parse complete travel plan solutions from string (does not include individual travel item mentions)."""
+    to_return = []
+    # First try to parse from <travel_plan> tags
+    travel_plan_content = parse_for_answer_tags(
+        msg, keyword="travel_plan", return_none_if_not_found=True
+    )
+    if travel_plan_content:
+        out = parse_travel_plan(travel_plan_content)
+        if out is not None:
+            to_return.append(json.dumps(out))
+    else:
+        # Fall back to parsing JSON directly (for backward compatibility)
+        out = parse_travel_plan(msg)
+        if out is not None:
+            to_return.append(json.dumps(out))
+    return to_return
+
+
+def parse_travel_plan_solutions_and_options(
+    msg: str, db: TravelDB, dest: str
+) -> List[str]:
+    """Parse both complete travel plan solutions and individual travel item mentions from string."""
+    to_return = []
+    # First try to parse from <travel_plan> tags
+    travel_plan_content = parse_for_answer_tags(
+        msg, keyword="travel_plan", return_none_if_not_found=True
+    )
+    if travel_plan_content:
+        out = parse_travel_plan(msg)
+        if out is not None:
+            to_return.append(json.dumps(out))
+
+    mentioned_travel = parse_for_answer_tags(
+        msg, keyword="travel", return_all=True, return_none_if_not_found=True
+    )
+    if mentioned_travel is not None:
+        # Don't split on commas since travel items are in "Name, City" format
+        mentioned_travel = [
+            travel.strip() for travel in mentioned_travel if travel.strip()
+        ]
+        mentioned_travel = list(dict.fromkeys(mentioned_travel))
+        for travel_name in mentioned_travel:
+            try:
+                travel_item = db.get_travel_item_by_name(travel_name)
+                fake_plan = [
+                    {
+                        "days": 1,
+                        "current_city": dest,
+                        "transportation": "-",
+                        "breakfast": "-",
+                        "attraction": "-",
+                        "lunch": "-",
+                        "dinner": "-",
+                        "accommodation": "-",
+                    }
+                ]
+                if travel_item["type"] == "restaurant":
+                    fake_plan[0]["dinner"] = travel_name
+                elif travel_item["type"] == "attraction":
+                    fake_plan[0]["attraction"] = travel_name
+                elif travel_item["type"] == "accommodation":
+                    fake_plan[0]["accommodation"] = travel_name
+                to_return.append(json.dumps(fake_plan))
+            except Exception as e:
+                pass
+    return to_return
+
+
+def output_to_txt(
+    msg: str,
+    db: TravelDB,
+    people_number: int = 1,
+) -> str:
+    """
+    Returns the rendered message in a text format.
+    All travel items in <travel> tags are rendered as JSONs from the database.
+    """
+
+    mentioned_travel = parse_for_answer_tags(
+        msg, keyword="travel", return_all=True, return_none_if_not_found=True
+    )
+    if mentioned_travel is not None:
+        # Don't split on commas since travel items are in "Name, City" format
+        mentioned_travel = [
+            travel.strip() for travel in mentioned_travel if travel.strip()
+        ]
+        mentioned_travel = list(dict.fromkeys(mentioned_travel))
+    else:
+        return msg
+
+    all_travel_items_jsons = []
+    for travel_name in mentioned_travel:
+        try:
+            travel_item = db.get_travel_item_by_name(travel_name)
+            if travel_item is not None:
+                travel_item_dict = {
+                    "name": travel_name,
+                    "type": travel_item["type"],
+                    "info": travel_item["info"],
+                }
+                all_travel_items_jsons.append(travel_item_dict)
+            else:
+                all_travel_items_jsons.append(
+                    {
+                        "name": travel_name,
+                        "error": "Invalid travel item (not in database)",
+                    }
+                )
+        except Exception as e:
+            all_travel_items_jsons.append(
+                {
+                    "name": travel_name,
+                    "error": f"Error retrieving travel item: {str(e)}",
+                }
+            )
+
+    out = msg
+    if all_travel_items_jsons:
+        out += "\n\n------- Information about mentioned travel items ----------\n\n"
+        out += str(all_travel_items_jsons)
+    return out
 
 
 def _normalize_accommodation_name(name: str) -> str:

@@ -24,7 +24,7 @@ def sidebar_tools():
             st.markdown("*No tools available for this task*")
             return
 
-        action_names = [action.name for action in available_actions if action.is_human]
+        action_names = [action.name for action in available_actions]
         selected_action_name = st.selectbox(
             "Select tool",
             options=action_names,
@@ -61,14 +61,14 @@ def render_specification():
     if st.session_state.spec.initial_specification_multimodal is not None:
         render_display_elements(st.session_state.spec.initial_specification_multimodal)
     else:
-        st.markdown(st.session_state.spec.current_specification)
+        st.markdown(st.session_state.spec.get_current_specification())
 
 
 def render_specification_banner():
     """
     Render a banner with the current specification, if available.
     """
-    text = getattr(st.session_state.spec, "current_specification", None)
+    text = st.session_state.spec.get_current_specification()
     if text:
         st.info("*Your task:* " + text)
 
@@ -79,7 +79,7 @@ def sidebar_specification():
     """
 
     if st.session_state.interaction_started:
-        text = getattr(st.session_state.spec, "current_specification", "")
+        text = st.session_state.spec.get_current_specification()
         if text is None:
             return
         text = f"<div class='no-copy monospace'><pre class='literal'>\n\n{text}</pre></div>"
@@ -184,15 +184,25 @@ def chat_conversation(
     """
     # render the initial shared state for the user's sake
     if st.session_state.spec.initial_shared_state is not None:
-        for label, obj in st.session_state.spec.initial_shared_state:
-            chat_bubble(
-                {
-                    "role": "user",
-                    "content": label,
-                    "dialog_content": obj,
-                },
-                show_response_time=show_response_time,
-            )
+        # Special handling for email_organization and file_organization datasets
+        # Instead of showing the dataframe in a dialog, render the unorganized state
+        dataset_name = getattr(st.session_state.spec, "dataset_name", None)
+        if dataset_name in ["email_organization", "file_organization"]:
+            # Render the unorganized state by calling render_msg_fn with an empty policy
+            # This will show all emails/files in their unorganized state
+            empty_policy_msg = "<policy>{}</policy>"
+            st.session_state.spec.render_msg_fn(empty_policy_msg)
+        else:
+            # For other datasets, show the initial shared state in dialogs as before
+            for label, obj in st.session_state.spec.initial_shared_state:
+                chat_bubble(
+                    {
+                        "role": "user",
+                        "content": label,
+                        "dialog_content": obj,
+                    },
+                    show_response_time=show_response_time,
+                )
 
     # render the conversation history
     nonempty_messages = [m for m in messages if m["content"] is not None]
@@ -597,7 +607,7 @@ def floating_tools():
             # List all tools in a scrollable area
             with st.container(height=200, border=False):
                 for action in st.session_state.simulator.actions:
-                    if not action.is_human:
+                    if not action:
                         continue
                     dialog_fn = render_tool_dialog(action)
                     st.button(
