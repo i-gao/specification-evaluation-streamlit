@@ -815,7 +815,7 @@ class EmailOrganizationDataset(SpecificationCollection):
                 ],
                 emails_data=emails_data,
                 render_evaluation_fn=render_email_eval,
-                render_evaluation_kwargs=["emails_data"],
+                render_evaluation_kwargs={"emails_data": emails_data},
                 render_search_interface_fn=render_email_search_interface,
                 render_search_interface_kwargs={"emails_data": emails_data},
             )

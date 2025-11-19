@@ -642,7 +642,7 @@ class FileOrganizationDataset(SpecificationCollection):
                 ],
                 files_data=files_data,
                 render_evaluation_fn=render_file_eval,
-                render_evaluation_kwargs=["files_data"],
+                render_evaluation_kwargs={"files_data": files_data},
                 render_search_interface_fn=render_file_search_interface,
                 render_search_interface_kwargs={"files_data": files_data},
             )
