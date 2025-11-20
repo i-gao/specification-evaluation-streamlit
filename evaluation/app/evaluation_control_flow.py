@@ -54,8 +54,8 @@ FIXED_EVALUATION_STEPS: List[tuple] = [
 # If a prerequisite step is not in the step list, the dependency check is skipped
 # Only include dependencies that are conceptually necessary
 STEP_DEPENDENCIES: Dict[str, List[str]] = {
-    "final_specification": [],  # chat_evaluation is handled separately
-    "final_prediction": [],  # Need spec before generating prediction
+    "final_specification": ["chat_evaluation"],  # chat_evaluation is handled separately
+    "final_prediction": [],  # No dependencies - can generate prediction independently
     "final_evaluation_first": ["final_prediction"],  # Need prediction to evaluate
     "y0_yhat_evaluation": ["final_prediction"],  # Need prediction to evaluate
     "search_exploration": [],  # No dependencies - can happen anytime after chat eval
@@ -69,11 +69,14 @@ def _check_step_dependencies(
 ) -> bool:
     """
     Check if all dependencies for a step are satisfied.
+    
+    Only checks dependencies for steps that come BEFORE the current step in the order.
+    This allows steps to be reordered without creating circular dependencies.
 
     Args:
         step_name: Name of the step to check
         completed_steps: Set of step names that have been completed
-        all_steps: List of all step names in the current flow
+        all_steps: List of all step names in the current flow (in order)
 
     Returns:
         True if all dependencies are satisfied, False otherwise
@@ -81,14 +84,30 @@ def _check_step_dependencies(
     if step_name not in STEP_DEPENDENCIES:
         return True
 
+    # Find the index of the current step in the flow
+    try:
+        current_step_index = all_steps.index(step_name)
+    except ValueError:
+        # Step not in flow, allow it
+        return True
+
     dependencies = STEP_DEPENDENCIES[step_name]
     for dep in dependencies:
         # Skip dependency if the prerequisite step is not in the current flow
         if dep not in all_steps:
             continue
-        # Check if dependency is completed
-        if dep not in completed_steps:
-            return False
+        
+        # Only require dependency if it comes BEFORE the current step in the order
+        try:
+            dep_index = all_steps.index(dep)
+            if dep_index < current_step_index:
+                # Dependency comes before, so it must be completed
+                if dep not in completed_steps:
+                    return False
+            # If dependency comes after, we don't require it (allows reordering)
+        except ValueError:
+            # Dependency not in flow, skip
+            continue
 
     return True
 
@@ -186,15 +205,9 @@ def step_final_prediction() -> bool:
 
     Returns True if this step is completed, False otherwise.
     """
-    # For custom specs, require final_specification_completed
-    if isinstance(st.session_state.spec, CustomSpecification):
-        if not st.session_state.final_specification_completed:
-            return False
-
-    # For fixed specs, only require chat_evaluation_completed
-    if isinstance(st.session_state.spec, FixedSpecification):
-        if not st.session_state.chat_evaluation_completed:
-            return False
+    # Only require chat_evaluation_completed (handled separately in evaluation_flow)
+    if not st.session_state.chat_evaluation_completed:
+        return False
 
     if st.session_state.get("final_prediction", None) is not None:
         return True
