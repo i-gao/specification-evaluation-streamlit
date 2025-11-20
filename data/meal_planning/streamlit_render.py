@@ -204,7 +204,7 @@ def _render_carousel(
 
     def display_fn(i):
         recipe = options[i]["recipe"]
-        st.markdown(f"### {recipe.title}")
+        st.markdown(f"**{recipe.title}**")
         # Display recipe image if available
         if getattr(recipe, "image_url", None):
             st.image(recipe.image_url, width=400)

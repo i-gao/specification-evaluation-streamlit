@@ -291,10 +291,12 @@ class TravelPlannerDataset(SpecificationCollection):
             },
         ]
 
-    def _create_user_expertise_form(self, dest: str = None, state: str = None) -> List[FormElement]:
+    def _create_user_expertise_form(
+        self, dest: str = None, state: str = None
+    ) -> List[FormElement]:
         """
         Create user expertise form for travel planning.
-        
+
         Args:
             dest: Optional destination city. If provided, adds a question about knowledge of that city.
             state: Optional state name. If provided along with dest, includes state in the question.
@@ -313,7 +315,7 @@ class TravelPlannerDataset(SpecificationCollection):
                 required=True,
             )
         ]
-        
+
         # Add city-specific question if destination is provided (for custom specs)
         if dest is not None:
             if state is not None:
@@ -335,7 +337,7 @@ class TravelPlannerDataset(SpecificationCollection):
                     help=f"This helps us understand your familiarity with {city_label}",
                 )
             )
-        
+
         return form_elements
 
     def _create_user_evaluation_form(self) -> List[FormElement]:
@@ -572,7 +574,7 @@ class TravelPlannerDataset(SpecificationCollection):
             specs[ix] = spec
         return specs
 
-    def _create_user_specification_form_final(self) -> List[FormElement]:
+    def _create_user_specification_form_final(self, budget) -> List[FormElement]:
         """Create the user specification form for travel planning."""
         return [
             FormElement(
@@ -582,6 +584,15 @@ class TravelPlannerDataset(SpecificationCollection):
                 step=1,
                 min_value=0,
                 max_value=10,
+                required=True,
+            ),
+            FormElement(
+                input_type="slider",
+                label="How much are you willing to spend on this trip? (in dollars)",
+                default=budget * 1.5,
+                min_value=500,
+                max_value=10000,
+                step=100,
                 required=True,
             ),
             FormElement(
@@ -613,7 +624,7 @@ class TravelPlannerDataset(SpecificationCollection):
                 "cities": fixed_task["cities"],
                 "local_constraint": {},  # drop local constraints from the fixed task
                 "driving_info": json.loads(fixed_task["driving_info"]),
-                "budget": fixed_task["budget"] * 1.2,  # give a bit of leeway
+                "budget": 999999,  # give a bit of leeway
                 # drop preferences and preference weights from the fixed task
             }
 
@@ -637,21 +648,25 @@ class TravelPlannerDataset(SpecificationCollection):
 
             # Get state for destination city
             dest_state = self._travel_db.get_city_state(task["dest"])
-            dest_with_state = f"{task['dest']}, {dest_state}" if dest_state else task["dest"]
-            
+            dest_with_state = (
+                f"{task['dest']}, {dest_state}" if dest_state else task["dest"]
+            )
+
             # Import search interface before creating spec
             from data.travel_planner.streamlit_search_interface import (
                 render_search_interface,
                 render_liked_items,
             )
-            
+
             # Create custom specification
-            initial_specification = f"Plan a trip from {task['org']} to {dest_with_state} over {task['days']} days from {task['date'][0]} to {task['date'][-1]}, with a budget of ${task['budget']}"
+            initial_specification = f"Plan a trip from {task['org']} to {dest_with_state} over {task['days']} days from {task['date'][0]} to {task['date'][-1]}"
             spec = CustomSpecification(
                 initial_specification=initial_specification,
                 current_specification=initial_specification,
                 commonsense_description=COMMONSENSE_DESCRIPTION,
-                user_specification_form_final=self._create_user_specification_form_final(),
+                user_specification_form_final=self._create_user_specification_form_final(
+                    budget=fixed_task["budget"]
+                ),
                 user_specification_callback=user_specification_callback,
                 user_specification_callback_kwargs=[
                     "_validity_kwargs",
@@ -664,7 +679,7 @@ class TravelPlannerDataset(SpecificationCollection):
                 },
                 people_number=1,
                 validity_fn_tool_name="check_travel_plan_validity",
-                validity_fn_tool_description="Check if the travel plan is valid and within budget",
+                validity_fn_tool_description="Check if the travel plan is valid",
                 y0=f"<travel_plan>{json.dumps(fixed_task['annotated_plan']) if isinstance(fixed_task['annotated_plan'], dict) else fixed_task['annotated_plan']}</travel_plan>",
                 render_task_explanation=self._render_custom_task_explanation,
                 actions=actions
@@ -680,7 +695,9 @@ class TravelPlannerDataset(SpecificationCollection):
                 state_files=[filename],
                 files_to_clean=[filename],
                 container_ids=[container_id],
-                user_expertise_form=self._create_user_expertise_form(dest=task["dest"], state=dest_state),
+                user_expertise_form=self._create_user_expertise_form(
+                    dest=task["dest"], state=dest_state
+                ),
                 db=self._travel_db,
                 render_evaluation_fn=lambda **kwargs: renderer.render_eval(
                     **kwargs, db=self._travel_db
@@ -689,13 +706,18 @@ class TravelPlannerDataset(SpecificationCollection):
                     "people_number": 1,
                     "y0": f"<travel_plan>{json.dumps(fixed_task['annotated_plan']) if isinstance(fixed_task['annotated_plan'], dict) else fixed_task['annotated_plan']}</travel_plan>",
                     "dest": task["dest"],
-                    "num_items_per_comparison": getattr(self, "eval_num_items_per_comparison", 5),
+                    "num_items_per_comparison": getattr(
+                        self, "eval_num_items_per_comparison", 5
+                    ),
                 },
                 dataset_name=self.dataset_name,
                 driving_options=task["driving_info"],
                 index=f"custom_{ix}",
                 render_search_interface_fn=render_search_interface,
-                render_search_interface_kwargs={"travel_db": self._travel_db, "city": task.get("dest")},
+                render_search_interface_kwargs={
+                    "travel_db": self._travel_db,
+                    "city": task.get("dest"),
+                },
                 render_liked_items_fn=render_liked_items,
                 render_liked_items_kwargs={"travel_db": self._travel_db},
             )
