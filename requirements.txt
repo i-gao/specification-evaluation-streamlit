@@ -22,6 +22,7 @@ docker
 kubernetes
 google-cloud-storage
 google-auth
+rank-bm25
 
 # Essential dependencies for visual score evaluation
 opencv-python
