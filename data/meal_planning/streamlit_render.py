@@ -14,8 +14,20 @@ RENDER_SESSION_STATE_KEY_PREFIXES = [
 ]
 
 
-def render_eval(*, final_prediction: str, y0: str, db: RecipeDB, num_items_per_comparison: int = 5, **kwargs):
-    ranking_done = rank_recipes(final_prediction=final_prediction, y0=y0, db=db, num_items_per_comparison=num_items_per_comparison)
+def render_eval(
+    *,
+    final_prediction: str,
+    y0: str,
+    db: RecipeDB,
+    num_items_per_comparison: int = 5,
+    **kwargs,
+):
+    ranking_done = rank_recipes(
+        final_prediction=final_prediction,
+        y0=y0,
+        db=db,
+        num_items_per_comparison=num_items_per_comparison,
+    )
     print("Ranking done:", ranking_done)
     if not ranking_done:
         return False, None
@@ -60,7 +72,9 @@ def render_eval(*, final_prediction: str, y0: str, db: RecipeDB, num_items_per_c
     return True, None
 
 
-def rank_recipes(*, final_prediction: str, y0: str, db: RecipeDB, num_items_per_comparison: int = 5):
+def rank_recipes(
+    *, final_prediction: str, y0: str, db: RecipeDB, num_items_per_comparison: int = 5
+):
     predicted = parse_meal_plan(final_prediction, db)
     y0 = parse_meal_plan(y0, db)
 
@@ -146,15 +160,26 @@ def _render_carousel(
 
     predicted_options = [p for p in predicted if p["recipe"].title in diff_names]
     y0_options = [p for p in y0 if p["recipe"].title in diff_names]
-    if num_items_per_comparison is not None and len(diff_names) > num_items_per_comparison:
+    if (
+        num_items_per_comparison is not None
+        and len(diff_names) > num_items_per_comparison
+    ):
         # try to get a roughly balanced set of options
         if len(predicted_options) < num_items_per_comparison / 2:
-            options = predicted_options + y0_options[: num_items_per_comparison - len(predicted_options)]
+            options = (
+                predicted_options
+                + y0_options[: num_items_per_comparison - len(predicted_options)]
+            )
         elif len(y0_options) < num_items_per_comparison / 2:
-            options = predicted_options[: num_items_per_comparison - len(y0_options)] + y0_options
+            options = (
+                predicted_options[: num_items_per_comparison - len(y0_options)]
+                + y0_options
+            )
         else:
             options = (
-                predicted_options[: num_items_per_comparison // 2 + num_items_per_comparison % 2]
+                predicted_options[
+                    : num_items_per_comparison // 2 + num_items_per_comparison % 2
+                ]
                 + y0_options[: num_items_per_comparison // 2]
             )
     else:
@@ -226,7 +251,7 @@ def render_comparison(*, final_prediction: str, y0: str, db: RecipeDB):
     # if both are invalid, just return True
     if predicted is None and y0_parsed is None:
         return True
-    
+
     # Randomize which plan goes on which side (stable across reruns)
     side_key = "meal_comparison_side_assignment"
     if side_key not in st.session_state:
@@ -237,7 +262,7 @@ def render_comparison(*, final_prediction: str, y0: str, db: RecipeDB):
     # Assign plans to left/right based on randomization
     plan_a = predicted if pred_on_left else y0_parsed
     plan_b = y0_parsed if pred_on_left else predicted
-    
+
     with st.container(border=True):
         st.markdown("## Compare these meal plans")
 
@@ -319,49 +344,50 @@ def output_to_streamlit_comparison(
 
     tab1, tab2 = st.tabs(["Plan A", "Plan B"])
 
-    with tab1:
-        if a_valid is not None:
-            if a_valid:
-                st.markdown(":small[:green[:material/check: Plan A is valid]]")
+    with st.container(border=True, height=700):
+        with tab1:
+            if a_valid is not None:
+                if a_valid:
+                    st.markdown(":small[:green[:material/check: Plan A is valid]]")
+                else:
+                    st.markdown(":small[:red[:material/close: Plan A invalid]]\n\n")
+                    constraints_md = "\n\n".join(
+                        [
+                            f":small[:red[- {constraint}]]"
+                            for constraint in (a_metadata or {}).get(
+                                "violated_constraints", []
+                            )
+                            if constraint is not None
+                        ]
+                    )
+                    if constraints_md:
+                        st.markdown(constraints_md)
+            if parsed1:
+                _render_meal_plan_streamlit(parsed1, f"{unique_id}_a")
             else:
-                st.markdown(":small[:red[:material/close: Plan A invalid]]\n\n")
-                constraints_md = "\n\n".join(
-                    [
-                        f":small[:red[- {constraint}]]"
-                        for constraint in (a_metadata or {}).get(
-                            "violated_constraints", []
-                        )
-                        if constraint is not None
-                    ]
-                )
-                if constraints_md:
-                    st.markdown(constraints_md)
-        if parsed1:
-            _render_meal_plan_streamlit(parsed1, f"{unique_id}_a")
-        else:
-            st.markdown("*Invalid meal plan*")
+                st.markdown("*Invalid meal plan*")
 
-    with tab2:
-        if b_valid is not None:
-            if b_valid:
-                st.markdown(":small[:green[:material/check: Plan B is valid]]")
+        with tab2:
+            if b_valid is not None:
+                if b_valid:
+                    st.markdown(":small[:green[:material/check: Plan B is valid]]")
+                else:
+                    st.markdown(":small[:red[:material/close: Plan B invalid]]\n\n")
+                    constraints_md = "\n\n".join(
+                        [
+                            f":small[:red[- {constraint}]]"
+                            for constraint in (b_metadata or {}).get(
+                                "violated_constraints", []
+                            )
+                            if constraint is not None
+                        ]
+                    )
+                    if constraints_md:
+                        st.markdown(constraints_md)
+            if parsed2:
+                _render_meal_plan_streamlit(parsed2, f"{unique_id}_b")
             else:
-                st.markdown(":small[:red[:material/close: Plan B invalid]]\n\n")
-                constraints_md = "\n\n".join(
-                    [
-                        f":small[:red[- {constraint}]]"
-                        for constraint in (b_metadata or {}).get(
-                            "violated_constraints", []
-                        )
-                        if constraint is not None
-                    ]
-                )
-                if constraints_md:
-                    st.markdown(constraints_md)
-        if parsed2:
-            _render_meal_plan_streamlit(parsed2, f"{unique_id}_b")
-        else:
-            st.markdown("*Invalid meal plan*")
+                st.markdown("*Invalid meal plan*")
 
 
 # -------------------- Helpers used by Streamlit renders --------------------

@@ -720,7 +720,7 @@ class TravelPlannerDataset(SpecificationCollection):
                     "attraction": "-",
                     "lunch": "-",
                     "dinner": "Bazille, Rockford",
-                    "accommodation": "Pure luxury one bdrm + sofa bed on park",
+                    "accommodation": "Pure luxury one bdrm + sofa bed on park, Rockford",
                 },
                 {
                     "days": 2,
@@ -730,7 +730,7 @@ class TravelPlannerDataset(SpecificationCollection):
                     "attraction": "Burpee Museum of Natural History, Rockford;Midway Village Museum, Rockford;Discovery Center Museum, Rockford;",
                     "lunch": "Poke Express, Rockford",
                     "dinner": "Al-Sham Palace, Rockford",
-                    "accommodation": "Pure luxury one bdrm + sofa bed on park",
+                    "accommodation": "Pure luxury one bdrm + sofa bed on park, Rockford",
                 },
                 {
                     "days": 3,
@@ -783,7 +783,7 @@ class TravelPlannerDataset(SpecificationCollection):
                     "attraction": "-",
                     "lunch": "-",
                     "dinner": "Made-up restaurant, Rockford",
-                    "accommodation": "Pure luxury one bdrm + sofa bed on park",
+                    "accommodation": "Pure luxury one bdrm + sofa bed on park, Rockford",
                 },
                 {
                     "days": 2,
@@ -793,7 +793,7 @@ class TravelPlannerDataset(SpecificationCollection):
                     "attraction": "Burpee Museum of Natural History, Rockford;Midway Village Museum, Rockford;Discovery Center Museum, Rockford;",
                     "lunch": "Poke Express, Rockford",
                     "dinner": "Al-Sham Palace, Rockford",
-                    "accommodation": "Pure luxury one bdrm + sofa bed on park",
+                    "accommodation": "Pure luxury one bdrm + sofa bed on park, Rockford",
                 },
                 {
                     "days": 3,
@@ -838,7 +838,7 @@ class TravelPlannerDataset(SpecificationCollection):
                     "attraction": "-",
                     "lunch": "-",
                     "dinner": "Bazille, Rockford",
-                    "accommodation": "Pure luxury one bdrm + sofa bed on park",
+                    "accommodation": "Pure luxury one bdrm + sofa bed on park, Rockford",
                 },
                 {
                     "days": 2,
@@ -848,7 +848,7 @@ class TravelPlannerDataset(SpecificationCollection):
                     "attraction": "Burpee Museum of Natural History, Rockford;Midway Village Museum, Rockford;Discovery Center Museum, Rockford;",
                     "lunch": "Poke Express, Rockford",
                     "dinner": "Al-Sham Palace, Rockford",
-                    "accommodation": "Pure luxury one bdrm + sofa bed on park",
+                    "accommodation": "Pure luxury one bdrm + sofa bed on park, Rockford",
                 },
                 {
                     "days": 3,
@@ -898,7 +898,7 @@ class TravelPlannerDataset(SpecificationCollection):
                     "attraction": "-",
                     "lunch": "-",
                     "dinner": "Bazille, Rockford",
-                    "accommodation": "Pure luxury one bdrm + sofa bed on park",
+                    "accommodation": "Pure luxury one bdrm + sofa bed on park, Rockford",
                 },
                 {
                     "days": 2,
