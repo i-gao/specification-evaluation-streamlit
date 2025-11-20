@@ -435,8 +435,9 @@ def final_prediction_evaluation(
 
     # Render the final prediction view
     st.markdown("Below is the assistant's final artifact for the task.")
-    with st.container(border=True, height=700):
+    with st.container(border=True):
         st.session_state.spec.render_msg_fn(st.session_state.final_prediction)
+    st.divider()
 
     form_elements = [
         FormElement(
