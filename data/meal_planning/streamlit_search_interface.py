@@ -298,6 +298,8 @@ def render_recipe_results(
                     st.rerun()
 
                 # Recipe details
+                st.header(recipe.title)
+                st.image(recipe.image_url)
                 recipe_markdown = _recipe_details(recipe)
                 st.markdown(recipe_markdown, unsafe_allow_html=True)
 
