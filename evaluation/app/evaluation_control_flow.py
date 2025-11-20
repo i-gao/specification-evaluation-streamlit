@@ -32,9 +32,9 @@ from evaluation.app.control_flow import (
 # Step names must match function names in this module (without the "step_" prefix)
 # Note: chat_evaluation is handled separately in evaluation_flow, so it's not included here
 CUSTOM_EVALUATION_STEPS: List[tuple] = [
-    ("final_specification", True),
     ("final_prediction", True),
     ("final_evaluation_first", True),
+    ("final_specification", True),
     ("y0_yhat_evaluation", True),
     ("search_exploration", True),
     ("final_evaluation_second", True),
