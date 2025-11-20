@@ -54,10 +54,8 @@ FIXED_EVALUATION_STEPS: List[tuple] = [
 # If a prerequisite step is not in the step list, the dependency check is skipped
 # Only include dependencies that are conceptually necessary
 STEP_DEPENDENCIES: Dict[str, List[str]] = {
-    "final_specification": ["chat_evaluation"],  # chat_evaluation is handled separately
-    "final_prediction": [
-        "final_specification"
-    ],  # Need spec before generating prediction
+    "final_specification": [],  # chat_evaluation is handled separately
+    "final_prediction": [],  # Need spec before generating prediction
     "final_evaluation_first": ["final_prediction"],  # Need prediction to evaluate
     "y0_yhat_evaluation": ["final_prediction"],  # Need prediction to evaluate
     "search_exploration": [],  # No dependencies - can happen anytime after chat eval
