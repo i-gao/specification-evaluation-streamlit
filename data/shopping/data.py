@@ -537,25 +537,25 @@ class ShoppingDataset(SpecificationCollection):
                     "Example shopping cart with 1 valid item and 1 invalid item (marked with error icon)"
                 )
 
-        st.markdown("* Stay within your specified budget.")
+        # st.markdown("* Stay within your specified budget.")
 
-        with st.container(border=True):
-            # Example that exceeds budget
-            over_budget_cart = "<cart>802444001,802553001</cart>"
-            st.info(
-                ":red[:material/close: *Example:* This cart exceeds the budget of \$150]"
-            )
-            try:
-                st.markdown(
-                    renderer._shopping_recommendations_to_markdown(
-                        over_budget_cart, self._catalog, header_type="cart"
-                    ),
-                    unsafe_allow_html=True,
-                )
-            except Exception:
-                st.markdown(
-                    "Example shopping cart with 5 items that would exceed a $150 budget"
-                )
+        # with st.container(border=True):
+        #     # Example that exceeds budget
+        #     over_budget_cart = "<cart>802444001,802553001</cart>"
+        #     st.info(
+        #         ":red[:material/close: *Example:* This cart exceeds the budget of \$150]"
+        #     )
+        #     try:
+        #         st.markdown(
+        #             renderer._shopping_recommendations_to_markdown(
+        #                 over_budget_cart, self._catalog, header_type="cart"
+        #             ),
+        #             unsafe_allow_html=True,
+        #         )
+        #     except Exception:
+        #         st.markdown(
+        #             "Example shopping cart with 5 items that would exceed a $150 budget"
+        #         )
 
         st.markdown(
             "* Match the shopping requirements you specified (e.g., if you asked for 2 hoodies, include 2 hoodies)."
