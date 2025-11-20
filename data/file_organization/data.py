@@ -27,7 +27,9 @@ from data.file_organization.streamlit_render import (
     render_file_policy_results_txt,
     render_eval as render_file_eval,
 )
-from data.file_organization.streamlit_search_interface import render_search_interface as render_file_search_interface
+from data.file_organization.streamlit_search_interface import (
+    render_search_interface as render_file_search_interface,
+)
 from data.file_organization.parser import (
     parse_policy,
     parse_file_organization_solutions,
@@ -118,18 +120,23 @@ def render_fixed_task_explanation():
 
 def render_custom_task_explanation(files_data: List[Dict] = None):
     """Render the custom task explanation for file organization."""
-    from data.file_organization.streamlit_render import render_custom_task_explanation as render_custom_explanation
+    from data.file_organization.streamlit_render import (
+        render_custom_task_explanation as render_custom_explanation,
+    )
+
     render_custom_explanation(files_data=files_data)
 
 
-def check_file_policy_validity(yhat: str, raise_errors: bool = False) -> Tuple[bool, dict]:
+def check_file_policy_validity(
+    yhat: str, raise_errors: bool = False
+) -> Tuple[bool, dict]:
     """
     Check if a file organization policy is valid.
-    
+
     Args:
         yhat: The policy string (may be wrapped in <policy></policy> tags)
         raise_errors: If True, raise an error if invalid
-    
+
     Returns:
         Tuple of (is_valid, metadata)
     """
@@ -140,44 +147,64 @@ def check_file_policy_validity(yhat: str, raise_errors: bool = False) -> Tuple[b
                 "Could not parse the policy. Wrap the JSON policy in <policy></policy> tags."
             )
         return False, {"error": "Could not parse the policy"}
-    
+
     # Validate that policy is a dict
     if not isinstance(policy, dict):
         if raise_errors:
             raise ValueError(
                 f"Policy must be a dictionary, but got {type(policy).__name__}."
             )
-        return False, {"error": f"Policy must be a dictionary, but got {type(policy).__name__}"}
-    
+        return False, {
+            "error": f"Policy must be a dictionary, but got {type(policy).__name__}"
+        }
+
     # Validate moving_rules if present
     if "moving_rules" in policy:
         moving_rules = policy["moving_rules"]
         if not isinstance(moving_rules, list):
             if raise_errors:
-                raise ValueError(f"'moving_rules' must be a list, but got {type(moving_rules).__name__}.")
-            return False, {"error": f"'moving_rules' must be a list, but got {type(moving_rules).__name__}"}
+                raise ValueError(
+                    f"'moving_rules' must be a list, but got {type(moving_rules).__name__}."
+                )
+            return False, {
+                "error": f"'moving_rules' must be a list, but got {type(moving_rules).__name__}"
+            }
         for i, rule in enumerate(moving_rules):
             if not isinstance(rule, dict):
                 if raise_errors:
-                    raise ValueError(f"Moving rule at index {i} must be a dictionary, but got {type(rule).__name__}.")
-                return False, {"error": f"Moving rule at index {i} must be a dictionary"}
+                    raise ValueError(
+                        f"Moving rule at index {i} must be a dictionary, but got {type(rule).__name__}."
+                    )
+                return False, {
+                    "error": f"Moving rule at index {i} must be a dictionary"
+                }
             if "folder" not in rule:
                 if raise_errors:
-                    raise ValueError(f"Moving rule at index {i} is missing the 'folder' field.")
+                    raise ValueError(
+                        f"Moving rule at index {i} is missing the 'folder' field."
+                    )
                 return False, {"error": f"Moving rule at index {i} is missing 'folder'"}
             if "conditions" not in rule:
                 if raise_errors:
-                    raise ValueError(f"Moving rule at index {i} is missing the 'conditions' field.")
-                return False, {"error": f"Moving rule at index {i} is missing 'conditions'"}
-    
+                    raise ValueError(
+                        f"Moving rule at index {i} is missing the 'conditions' field."
+                    )
+                return False, {
+                    "error": f"Moving rule at index {i} is missing 'conditions'"
+                }
+
     # Validate naming_policy if present
     if "naming_policy" in policy:
         naming_policy = policy["naming_policy"]
         if not isinstance(naming_policy, dict):
             if raise_errors:
-                raise ValueError(f"'naming_policy' must be a dictionary, but got {type(naming_policy).__name__}.")
-            return False, {"error": f"'naming_policy' must be a dictionary, but got {type(naming_policy).__name__}"}
-    
+                raise ValueError(
+                    f"'naming_policy' must be a dictionary, but got {type(naming_policy).__name__}."
+                )
+            return False, {
+                "error": f"'naming_policy' must be a dictionary, but got {type(naming_policy).__name__}"
+            }
+
     return True, {}
 
 
@@ -277,10 +304,10 @@ class FileOrganizationDataset(SpecificationCollection):
     def _load_files_data(self, uuid_or_custom: str) -> Optional[List[Dict]]:
         """
         Load files data from JSON file, trying gold directory first, then regular.
-        
+
         Args:
             uuid_or_custom: UUID string for fixed specs, or "custom" for custom specs
-        
+
         Returns:
             List of file dictionaries, or None if files don't exist
         """
@@ -293,12 +320,15 @@ class FileOrganizationDataset(SpecificationCollection):
             )
         else:
             files_gold_path = os.path.join(
-                DATASET_ROOT, "assets", "dataset_files_gold", f"{uuid_or_custom}_files.json"
+                DATASET_ROOT,
+                "assets",
+                "dataset_files_gold",
+                f"{uuid_or_custom}_files.json",
             )
             files_path = os.path.join(
                 DATASET_ROOT, "assets", "dataset_files", f"{uuid_or_custom}_files.json"
             )
-        
+
         # Try to load from gold directory first (has theme info), otherwise use regular files
         if os.path.exists(files_gold_path):
             with open(files_gold_path, "r") as f:
@@ -311,7 +341,7 @@ class FileOrganizationDataset(SpecificationCollection):
     def _build_file_fields(self, sample_file: Dict) -> Dict[str, str]:
         """
         Build file field descriptions from a sample file.
-        
+
         Returns:
             Dictionary mapping field names to descriptions
         """
@@ -320,28 +350,36 @@ class FileOrganizationDataset(SpecificationCollection):
             if key == "filename":
                 file_fields[key] = "Original filename of the file"
             elif key == "create_date":
-                file_fields[key] = "Creation date of the file (format: YYYY-MM-DD HH:MM:SS)"
+                file_fields[key] = (
+                    "Creation date of the file (format: YYYY-MM-DD HH:MM:SS)"
+                )
             elif key == "edit_date":
-                file_fields[key] = "Last edit date of the file (format: YYYY-MM-DD HH:MM:SS)"
+                file_fields[key] = (
+                    "Last edit date of the file (format: YYYY-MM-DD HH:MM:SS)"
+                )
             elif key == "file_contents_preview":
-                file_fields[key] = "Preview of the file contents (first portion of the file)"
+                file_fields[key] = (
+                    "Preview of the file contents (first portion of the file)"
+                )
         return file_fields
 
-    def _create_ls_output(self, files_data: List[Dict], uuid_or_custom: str) -> List[Dict]:
+    def _create_ls_output(
+        self, files_data: List[Dict], uuid_or_custom: str
+    ) -> List[Dict]:
         """
         Create ls_output description for files JSON file.
-        
+
         Args:
             files_data: List of file dictionaries
             uuid_or_custom: UUID string for fixed specs, or "custom" for custom specs
-        
+
         Returns:
             List with single dict describing the files JSON file
         """
         sample_file = files_data[0] if files_data else {}
         file_fields = self._build_file_fields(sample_file)
         files_json_path = os.path.join("dataset_files", f"{uuid_or_custom}_files.json")
-        
+
         return [
             {
                 "filename": files_json_path,
@@ -353,10 +391,11 @@ class FileOrganizationDataset(SpecificationCollection):
     def _create_apply_policy_tool(self, files_data: List[Dict]) -> Action:
         """
         Create the apply_policy_and_see_results tool.
-        
+
         Returns:
             Action object for the tool
         """
+
         @tool(parse_docstring=True)
         def apply_policy_and_see_results(policy_json: str) -> str:
             """
@@ -643,6 +682,7 @@ class FileOrganizationDataset(SpecificationCollection):
                 files_data=files_data,
                 render_evaluation_fn=render_file_eval,
                 render_evaluation_kwargs={
+                    "y0": y0,
                     "files_data": files_data,
                     "num_comparisons": self.eval_num_comparisons,
                     "num_items_per_comparison": self.eval_num_items_per_comparison,

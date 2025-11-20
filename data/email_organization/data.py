@@ -820,6 +820,7 @@ class EmailOrganizationDataset(SpecificationCollection):
                 emails_data=emails_data,
                 render_evaluation_fn=render_email_eval,
                 render_evaluation_kwargs={
+                    "y0": y0,
                     "emails_data": emails_data,
                     "num_comparisons": self.eval_num_comparisons,
                     "num_items_per_comparison": self.eval_num_items_per_comparison,

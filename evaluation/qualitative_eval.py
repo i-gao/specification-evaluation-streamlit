@@ -33,7 +33,7 @@ ASSISTANT_INSTRUMENTS = {
         "The assistant talked too much.",
         "Reading the assistant's messages took a long time.",
         "The assistant would think for too long before responding.",
-    ]
+    ],
 }
 ASSISTANT_INSTRUMENTS_DIRECTIONS = {
     "technical_competence": {
@@ -88,8 +88,8 @@ NASA_TLX_SCALES = {
     },
     "Performance": {
         "description": "How successful were you in performing the task? How satisfied were you with your performance?",
-        "low_anchor": "Perfect",
-        "high_anchor": "Failure",
+        "low_anchor": "Failure",
+        "high_anchor": "Perfect",
     },
     "Effort": {
         "description": "How hard did you have to work (mentally and physically) to accomplish your level of performance?",
@@ -109,5 +109,9 @@ NASA_TLX_MIN_VALUE = 0
 NASA_TLX_MAX_VALUE = 100
 NASA_TLX_STEP = 5
 
-MUST_HAVES_QUESTION = "Think about the task. What are your **must-haves** or **must-not-haves**?"
-NICE_TO_HAVES_QUESTION = "Think about the task. What are your **nice-to-haves** or **nice-to-not-haves**?"
+MUST_HAVES_QUESTION = (
+    "Think about the task. What are your **must-haves** or **must-not-haves**?"
+)
+NICE_TO_HAVES_QUESTION = (
+    "Think about the task. What are your **nice-to-haves** or **nice-to-not-haves**?"
+)

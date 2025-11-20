@@ -7,6 +7,184 @@ from utils.misc import parse_for_answer_tags
 from data.file_organization.reward import apply_policy
 from data.file_organization.parser import parse_policy
 
+# Session state key prefixes used by this render module that should be cleared between rounds
+RENDER_SESSION_STATE_KEY_PREFIXES = [
+    "file_comparison_",
+]
+
+
+# ============================================================================
+# Helper functions for rendering files
+# ============================================================================
+
+
+def parse_file_date(file_dict: Dict) -> datetime:
+    """
+    Parse file date string to datetime for sorting.
+    Prefers edit_date, falls back to create_date.
+
+    Args:
+        file_dict: File dictionary with date fields
+
+    Returns:
+        datetime object for sorting, or datetime.min if parsing fails
+    """
+    date_str = file_dict.get("edit_date", "") or file_dict.get("create_date", "")
+    if not date_str:
+        return datetime.min
+    try:
+        # Try common date formats
+        for fmt in ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d", "%m/%d/%Y %H:%M:%S", "%m/%d/%Y"]:
+            try:
+                return datetime.strptime(date_str.strip(), fmt)
+            except ValueError:
+                continue
+    except Exception:
+        pass
+    return datetime.min
+
+
+def format_file_date(date_str: str) -> str:
+    """
+    Format a file date string for display.
+
+    Args:
+        date_str: Date string to format
+
+    Returns:
+        Formatted date string (truncated to 16 chars if longer than 10, else 10)
+    """
+    if not date_str:
+        return ""
+    return date_str[:16] if len(date_str) > 10 else date_str[:10]
+
+
+def get_file_icon(filename: str) -> str:
+    """
+    Determine file icon emoji based on file extension.
+
+    Args:
+        filename: Filename (with or without extension)
+
+    Returns:
+        Emoji icon string
+    """
+    file_ext = filename.split(".")[-1].lower() if "." in filename else ""
+    file_icon = "📄"  # Default
+
+    if file_ext in ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"]:
+        file_icon = "🖼️"
+    elif file_ext in ["pdf"]:
+        file_icon = "📕"
+    elif file_ext in ["doc", "docx"]:
+        file_icon = "📘"
+    elif file_ext in ["xls", "xlsx", "csv"]:
+        file_icon = "📊"
+    elif file_ext in ["txt", "md", "rtf"]:
+        file_icon = "📝"
+    elif file_ext in ["py", "js", "java", "cpp", "c", "ts", "html", "css"]:
+        file_icon = "💻"
+    elif file_ext in ["zip", "rar", "7z", "tar", "gz"]:
+        file_icon = "📦"
+    elif file_ext in ["mp3", "mp4", "avi", "wav", "flac"]:
+        file_icon = "🎵"
+
+    return file_icon
+
+
+def build_file_name_display(file: Dict) -> str:
+    """
+    Build HTML for file name display, including original filename and preview if applicable.
+
+    Args:
+        file: File dictionary with filename, optional original_filename, and file_contents_preview
+
+    Returns:
+        HTML string for name display
+    """
+    original_filename = file.get("original_filename", "")
+    new_filename = file.get("filename", "")
+    file_preview = file.get("file_contents_preview", "")
+
+    # Show new filename if different from original, otherwise show original
+    # If original_filename is empty (unsorted files), just use new_filename
+    if original_filename:
+        display_name = (
+            new_filename if new_filename != original_filename else original_filename
+        )
+    else:
+        display_name = new_filename
+
+    name_display = f'<span class="file-name">{display_name}</span>'
+
+    # Add original filename if it was renamed (and original_filename exists)
+    if original_filename and new_filename != original_filename:
+        name_display += f'<br><span class="original-name">Original filename: {original_filename}</span>'
+
+    # Add preview if available
+    if file_preview:
+        # Truncate preview for inline display
+        preview_display = (
+            file_preview[:200] + "..." if len(file_preview) > 200 else file_preview
+        )
+        # Escape HTML in preview to prevent rendering issues
+        preview_display = preview_display.replace("<", "&lt;").replace(">", "&gt;")
+        name_display += f'<br><span class="original-name" style="font-size: 11px; color: #888; font-style: normal; margin-top: 4px; display: block;">{preview_display}</span>'
+
+    return name_display
+
+
+def render_file_row(file: Dict) -> None:
+    """
+    Render a single file row in Windows Explorer-style grid format.
+
+    Args:
+        file: File dictionary with filename, dates, and optional original_filename and preview
+    """
+    new_filename = file.get("filename", "")
+    create_date = file.get("create_date", "")
+    edit_date = file.get("edit_date", "")
+
+    # Format dates
+    create_display = format_file_date(create_date)
+    edit_display = format_file_date(edit_date)
+
+    # Get file icon
+    file_icon = get_file_icon(new_filename)
+
+    # Build name display
+    name_display = build_file_name_display(file)
+
+    # Render the file row
+    st.markdown(
+        f"""
+    <div class="file-grid file-item">
+        <div style="font-size: 20px;">{file_icon}</div>
+        <div>{name_display}</div>
+        <div class="file-date">{create_display}</div>
+        <div class="file-date">{edit_display}</div>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_file_grid_header() -> None:
+    """
+    Render the header row for the file grid (column headers).
+    """
+    st.markdown(
+        """
+    <div class="file-grid file-grid-header">
+        <div></div>
+        <div>Name</div>
+        <div>Date Created</div>
+        <div>Date Modified</div>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
+
 
 def render_file_policy_results(msg: str, files_data: List[Dict]) -> None:
     """
@@ -49,10 +227,11 @@ def render_file_policy_results(msg: str, files_data: List[Dict]) -> None:
         return
 
     # Windows Explorer-like display
-    with st.container(border=True, height=700):
+    with st.container(border=True, height=600):
         st.subheader("File Explorer")
         # Add CSS for Windows Explorer-like styling
-        st.markdown("""
+        st.markdown(
+            """
         <style>
         div[data-testid="column"]:first-child {
             background-color: #f8f8f8;
@@ -96,6 +275,10 @@ def render_file_policy_results(msg: str, files_data: List[Dict]) -> None:
             box-sizing: border-box;
             width: 100%;
         }
+        .file-grid > div:nth-child(2) {
+            min-width: 0;
+            overflow: hidden;
+        }
         .file-grid:last-child {
             border-bottom: none;
         }
@@ -117,153 +300,91 @@ def render_file_policy_results(msg: str, files_data: List[Dict]) -> None:
         .file-name {
             font-size: 14px;
             color: #333;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            display: block;
         }
         .file-date {
             font-size: 13px;
             color: #666;
+            white-space: nowrap;
         }
         .original-name {
             font-size: 12px;
             color: #888;
             font-style: italic;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
         </style>
-        """, unsafe_allow_html=True)
-        
+        """,
+            unsafe_allow_html=True,
+        )
+
         # Sort folders for consistent display
         sorted_folders = [f for f in sorted(organized.keys()) if len(organized[f]) > 0]
-        
+
         if not sorted_folders:
             st.info("No files to display.")
             return
-        
+
         # Create a two-column layout: sidebar for folders, main area for files
         col1, col2 = st.columns([1, 3], gap="small")
-        
+
         # Sidebar: Folder tree view (like Windows Explorer navigation pane)
-        with col1:            
+        with col1:
             # Display folder tree
             for folder in sorted_folders:
                 files_count = len(organized[folder])
-                st.markdown(f'<div class="folder-item">📁 <strong>{folder}</strong> ({files_count})</div>', unsafe_allow_html=True)
-        
+                st.markdown(
+                    f'<div class="folder-item">📁 <strong>{folder}</strong> ({files_count})</div>',
+                    unsafe_allow_html=True,
+                )
+
         # Main area: File details view (like Windows Explorer details pane)
         with col2:
             # Create tabs for each folder if multiple folders exist
             if len(sorted_folders) > 1:
-                folder_tabs = st.tabs([f"📁 {folder} ({len(organized[folder])})" for folder in sorted_folders])
-                folder_tab_map = {folder: tab for folder, tab in zip(sorted_folders, folder_tabs)}
+                folder_tabs = st.tabs(
+                    [
+                        f"📁 {folder} ({len(organized[folder])})"
+                        for folder in sorted_folders
+                    ]
+                )
+                folder_tab_map = {
+                    folder: tab for folder, tab in zip(sorted_folders, folder_tabs)
+                }
             else:
                 # Single folder - no tabs needed
                 folder_tab_map = {sorted_folders[0]: st.container()}
-            
+
             # Display files for each folder
             for folder in sorted_folders:
                 files = organized[folder]
                 if not files:
                     continue
-                
-                # Sort files by edit_date (newest first), fallback to create_date if edit_date is missing
-                def parse_file_date(file_dict):
-                    """Parse file date string to datetime for sorting."""
-                    # Prefer edit_date, fallback to create_date
-                    date_str = file_dict.get("edit_date", "") or file_dict.get("create_date", "")
-                    if not date_str:
-                        return datetime.min
-                    try:
-                        # Try common date formats
-                        for fmt in ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d", "%m/%d/%Y %H:%M:%S", "%m/%d/%Y"]:
-                            try:
-                                return datetime.strptime(date_str.strip(), fmt)
-                            except ValueError:
-                                continue
-                    except Exception:
-                        pass
-                    return datetime.min
-                
+
                 # Sort files by date (newest first)
                 sorted_files = sorted(files, key=parse_file_date, reverse=True)
-                
+
                 # Use tab if multiple folders, otherwise use container
                 container = folder_tab_map[folder]
-                
+
                 with container:
                     # Wrap file grids in a container for proper overflow handling
-                    st.markdown('<div class="file-grid-container">', unsafe_allow_html=True)
-                    
+                    st.markdown(
+                        '<div class="file-grid-container">', unsafe_allow_html=True
+                    )
+
                     # Header row (column headers)
-                    st.markdown("""
-                    <div class="file-grid file-grid-header">
-                        <div></div>
-                        <div>Name</div>
-                        <div>Date Created</div>
-                        <div>Date Modified</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
+                    render_file_grid_header()
+
                     # File rows
                     for file in sorted_files:
-                        original_filename = file.get("original_filename", "")
-                        new_filename = file.get("filename", "")
-                        create_date = file.get("create_date", "")
-                        edit_date = file.get("edit_date", "")
-                        file_preview = file.get("file_contents_preview", "")
-                        
-                        # Format dates (show date and time if available)
-                        if create_date:
-                            create_display = create_date[:16] if len(create_date) > 10 else create_date[:10]
-                        else:
-                            create_display = ""
-                        if edit_date:
-                            edit_display = edit_date[:16] if len(edit_date) > 10 else edit_date[:10]
-                        else:
-                            edit_display = ""
-                        
-                        # Determine file icon based on extension
-                        file_ext = new_filename.split('.')[-1].lower() if '.' in new_filename else ""
-                        file_icon = "📄"
-                        if file_ext in ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp']:
-                            file_icon = "🖼️"
-                        elif file_ext in ['pdf']:
-                            file_icon = "📕"
-                        elif file_ext in ['doc', 'docx']:
-                            file_icon = "📘"
-                        elif file_ext in ['xls', 'xlsx', 'csv']:
-                            file_icon = "📊"
-                        elif file_ext in ['txt', 'md', 'rtf']:
-                            file_icon = "📝"
-                        elif file_ext in ['py', 'js', 'java', 'cpp', 'c', 'ts', 'html', 'css']:
-                            file_icon = "💻"
-                        elif file_ext in ['zip', 'rar', '7z', 'tar', 'gz']:
-                            file_icon = "📦"
-                        elif file_ext in ['mp3', 'mp4', 'avi', 'wav', 'flac']:
-                            file_icon = "🎵"
-                        
-                        # Show new filename if different from original, otherwise show original
-                        display_name = new_filename if new_filename != original_filename else original_filename
-                        name_display = f'<span class="file-name">{display_name}</span>'
-                        if new_filename != original_filename:
-                            name_display += f'<br><span class="original-name">Original filename: {original_filename}</span>'
-                        
-                        # Add preview if available
-                        if file_preview:
-                            # Truncate preview for inline display
-                            preview_display = file_preview[:200] + "..." if len(file_preview) > 200 else file_preview
-                            # Escape HTML in preview to prevent rendering issues
-                            preview_display = preview_display.replace("<", "&lt;").replace(">", "&gt;")
-                            name_display += f'<br><span class="original-name" style="font-size: 11px; color: #888; font-style: normal; margin-top: 4px; display: block;">{preview_display}</span>'
-                        
-                        st.markdown(f"""
-                        <div class="file-grid file-item">
-                            <div style="font-size: 20px;">{file_icon}</div>
-                            <div>{name_display}</div>
-                            <div class="file-date">{create_display}</div>
-                            <div class="file-date">{edit_display}</div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                    
+                        render_file_row(file)
+
                     # Close the file grid container
-                    st.markdown('</div>', unsafe_allow_html=True)
+                    st.markdown("</div>", unsafe_allow_html=True)
 
 
 def render_file_policy_results_txt(msg: str, files_data: List[Dict]) -> str:
@@ -321,14 +442,14 @@ def render_eval(
     """
     Render evaluation UI comparing final_prediction against y0.
     Shows side-by-side clustering comparisons and collects user preferences.
-    
+
     Args:
         final_prediction: The assistant's policy prediction
         y0: The gold/reference policy
         files_data: List of file dictionaries
         num_comparisons: Number of comparison iterations to run
         num_items_per_comparison: Number of items to sample per comparison
-        
+
     Returns:
         Tuple of (completed: bool, feedback: Optional[Dict])
     """
@@ -337,20 +458,22 @@ def render_eval(
         st.session_state.form_results["final_evaluation"] = {}
     if "comparison_results" not in st.session_state.form_results["final_evaluation"]:
         st.session_state.form_results["final_evaluation"]["comparison_results"] = []
-    
-    comparison_results = st.session_state.form_results["final_evaluation"]["comparison_results"]
-    
+
+    comparison_results = st.session_state.form_results["final_evaluation"][
+        "comparison_results"
+    ]
+
     # Parse both policies
     pred_policy = parse_policy(final_prediction, raise_errors=False)
     y0_policy = parse_policy(y0, raise_errors=False)
-    
+
     if pred_policy is None:
         st.error("Could not parse final_prediction policy.")
         return False, None
     if y0_policy is None:
         st.error("Could not parse y0 policy.")
         return False, None
-    
+
     # Apply both policies to get clustering
     try:
         pred_organized = apply_policy(files_data, pred_policy)
@@ -358,37 +481,42 @@ def render_eval(
     except Exception as e:
         st.error(f"Error applying policies: {str(e)}")
         return False, None
-    
+
     # Build filename to file mapping
     # Note: files_data contains raw files with "filename" as the original filename
     # After apply_policy, files will have both "original_filename" and "filename" (new name)
-    filename_to_file = {f.get("filename", ""): f for f in files_data if f.get("filename", "")}
+    filename_to_file = {
+        f.get("filename", ""): f for f in files_data if f.get("filename", "")
+    }
     all_filenames = list(filename_to_file.keys())
-    
+
     # Run comparisons
     current_comparison = len(comparison_results)
-    
+
     if current_comparison < num_comparisons:
         # Sample items for this comparison (stable across reruns)
-        sample_key = f"comparison_{current_comparison}_sample"
+        sample_key = f"file_comparison_{current_comparison}_sample"
         if sample_key not in st.session_state:
             # Sample unique items
             sample_size = min(num_items_per_comparison, len(all_filenames))
             st.session_state[sample_key] = random.sample(all_filenames, sample_size)
         sampled_filenames = st.session_state[sample_key]
-        
+
         # Randomize which policy goes on which side (stable across reruns)
-        side_key = f"comparison_{current_comparison}_side_assignment"
+        side_key = f"file_comparison_{current_comparison}_side_assignment"
         if side_key not in st.session_state:
             # Randomly assign: True means pred on left, False means y0 on left
             st.session_state[side_key] = random.choice([True, False])
         pred_on_left = st.session_state[side_key]
-        
+
         st.markdown(f"### Comparison {current_comparison + 1} of {num_comparisons}")
-        st.markdown(f"Comparing how **{len(sampled_filenames)} files** are organized by each policy.")
-        
+        st.markdown(
+            f"Comparing how **{len(sampled_filenames)} files** are organized by each policy."
+        )
+
         # Add CSS for Windows Explorer-like styling
-        st.markdown("""
+        st.markdown(
+            """
         <style>
         .file-item {
             padding: 6px 8px;
@@ -408,6 +536,10 @@ def render_eval(
             border-bottom: 1px solid #eee;
             box-sizing: border-box;
             width: 100%;
+        }
+        .file-grid > div:nth-child(2) {
+            min-width: 0;
+            overflow: hidden;
         }
         .file-grid:last-child {
             border-bottom: none;
@@ -430,23 +562,31 @@ def render_eval(
         .file-name {
             font-size: 14px;
             color: #333;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            display: block;
         }
         .file-date {
             font-size: 13px;
             color: #666;
+            white-space: nowrap;
         }
         .original-name {
             font-size: 12px;
             color: #888;
             font-style: italic;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
         </style>
-        """, unsafe_allow_html=True)
-        
+        """,
+            unsafe_allow_html=True,
+        )
+
         # Get clustering for sampled items under each policy
         pred_clusters = {}
         y0_clusters = {}
-        
+
         for filename in sampled_filenames:
             # Find which folder each file goes to in each policy
             # After apply_policy, files have "original_filename" field
@@ -456,39 +596,25 @@ def render_eval(
                     break
             else:
                 pred_clusters[filename] = "Uncategorized"
-            
+
             for folder, files in y0_organized.items():
                 if any(f.get("original_filename", "") == filename for f in files):
                     y0_clusters[filename] = folder
                     break
             else:
                 y0_clusters[filename] = "Uncategorized"
-        
+
         # Assign clusters to left/right based on randomization
         left_clusters = pred_clusters if pred_on_left else y0_clusters
         right_clusters = y0_clusters if pred_on_left else pred_clusters
-        
-        # Helper function to parse file date for sorting
-        def parse_file_date(file_dict):
-            """Parse file date string to datetime for sorting."""
-            # Prefer edit_date, fallback to create_date
-            date_str = file_dict.get("edit_date", "") or file_dict.get("create_date", "")
-            if not date_str:
-                return datetime.min
-            try:
-                # Try common date formats
-                for fmt in ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d", "%m/%d/%Y %H:%M:%S", "%m/%d/%Y"]:
-                    try:
-                        return datetime.strptime(date_str.strip(), fmt)
-                    except ValueError:
-                        continue
-            except Exception:
-                pass
-            return datetime.min
-        
+
+        # Assign organized data to left/right based on randomization
+        left_organized = pred_organized if pred_on_left else y0_organized
+        right_organized = y0_organized if pred_on_left else pred_organized
+
         # Display side-by-side comparison
         col1, col2 = st.columns(2)
-        
+
         with col1:
             with st.container(border=True):
                 st.markdown("#### **Policy A**")
@@ -498,96 +624,38 @@ def render_eval(
                     if folder not in left_folders:
                         left_folders[folder] = []
                     left_folders[folder].append(filename)
-                
+
                 # Display each folder as a section with files in Windows Explorer style
                 for folder in sorted(left_folders.keys()):
                     files_in_folder = left_folders[folder]
                     # Get full file objects from organized data and sort by date
                     folder_files = []
                     for filename in files_in_folder:
-                        for f in pred_organized.get(left_clusters[filename], []):
+                        for f in left_organized.get(left_clusters[filename], []):
                             if f.get("original_filename", "") == filename:
                                 folder_files.append(f)
                                 break
-                    
-                    sorted_files = sorted(folder_files, key=parse_file_date, reverse=True)
-                    
+
+                    sorted_files = sorted(
+                        folder_files, key=parse_file_date, reverse=True
+                    )
+
                     st.markdown(f"**📁 {folder}** ({len(files_in_folder)} files)")
-                    
+
                     # Windows Explorer-style grid
-                    st.markdown('<div class="file-grid-container">', unsafe_allow_html=True)
-                    
+                    st.markdown(
+                        '<div class="file-grid-container">', unsafe_allow_html=True
+                    )
+
                     # Header row
-                    st.markdown("""
-                    <div class="file-grid file-grid-header">
-                        <div></div>
-                        <div>Name</div>
-                        <div>Date Created</div>
-                        <div>Date Modified</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
+                    render_file_grid_header()
+
                     # File rows
                     for file in sorted_files:
-                        original_filename = file.get("original_filename", "")
-                        new_filename = file.get("filename", "")
-                        create_date = file.get("create_date", "")
-                        edit_date = file.get("edit_date", "")
-                        file_preview = file.get("file_contents_preview", "")
-                        
-                        # Format dates
-                        if create_date:
-                            create_display = create_date[:16] if len(create_date) > 10 else create_date[:10]
-                        else:
-                            create_display = ""
-                        if edit_date:
-                            edit_display = edit_date[:16] if len(edit_date) > 10 else edit_date[:10]
-                        else:
-                            edit_display = ""
-                        
-                        # Determine file icon
-                        file_ext = new_filename.split('.')[-1].lower() if '.' in new_filename else ""
-                        file_icon = "📄"
-                        if file_ext in ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp']:
-                            file_icon = "🖼️"
-                        elif file_ext in ['pdf']:
-                            file_icon = "📕"
-                        elif file_ext in ['doc', 'docx']:
-                            file_icon = "📘"
-                        elif file_ext in ['xls', 'xlsx', 'csv']:
-                            file_icon = "📊"
-                        elif file_ext in ['txt', 'md', 'rtf']:
-                            file_icon = "📝"
-                        elif file_ext in ['py', 'js', 'java', 'cpp', 'c', 'ts', 'html', 'css']:
-                            file_icon = "💻"
-                        elif file_ext in ['zip', 'rar', '7z', 'tar', 'gz']:
-                            file_icon = "📦"
-                        elif file_ext in ['mp3', 'mp4', 'avi', 'wav', 'flac']:
-                            file_icon = "🎵"
-                        
-                        # Show new filename if different from original, otherwise show original
-                        display_name = new_filename if new_filename != original_filename else original_filename
-                        name_display = f'<span class="file-name">{display_name}</span>'
-                        if new_filename != original_filename:
-                            name_display += f'<br><span class="original-name">Original filename: {original_filename}</span>'
-                        
-                        # Add preview if available
-                        if file_preview:
-                            preview_display = file_preview[:200] + "..." if len(file_preview) > 200 else file_preview
-                            preview_display = preview_display.replace("<", "&lt;").replace(">", "&gt;")
-                            name_display += f'<br><span class="original-name" style="font-size: 11px; color: #888; font-style: normal; margin-top: 4px; display: block;">{preview_display}</span>'
-                        
-                        st.markdown(f"""
-                        <div class="file-grid file-item">
-                            <div style="font-size: 20px;">{file_icon}</div>
-                            <div>{name_display}</div>
-                            <div class="file-date">{create_display}</div>
-                            <div class="file-date">{edit_display}</div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                    
-                    st.markdown('</div>', unsafe_allow_html=True)
-        
+                        render_file_row(file)
+
+                    st.markdown("</div>", unsafe_allow_html=True)
+
         with col2:
             with st.container(border=True):
                 st.markdown("#### **Policy B**")
@@ -597,105 +665,47 @@ def render_eval(
                     if folder not in right_folders:
                         right_folders[folder] = []
                     right_folders[folder].append(filename)
-                
+
                 # Display each folder as a section with files in Windows Explorer style
                 for folder in sorted(right_folders.keys()):
                     files_in_folder = right_folders[folder]
                     # Get full file objects from organized data and sort by date
                     folder_files = []
                     for filename in files_in_folder:
-                        for f in y0_organized.get(right_clusters[filename], []):
+                        for f in right_organized.get(right_clusters[filename], []):
                             if f.get("original_filename", "") == filename:
                                 folder_files.append(f)
                                 break
-                    
-                    sorted_files = sorted(folder_files, key=parse_file_date, reverse=True)
-                    
+
+                    sorted_files = sorted(
+                        folder_files, key=parse_file_date, reverse=True
+                    )
+
                     st.markdown(f"**📁 {folder}** ({len(files_in_folder)} files)")
-                    
+
                     # Windows Explorer-style grid
-                    st.markdown('<div class="file-grid-container">', unsafe_allow_html=True)
-                    
+                    st.markdown(
+                        '<div class="file-grid-container">', unsafe_allow_html=True
+                    )
+
                     # Header row
-                    st.markdown("""
-                    <div class="file-grid file-grid-header">
-                        <div></div>
-                        <div>Name</div>
-                        <div>Date Created</div>
-                        <div>Date Modified</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
+                    render_file_grid_header()
+
                     # File rows
                     for file in sorted_files:
-                        original_filename = file.get("original_filename", "")
-                        new_filename = file.get("filename", "")
-                        create_date = file.get("create_date", "")
-                        edit_date = file.get("edit_date", "")
-                        file_preview = file.get("file_contents_preview", "")
-                        
-                        # Format dates
-                        if create_date:
-                            create_display = create_date[:16] if len(create_date) > 10 else create_date[:10]
-                        else:
-                            create_display = ""
-                        if edit_date:
-                            edit_display = edit_date[:16] if len(edit_date) > 10 else edit_date[:10]
-                        else:
-                            edit_display = ""
-                        
-                        # Determine file icon
-                        file_ext = new_filename.split('.')[-1].lower() if '.' in new_filename else ""
-                        file_icon = "📄"
-                        if file_ext in ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp']:
-                            file_icon = "🖼️"
-                        elif file_ext in ['pdf']:
-                            file_icon = "📕"
-                        elif file_ext in ['doc', 'docx']:
-                            file_icon = "📘"
-                        elif file_ext in ['xls', 'xlsx', 'csv']:
-                            file_icon = "📊"
-                        elif file_ext in ['txt', 'md', 'rtf']:
-                            file_icon = "📝"
-                        elif file_ext in ['py', 'js', 'java', 'cpp', 'c', 'ts', 'html', 'css']:
-                            file_icon = "💻"
-                        elif file_ext in ['zip', 'rar', '7z', 'tar', 'gz']:
-                            file_icon = "📦"
-                        elif file_ext in ['mp3', 'mp4', 'avi', 'wav', 'flac']:
-                            file_icon = "🎵"
-                        
-                        # Show new filename if different from original, otherwise show original
-                        display_name = new_filename if new_filename != original_filename else original_filename
-                        name_display = f'<span class="file-name">{display_name}</span>'
-                        if new_filename != original_filename:
-                            name_display += f'<br><span class="original-name">Original filename: {original_filename}</span>'
-                        
-                        # Add preview if available
-                        if file_preview:
-                            preview_display = file_preview[:200] + "..." if len(file_preview) > 200 else file_preview
-                            preview_display = preview_display.replace("<", "&lt;").replace(">", "&gt;")
-                            name_display += f'<br><span class="original-name" style="font-size: 11px; color: #888; font-style: normal; margin-top: 4px; display: block;">{preview_display}</span>'
-                        
-                        st.markdown(f"""
-                        <div class="file-grid file-item">
-                            <div style="font-size: 20px;">{file_icon}</div>
-                            <div>{name_display}</div>
-                            <div class="file-date">{create_display}</div>
-                            <div class="file-date">{edit_display}</div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                    
-                    st.markdown('</div>', unsafe_allow_html=True)
-        
+                        render_file_row(file)
+
+                    st.markdown("</div>", unsafe_allow_html=True)
+
         # Collect user preference
         with st.form(key=f"comparison_form_{current_comparison}"):
             preference = st.radio(
                 "Which policy organizes these files better?",
-                options=["Policy A", "Policy B", "No preference"],
+                options=["-", "Policy A", "Policy B", "No preference"],
                 key=f"preference_{current_comparison}",
             )
             submit = st.form_submit_button("Submit", type="primary")
-            
+
             if submit:
                 # Map user preference back to actual policies
                 # If pred_on_left: Policy A = pred, Policy B = y0
@@ -706,43 +716,43 @@ def render_eval(
                     actual_preference = "y0" if pred_on_left else "pred"
                 else:
                     actual_preference = "tie"
-                
-                comparison_results.append({
-                    "comparison_index": current_comparison,
-                    "sampled_filenames": sampled_filenames,
-                    "preference": preference,
-                    "actual_preference": actual_preference,  # Internal tracking
-                    "pred_on_left": pred_on_left,  # Track assignment for this comparison
-                    "pred_clusters": pred_clusters,
-                    "y0_clusters": y0_clusters,
-                })
-                st.session_state.form_results["final_evaluation"]["comparison_results"] = comparison_results
+
+                comparison_results.append(
+                    {
+                        "comparison_index": current_comparison,
+                        "sampled_filenames": sampled_filenames,
+                        "preference": preference,
+                        "actual_preference": actual_preference,  # Internal tracking
+                        "pred_on_left": pred_on_left,  # Track assignment for this comparison
+                        "pred_clusters": pred_clusters,
+                        "y0_clusters": y0_clusters,
+                    }
+                )
+                st.session_state.form_results["final_evaluation"][
+                    "comparison_results"
+                ] = comparison_results
                 st.rerun()
-        
+
         return False, None
-    
+
     # All comparisons completed
     st.success(f"✅ Completed all {num_comparisons} comparisons!")
-    
+
     # Calculate summary statistics based on actual preferences
-    pred_wins = sum(1 for r in comparison_results if r.get("actual_preference") == "pred")
+    pred_wins = sum(
+        1 for r in comparison_results if r.get("actual_preference") == "pred"
+    )
     y0_wins = sum(1 for r in comparison_results if r.get("actual_preference") == "y0")
     ties = sum(1 for r in comparison_results if r.get("actual_preference") == "tie")
-    
+
     # Calculate win rate score for final_prediction
     # Each pred win = 1 point, each tie = 0.5 points, each y0 win = 0 points
     # Win rate = (pred_wins + 0.5 * ties) / total_comparisons
     score = (pred_wins + 0.5 * ties) / num_comparisons if num_comparisons > 0 else 0.0
-    
+
     # Store score in session state
     st.session_state.form_results["final_evaluation"]["score"] = score
-    
-    st.markdown("### Summary")
-    st.markdown(f"- **Policy A wins**: {sum(1 for r in comparison_results if r['preference'] == 'Policy A')}")
-    st.markdown(f"- **Policy B wins**: {sum(1 for r in comparison_results if r['preference'] == 'Policy B')}")
-    st.markdown(f"- **No preference**: {ties}")
-    st.markdown(f"- **Score**: {score:.3f} (win rate for final prediction)")
-    
+
     return True, {
         "comparison_results": comparison_results,
         "summary": {
@@ -751,7 +761,7 @@ def render_eval(
             "ties": ties,
             "total": num_comparisons,
             "score": score,
-        }
+        },
     }
 
 
@@ -759,15 +769,16 @@ def _render_unsorted_folder(files: List[Dict]):
     """
     Render an unsorted folder showing files in a simple list format.
     Matches the file rendering format used in render_file_policy_results.
-    
+
     Args:
         files: List of file dictionaries
     """
     st.markdown("### 📁 Your Desktop Folder")
     st.markdown("These are your unorganized files:")
-    
+
     # Add CSS for Windows Explorer-like styling (same as render_file_policy_results)
-    st.markdown("""
+    st.markdown(
+        """
         <style>
         .file-item {
             padding: 6px 8px;
@@ -787,6 +798,10 @@ def _render_unsorted_folder(files: List[Dict]):
             border-bottom: 1px solid #eee;
             box-sizing: border-box;
             width: 100%;
+        }
+        .file-grid > div:nth-child(2) {
+            min-width: 0;
+            overflow: hidden;
         }
         .file-grid:last-child {
             border-bottom: none;
@@ -809,116 +824,49 @@ def _render_unsorted_folder(files: List[Dict]):
         .file-name {
             font-size: 14px;
             color: #333;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            display: block;
         }
         .file-date {
             font-size: 13px;
             color: #666;
+            white-space: nowrap;
         }
         .original-name {
             font-size: 12px;
             color: #888;
             font-style: italic;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
         </style>
-        """, unsafe_allow_html=True)
-    
-    # Sort files by edit_date (newest first), fallback to create_date
-    def parse_file_date(file_dict):
-        """Parse file date string to datetime for sorting."""
-        date_str = file_dict.get("edit_date", "") or file_dict.get("create_date", "")
-        if not date_str:
-            return datetime.min
-        try:
-            for fmt in ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d", "%m/%d/%Y %H:%M:%S", "%m/%d/%Y"]:
-                try:
-                    return datetime.strptime(date_str.strip(), fmt)
-                except ValueError:
-                    continue
-        except Exception:
-            pass
-        return datetime.min
-    
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Sort files by date (newest first)
     sorted_files = sorted(files, key=parse_file_date, reverse=True)
-    
+
     # Wrap file grids in a container for proper overflow handling
     st.markdown('<div class="file-grid-container">', unsafe_allow_html=True)
-    
+
     # Header row (column headers)
-    st.markdown("""
-    <div class="file-grid file-grid-header">
-        <div></div>
-        <div>Name</div>
-        <div>Date Created</div>
-        <div>Date Modified</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
+    render_file_grid_header()
+
     # File rows
     for file in sorted_files:
-        filename = file.get("filename", "")
-        create_date = file.get("create_date", "")
-        edit_date = file.get("edit_date", "")
-        file_preview = file.get("file_contents_preview", "")
-        
-        # Format dates (show date and time if available)
-        if create_date:
-            create_display = create_date[:16] if len(create_date) > 10 else create_date[:10]
-        else:
-            create_display = ""
-        if edit_date:
-            edit_display = edit_date[:16] if len(edit_date) > 10 else edit_date[:10]
-        else:
-            edit_display = ""
-        
-        # Determine file icon based on extension
-        file_ext = filename.split('.')[-1].lower() if '.' in filename else ""
-        file_icon = "📄"
-        if file_ext in ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp']:
-            file_icon = "🖼️"
-        elif file_ext in ['pdf']:
-            file_icon = "📕"
-        elif file_ext in ['doc', 'docx']:
-            file_icon = "📘"
-        elif file_ext in ['xls', 'xlsx', 'csv']:
-            file_icon = "📊"
-        elif file_ext in ['txt', 'md', 'rtf']:
-            file_icon = "📝"
-        elif file_ext in ['py', 'js', 'java', 'cpp', 'c', 'ts', 'html', 'css']:
-            file_icon = "💻"
-        elif file_ext in ['zip', 'rar', '7z', 'tar', 'gz']:
-            file_icon = "📦"
-        elif file_ext in ['mp3', 'mp4', 'avi', 'wav', 'flac']:
-            file_icon = "🎵"
-        
-        # Show filename (no original_filename in unsorted view since files haven't been renamed yet)
-        name_display = f'<span class="file-name">{filename}</span>'
-        
-        # Add preview if available
-        if file_preview:
-            # Truncate preview for inline display
-            preview_display = file_preview[:200] + "..." if len(file_preview) > 200 else file_preview
-            # Escape HTML in preview to prevent rendering issues
-            preview_display = preview_display.replace("<", "&lt;").replace(">", "&gt;")
-            name_display += f'<br><span class="original-name" style="font-size: 11px; color: #888; font-style: normal; margin-top: 4px; display: block;">{preview_display}</span>'
-        
-        st.markdown(f"""
-        <div class="file-grid file-item">
-            <div style="font-size: 20px;">{file_icon}</div>
-            <div>{name_display}</div>
-            <div class="file-date">{create_display}</div>
-            <div class="file-date">{edit_display}</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
+        render_file_row(file)
+
     # Close the file grid container
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 def render_custom_task_explanation(files_data: List[Dict] = None):
     """
     Render the custom task explanation for file organization.
     Shows what a Desktop folder is, what file attributes are, how renaming works, and an example policy.
-    
+
     Args:
         files_data: Optional list of file dictionaries for examples. If None, creates sample data.
     """
@@ -926,7 +874,7 @@ def render_custom_task_explanation(files_data: List[Dict] = None):
     st.markdown(
         "Your Desktop folder is messy --- it has accumulated a lot of files over time. In this task, **your goal is to get the assistant to organize those files.** To do so, the assistant will write some rules that automatically organize your files into folders. The assistant might also rename some files so that filenames are more descriptive."
     )
-    
+
     # Create example files if none provided
     if files_data is None:
         example_files = [
@@ -952,19 +900,21 @@ def render_custom_task_explanation(files_data: List[Dict] = None):
     else:
         # Use first few files from provided data
         example_files = files_data[:3] if len(files_data) >= 3 else files_data
-    
+
     st.markdown("### What are the parts of a file?")
     st.markdown(
         "Each file has several attributes you can use to create organization rules:"
     )
     st.markdown(
         "- **Filename:** The name of the file (including extension)\n"
-        "- **Content:** The text content inside the file\n"
+        "- **Content:** The text content inside the file (in small text underneath the filename)\n"
         "- **Date Created:** When the file was first created\n"
         "- **Date Modified:** When the file was last edited"
     )
-    st.markdown("For example, you might want to ask the assistant to group all files with 'meeting' in their name or content into a folder titled `Meetings`.")
-    
+    st.markdown(
+        "For example, you might want to ask the assistant to group all files with 'meeting' in their name or content into a folder titled `Meetings`."
+    )
+
     with st.container(border=True):
         _render_unsorted_folder(example_files)
 
@@ -986,24 +936,24 @@ def render_custom_task_explanation(files_data: List[Dict] = None):
                 {
                     "conditions": {
                         "name_contains": ["meeting", "notes"],
-                        "content_contains": ["meeting"]
+                        "content_contains": ["meeting"],
                     },
-                    "folder": "Meetings"
+                    "folder": "Meetings",
                 },
                 {
                     "conditions": {
                         "name_contains": ["project", "plan"],
-                        "content_contains": ["project"]
+                        "content_contains": ["project"],
                     },
-                    "folder": "Projects"
-                }
+                    "folder": "Projects",
+                },
             ],
             "naming_policy": {
                 "case": "lower",
                 "delimiter": "_",
                 "include_date": True,
-                "date_format": "%Y-%m-%d"
-            }
+                "date_format": "%Y-%m-%d",
+            },
         }
         example_msg = f"Here's my file organization policy:\n\n<policy>{json.dumps(example_policy)}</policy>"
 
@@ -1016,4 +966,3 @@ def render_custom_task_explanation(files_data: List[Dict] = None):
         "Think about how you want to organize your files. The assistant should create a policy that groups related files together "
         "and applies consistent naming conventions based on patterns you identify in the filenames or content."
     )
-

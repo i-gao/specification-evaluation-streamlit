@@ -7,6 +7,12 @@ import random
 from evaluation.qualitative_eval import COMPARISON_LIKERT
 from data.reward import likert_to_win_rate, pairwise_win_rate
 
+# Session state key prefixes used by this render module that should be cleared between rounds
+RENDER_SESSION_STATE_KEY_PREFIXES = [
+    "meal_options_order_",
+    "meal_comparison_",
+]
+
 
 def render_eval(*, final_prediction: str, y0: str, db: RecipeDB, num_items_per_comparison: int = 5, **kwargs):
     ranking_done = rank_recipes(final_prediction=final_prediction, y0=y0, db=db, num_items_per_comparison=num_items_per_comparison)
@@ -155,7 +161,7 @@ def _render_carousel(
         options = predicted_options + y0_options
 
     # Stabilize the options order across reruns within this fragment
-    state_key = f"options_order_{name}"
+    state_key = f"meal_options_order_{name}"
     if state_key not in st.session_state:
         # Store stable order as indices into the current options list
         order = list(range(len(options)))
@@ -216,15 +222,27 @@ def _render_carousel(
 
 def render_comparison(*, final_prediction: str, y0: str, db: RecipeDB):
     predicted = parse_meal_plan(final_prediction, db)
-    y0 = parse_meal_plan(y0, db)
+    y0_parsed = parse_meal_plan(y0, db)
     # if both are invalid, just return True
-    if predicted is None and y0 is None:
+    if predicted is None and y0_parsed is None:
         return True
+    
+    # Randomize which plan goes on which side (stable across reruns)
+    side_key = "meal_comparison_side_assignment"
+    if side_key not in st.session_state:
+        # Randomly assign: True means pred on left (Plan A), False means y0 on left (Plan A)
+        st.session_state[side_key] = random.choice([True, False])
+    pred_on_left = st.session_state[side_key]
+
+    # Assign plans to left/right based on randomization
+    plan_a = predicted if pred_on_left else y0_parsed
+    plan_b = y0_parsed if pred_on_left else predicted
+    
     with st.container(border=True):
         st.markdown("## Compare these meal plans")
 
         output_to_streamlit_comparison(
-            predicted, y0, db, valid1=None, valid2=None, metadata1=None, metadata2=None
+            plan_a, plan_b, db, valid1=None, valid2=None, metadata1=None, metadata2=None
         )
 
     st.divider()

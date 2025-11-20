@@ -8,6 +8,12 @@ from data.workout_planning.parser import parse_workout_plan
 from evaluation.qualitative_eval import COMPARISON_LIKERT
 from data.reward import likert_to_win_rate, pairwise_win_rate
 
+# Session state key prefixes used by this render module that should be cleared between rounds
+RENDER_SESSION_STATE_KEY_PREFIXES = [
+    "workout_options_order_",
+    "workout_comparison_",
+]
+
 
 def render_eval(*, final_prediction: str, y0: Optional[str], db, num_items_per_comparison: int = 5, **kwargs):
     """
@@ -177,7 +183,7 @@ def _render_carousel(
         options = predicted_options + y0_options
 
     # Stabilize the options order across reruns within this fragment
-    state_key = f"options_order_{name}"
+    state_key = f"workout_options_order_{name}"
     if state_key not in st.session_state:
         # Store stable order as indices into the current options list
         order = list(range(len(options)))
@@ -288,11 +294,22 @@ def render_comparison(*, final_prediction: str, y0: Optional[str], db):
     if parsed_pred is None and parsed_y0 is None:
         return True
 
+    # Randomize which plan goes on which side (stable across reruns)
+    side_key = "workout_comparison_side_assignment"
+    if side_key not in st.session_state:
+        # Randomly assign: True means pred on left (Plan A), False means y0 on left (Plan A)
+        st.session_state[side_key] = random.choice([True, False])
+    pred_on_left = st.session_state[side_key]
+
+    # Assign plans to left/right based on randomization
+    plan_a = parsed_pred if pred_on_left else parsed_y0
+    plan_b = parsed_y0 if pred_on_left else parsed_pred
+
     with st.container(border=True):
         st.markdown("## Compare these workout plans")
         output_to_streamlit_comparison(
-            parsed_pred,
-            parsed_y0,
+            plan_a,
+            plan_b,
             db,
             valid1=None,
             valid2=None,

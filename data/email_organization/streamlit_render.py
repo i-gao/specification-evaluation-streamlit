@@ -8,6 +8,11 @@ from utils.misc import parse_for_answer_tags, replace_tags_with_link
 from data.email_organization.reward import apply_email_policy
 from data.email_organization.parser import parse_policy
 
+# Session state key prefixes used by this render module that should be cleared between rounds
+RENDER_SESSION_STATE_KEY_PREFIXES = [
+    "email_comparison_",
+]
+
 
 def render_email_policy_results(msg: str, emails_data: List[Dict]) -> None:
     """
@@ -121,83 +126,84 @@ def render_email_policy_results(msg: str, emails_data: List[Dict]) -> None:
 
     # Display organized emails grouped by folder
     if organized:
-        st.markdown("### 📁 Organized Emails")
+        with st.container(border=True, height=600):
+            st.markdown("### 📁 Organized Emails")
 
-        # Create tabs for each folder
-        folder_names = sorted(organized.keys())
-        if len(folder_names) > 0:
-            tabs = st.tabs(folder_names)
+            # Create tabs for each folder
+            folder_names = sorted(organized.keys())
+            if len(folder_names) > 0:
+                tabs = st.tabs(folder_names)
 
-            for tab, folder_name in zip(tabs, folder_names):
-                with tab:
-                    emails_in_folder = organized[folder_name]
+                for tab, folder_name in zip(tabs, folder_names):
+                    with tab:
+                        emails_in_folder = organized[folder_name]
 
-                    if not emails_in_folder:
-                        st.info(f"No emails in {folder_name}")
-                        continue
+                        if not emails_in_folder:
+                            st.info(f"No emails in {folder_name}")
+                            continue
 
-                    # Sort emails by date if available
-                    try:
-                        emails_in_folder = sorted(
-                            emails_in_folder,
-                            key=lambda x: x.get("date", ""),
-                            reverse=True,
-                        )
-                    except Exception:
-                        pass
-
-                    for email in emails_in_folder:
-                        email_id = str(email.get("email_id", ""))
-                        from_addr = email.get("from", "")
-                        to_addr = email.get("to", "")
-                        subject = email.get("subject", "")
-                        date = email.get("date", "")
-                        message = email.get("message", "")
-
-                        # Build the main part of the expander label
-                        main_part = (
-                            f"{subject}"
-                            if subject
-                            else f"Email {email_id}"
-                        )
-
-                        # Add date suffix if available
-                        date_suffix = ""
-                        if date:
-                            try:
-                                # Try to parse and format the date
-                                date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
-                                date_suffix = f" ({date_obj.strftime('%b %d, %Y')})"
-                            except Exception:
-                                date_suffix = f" ({date})"
-
-                        expander_label = main_part + date_suffix
-
-                        with st.expander(expander_label, expanded=False):
-                            # Email header information
-                            col1, col2 = st.columns([3, 1])
-                            with col1:
-                                st.markdown(f"**From:** {from_addr}")
-                                if to_addr:
-                                    st.markdown(f"**To:** {to_addr}")
-                            with col2:
-                                st.markdown(f"**Email ID:** `{email_id}`")
-                                st.markdown(f"**Date:** {date}")
-
-                            # Email subject
-                            if subject:
-                                st.markdown(f"**Subject:** {subject}")
-
-                            # Email body - use markdown with reduced whitespace
-                            st.markdown("**Message:**")
-                            # Remove excessive whitespace from message
-                            message_clean = "\n".join(
-                                line.rstrip() for line in message.split("\n")
+                        # Sort emails by date if available
+                        try:
+                            emails_in_folder = sorted(
+                                emails_in_folder,
+                                key=lambda x: x.get("date", ""),
+                                reverse=True,
                             )
-                            st.markdown(
-                                f"<div style='white-space: pre-wrap; margin-top: 0.5rem;'>{message_clean}</div>",
-                                unsafe_allow_html=True,
+                        except Exception:
+                            pass
+
+                        for email in emails_in_folder:
+                            email_id = str(email.get("email_id", ""))
+                            from_addr = email.get("from", "")
+                            to_addr = email.get("to", "")
+                            subject = email.get("subject", "")
+                            date = email.get("date", "")
+                            message = email.get("message", "")
+
+                            # Build the main part of the expander label
+                            main_part = (
+                                f"{subject}"
+                                if subject
+                                else f"Email {email_id}"
                             )
+
+                            # Add date suffix if available
+                            date_suffix = ""
+                            if date:
+                                try:
+                                    # Try to parse and format the date
+                                    date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+                                    date_suffix = f" ({date_obj.strftime('%b %d, %Y')})"
+                                except Exception:
+                                    date_suffix = f" ({date})"
+
+                            expander_label = main_part + date_suffix
+
+                            with st.expander(expander_label, expanded=False):
+                                # Email header information
+                                col1, col2 = st.columns([3, 1])
+                                with col1:
+                                    st.markdown(f"**From:** {from_addr}")
+                                    if to_addr:
+                                        st.markdown(f"**To:** {to_addr}")
+                                with col2:
+                                    st.markdown(f"**Email ID:** `{email_id}`")
+                                    st.markdown(f"**Date:** {date}")
+
+                                # Email subject
+                                if subject:
+                                    st.markdown(f"**Subject:** {subject}")
+
+                                # Email body - use markdown with reduced whitespace
+                                st.markdown("**Message:**")
+                                # Remove excessive whitespace from message
+                                message_clean = "\n".join(
+                                    line.rstrip() for line in message.split("\n")
+                                )
+                                st.markdown(
+                                    f"<div style='white-space: pre-wrap; margin-top: 0.5rem;'>{message_clean}</div>",
+                                    unsafe_allow_html=True,
+                                )
 
 
 def render_email_policy_results_txt(msg: str, emails_data: List[Dict]) -> str:
@@ -377,11 +383,22 @@ def render_eval(
         # All comparisons done
         return True, {"comparison_results": comparison_results}
 
-    # Sample emails for this comparison
-    if len(all_email_ids) > num_items_per_comparison:
-        sampled_ids = random.sample(all_email_ids, num_items_per_comparison)
-    else:
-        sampled_ids = all_email_ids
+    # Sample emails for this comparison (stable across reruns)
+    sample_key = f"email_comparison_{current_comparison}_sample"
+    if sample_key not in st.session_state:
+        if len(all_email_ids) > num_items_per_comparison:
+            sampled_ids = random.sample(all_email_ids, num_items_per_comparison)
+        else:
+            sampled_ids = all_email_ids
+        st.session_state[sample_key] = sampled_ids
+    sampled_ids = st.session_state[sample_key]
+
+    # Randomize which policy goes on which side (stable across reruns)
+    side_key = f"email_comparison_{current_comparison}_side_assignment"
+    if side_key not in st.session_state:
+        # Randomly assign: True means pred on left, False means y0 on left
+        st.session_state[side_key] = random.choice([True, False])
+    pred_on_left = st.session_state[side_key]
 
     # Get folders for sampled emails in both policies
     pred_folders = {}
@@ -400,6 +417,27 @@ def render_eval(
                 y0_folders[email_id] = folder
                 break
 
+    # Assign folders to left/right based on randomization
+    left_folders = pred_folders if pred_on_left else y0_folders
+    right_folders = y0_folders if pred_on_left else pred_folders
+
+    # Group emails by folder for both sides
+    left_emails_by_folder = {}
+    right_emails_by_folder = {}
+    
+    for email_id in sampled_ids:
+        # Left side grouping
+        left_folder = left_folders.get(email_id, "Uncategorized")
+        if left_folder not in left_emails_by_folder:
+            left_emails_by_folder[left_folder] = []
+        left_emails_by_folder[left_folder].append(email_id)
+        
+        # Right side grouping
+        right_folder = right_folders.get(email_id, "Uncategorized")
+        if right_folder not in right_emails_by_folder:
+            right_emails_by_folder[right_folder] = []
+        right_emails_by_folder[right_folder].append(email_id)
+
     # Display comparison
     st.markdown(f"### Comparison {current_comparison + 1} of {num_comparisons}")
     st.markdown("Compare how emails are organized in Policy A vs Policy B:")
@@ -408,33 +446,135 @@ def render_eval(
 
     with col1:
         st.markdown("#### Policy A")
-        for email_id in sampled_ids:
-            folder = pred_folders.get(email_id, "Uncategorized")
-            email = email_id_to_email.get(email_id, {})
-            subject = email.get("subject", f"Email {email_id}")
-            st.markdown(f"- **{subject}** → `{folder}`")
+        # Display folders in sorted order
+        for folder in sorted(left_emails_by_folder.keys()):
+            with st.container(border=True):
+                st.markdown(f"**📁 {folder}**")
+                for email_id in left_emails_by_folder[folder]:
+                    email = email_id_to_email.get(email_id, {})
+                    from_addr = email.get("from", "")
+                    to_addr = email.get("to", "")
+                    subject = email.get("subject", f"Email {email_id}")
+                    date = email.get("date", "")
+                    message = email.get("message", "")
+
+                    # Build the expander label (matching render_email_policy_results style)
+                    main_part = subject if subject else f"Email {email_id}"
+                    date_suffix = ""
+                    if date:
+                        try:
+                            date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+                            date_suffix = f" ({date_obj.strftime('%b %d, %Y')})"
+                        except Exception:
+                            date_suffix = f" ({date})"
+                    
+                    expander_label = f"{main_part}{date_suffix}"
+
+                    with st.expander(expander_label, expanded=False):
+                        # Email header information
+                        col1a, col1b = st.columns([3, 1])
+                        with col1a:
+                            st.markdown(f"**From:** {from_addr}")
+                            if to_addr:
+                                st.markdown(f"**To:** {to_addr}")
+                        with col1b:
+                            st.markdown(f"**Email ID:** `{email_id}`")
+                            st.markdown(f"**Date:** {date}")
+
+                        # Email subject
+                        if subject:
+                            st.markdown(f"**Subject:** {subject}")
+
+                        # Email body
+                        st.markdown("**Message:**")
+                        message_clean = "\n".join(
+                            line.rstrip() for line in message.split("\n")
+                        )
+                        st.markdown(
+                            f"<div style='white-space: pre-wrap; margin-top: 0.5rem;'>{message_clean}</div>",
+                            unsafe_allow_html=True,
+                        )
 
     with col2:
         st.markdown("#### Policy B")
-        for email_id in sampled_ids:
-            folder = y0_folders.get(email_id, "Uncategorized")
-            email = email_id_to_email.get(email_id, {})
-            subject = email.get("subject", f"Email {email_id}")
-            st.markdown(f"- **{subject}** → `{folder}`")
+        # Display folders in sorted order
+        for folder in sorted(right_emails_by_folder.keys()):
+            with st.container(border=True):
+                st.markdown(f"**📁 {folder}**")
+                for email_id in right_emails_by_folder[folder]:
+                    email = email_id_to_email.get(email_id, {})
+                    from_addr = email.get("from", "")
+                    to_addr = email.get("to", "")
+                    subject = email.get("subject", f"Email {email_id}")
+                    date = email.get("date", "")
+                    message = email.get("message", "")
+
+                    # Build the expander label (matching render_email_policy_results style)
+                    main_part = subject if subject else f"Email {email_id}"
+                    date_suffix = ""
+                    if date:
+                        try:
+                            date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+                            date_suffix = f" ({date_obj.strftime('%b %d, %Y')})"
+                        except Exception:
+                            date_suffix = f" ({date})"
+                    
+                    expander_label = f"{main_part}{date_suffix}"
+
+                    with st.expander(expander_label, expanded=False):
+                        # Email header information
+                        col2a, col2b = st.columns([3, 1])
+                        with col2a:
+                            st.markdown(f"**From:** {from_addr}")
+                            if to_addr:
+                                st.markdown(f"**To:** {to_addr}")
+                        with col2b:
+                            st.markdown(f"**Email ID:** `{email_id}`")
+                            st.markdown(f"**Date:** {date}")
+
+                        # Email subject
+                        if subject:
+                            st.markdown(f"**Subject:** {subject}")
+
+                        # Email body
+                        st.markdown("**Message:**")
+                        message_clean = "\n".join(
+                            line.rstrip() for line in message.split("\n")
+                        )
+                        st.markdown(
+                            f"<div style='white-space: pre-wrap; margin-top: 0.5rem;'>{message_clean}</div>",
+                            unsafe_allow_html=True,
+                        )
 
     # Collect preference
     preference = st.radio(
         "Which organization do you prefer?",
-        ["A", "neutral", "B"],
+        ["-", "A", "neutral", "B"],
         key=f"comparison_{current_comparison}",
     )
 
     if st.button("Submit", key=f"submit_comparison_{current_comparison}"):
+        # Store preference relative to which policy is which
+        # If pred_on_left: A=pred, B=y0. If not: A=y0, B=pred
+        # Convert preference to always be relative to pred vs y0
+        if pred_on_left:
+            # A is pred, B is y0, so preference is already correct
+            pred_preference = preference
+        else:
+            # A is y0, B is pred, so flip the preference
+            if preference == "A":
+                pred_preference = "B"
+            elif preference == "B":
+                pred_preference = "A"
+            else:
+                pred_preference = "neutral"
+        
         comparison_results.append(
             {
                 "comparison_index": current_comparison,
                 "sampled_email_ids": sampled_ids,
-                "preference": preference,
+                "preference": pred_preference,
+                "pred_on_left": pred_on_left,  # Store for reference
             }
         )
         st.session_state.form_results["final_evaluation"]["comparison_results"] = (

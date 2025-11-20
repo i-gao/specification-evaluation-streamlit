@@ -8,6 +8,12 @@ from data.design2code.parser import is_html
 import streamlit as st
 from typing import List, Dict, Any
 import subprocess
+import random
+
+# Session state key prefixes used by this render module that should be cleared between rounds
+RENDER_SESSION_STATE_KEY_PREFIXES = [
+    "design2code_comparison_side_assignment_",
+]
 
 
 @functools.lru_cache(maxsize=50)
@@ -118,13 +124,24 @@ def render_comparison(
     """
     Compare two HTML codes and return a markdown string.
     """
+    # Randomize which design goes on which side (stable across reruns)
+    side_key = f"design2code_comparison_side_assignment_{test_id}"
+    if side_key not in st.session_state:
+        # Randomly assign: True means y1 on left (Design A), False means y2 on left (Design A)
+        st.session_state[side_key] = random.choice([True, False])
+    y1_on_left = st.session_state[side_key]
+
+    # Assign designs to left/right based on randomization
+    design_a = y1 if y1_on_left else y2
+    design_b = y2 if y1_on_left else y1
+    
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("## Design A")
-        render_output(y1, docker_image, docker_container_id, test_id)
+        render_output(design_a, docker_image, docker_container_id, test_id)
     with col2:
         st.markdown("## Design B")
-        render_output(y2, docker_image, docker_container_id, test_id)
+        render_output(design_b, docker_image, docker_container_id, test_id)
 
 def render_eval(
     *,

@@ -637,6 +637,12 @@ class TravelPlannerDataset(SpecificationCollection):
             dest_state = self._travel_db.get_city_state(task["dest"])
             dest_with_state = f"{task['dest']}, {dest_state}" if dest_state else task["dest"]
             
+            # Import search interface before creating spec
+            from data.travel_planner.streamlit_search_interface import (
+                render_search_interface,
+                render_liked_items,
+            )
+            
             # Create custom specification
             initial_specification = f"Plan a trip from {task['org']} to {dest_with_state} over {task['days']} days from {task['date'][0]} to {task['date'][-1]}, with a budget of ${task['budget']}"
             spec = CustomSpecification(
@@ -686,6 +692,10 @@ class TravelPlannerDataset(SpecificationCollection):
                 dataset_name=self.dataset_name,
                 driving_options=task["driving_info"],
                 index=f"custom_{ix}",
+                render_search_interface_fn=render_search_interface,
+                render_search_interface_kwargs={"travel_db": self._travel_db, "city": task.get("dest")},
+                render_liked_items_fn=render_liked_items,
+                render_liked_items_kwargs={"travel_db": self._travel_db},
             )
             specs[ix] = spec
         return specs

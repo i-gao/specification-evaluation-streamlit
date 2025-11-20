@@ -174,8 +174,12 @@ def apply_naming_policy(working_files: List[Dict], user_pol: Dict) -> List[Dict]
             name_part = re.sub(r'([a-z0-9])([A-Z])', r'\1 \2', name_part)
         
         # Remove version indicators, dates, FINAL, DRAFT, etc.
+        # Use word boundaries and lookaheads to avoid matching 'v' inside words like "movie"
+        # Pattern matches: v1, v2, _v1, -v2, ver1, _ver2, final, draft, copy, etc.
+        # For 'v' and 'ver': only match if followed by optional delimiters and digits (version numbers)
+        # For 'final', 'draft', 'copy': use word boundaries to match whole words only
         name_part = re.sub(
-            r"[-_\s]*(v|ver|final|draft|copy)[-\s_]*\d*",
+            r"[-_\s]*(v(?=[-\s_]*\d)|ver(?=[-\s_]*\d)|\bfinal\b|\bdraft\b|\bcopy\b)[-\s_]*\d*",
             "",
             name_part,
             flags=re.IGNORECASE,

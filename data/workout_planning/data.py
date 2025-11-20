@@ -67,9 +67,7 @@ Only exercises and variations from the database can be used.
 """.strip()
 )
 
-MSG_FMT_INSTRUCTIONS = (
-    """To render a description of a single exercise to the user, you can mention its exercise_name and wrap it in <exercise></exercise>, e.g.: '<exercise>Bodyweight Glute Bridge</exercise>'. You should wrap all exercises you mention by default."""
-)
+MSG_FMT_INSTRUCTIONS = """To render a description of a single exercise to the user, you can mention its exercise_name and wrap it in <exercise></exercise>, e.g.: '<exercise>Bodyweight Glute Bridge</exercise>'. You should wrap all exercises you mention by default."""
 
 FIXED_INSTRUCTIONS = """
 ### What you need to prompt the assistant to do
@@ -307,7 +305,9 @@ class WorkoutPlanningDataset(SpecificationCollection):
             constraints = []
             constraint_dicts = profile["constraints"]
             for c_dict in constraint_dicts:
-                constraint = Constraint.from_dict(c_dict, extractor_lookup=self._extractor_lookup)
+                constraint = Constraint.from_dict(
+                    c_dict, extractor_lookup=self._extractor_lookup
+                )
                 # Preserve is_factoid flag from dict to constraint's _kwargs
                 if c_dict.get("is_factoid", False):
                     constraint._kwargs["is_factoid"] = True
@@ -315,6 +315,7 @@ class WorkoutPlanningDataset(SpecificationCollection):
 
             if self._persist_docker_container and self._docker_image is not None:
                 from llm_sandbox import SandboxSession
+
                 session = SandboxSession(image=self._docker_image)
                 session.open()
                 container_id = session.container.id
@@ -328,9 +329,7 @@ class WorkoutPlanningDataset(SpecificationCollection):
                 root_dir=os.path.join(DATASET_ROOT, "assets"),
             )
 
-            signature = (
-                "Self-description: " + profile["text"]
-            )
+            signature = "Self-description: " + profile["text"]
 
             # Construct all_weights: hard constraints get large weights (99999), soft get profile weights
             # Use absolute value; linear_reward will handle sign correction for penalty constraints
@@ -348,7 +347,9 @@ class WorkoutPlanningDataset(SpecificationCollection):
                     all_weights.append(99999.0)  # Large weight for hard constraints
                 else:
                     if soft_weight_idx < len(profile["weights"]):
-                        all_weights.append(abs(float(profile["weights"][soft_weight_idx])))
+                        all_weights.append(
+                            abs(float(profile["weights"][soft_weight_idx]))
+                        )
                     else:
                         all_weights.append(1.0)  # Default weight if missing
                     soft_weight_idx += 1
@@ -411,6 +412,7 @@ class WorkoutPlanningDataset(SpecificationCollection):
         for ix in indexes:
             if self._persist_docker_container and self._docker_image is not None:
                 from llm_sandbox import SandboxSession
+
                 session = SandboxSession(image=self._docker_image)
                 session.open()
                 container_id = session.container.id
@@ -443,6 +445,11 @@ class WorkoutPlanningDataset(SpecificationCollection):
                 Constraint.from_dict(c, extractor_lookup=self._extractor_lookup)
                 for c in initial_constraints
             ]
+
+            # Import search interface before creating spec
+            from data.workout_planning import (
+                streamlit_search_interface as search_interface,
+            )
 
             spec = CustomSpecification(
                 dataset_name=self.dataset_name,
@@ -479,26 +486,16 @@ class WorkoutPlanningDataset(SpecificationCollection):
                 user_expertise_form=self._create_user_expertise_form(),
                 _y0_mapping=self._y0_mapping,
                 _extractor_lookup=self._extractor_lookup,
-                render_evaluation_fn=lambda **kwargs: renderer.render_eval(
-                    **kwargs, db=self._exercise_db
-                ),
+                render_evaluation_fn=renderer.render_eval,
                 render_evaluation_kwargs={
                     "num_items_per_comparison": self.eval_num_items_per_comparison,
+                    "db": self._exercise_db,
                 },
+                render_search_interface_fn=search_interface.render_search_interface,
+                render_search_interface_kwargs={"exercise_db": self._exercise_db},
+                render_liked_items_fn=search_interface.render_liked_items,
+                render_liked_items_kwargs={"exercise_db": self._exercise_db},
             )
-            # Add search interface functions
-            from data.workout_planning import streamlit_search_interface as search_interface
-            spec._render_search_interface_fn = lambda **kwargs: search_interface.render_search_interface(
-                exercise_db=self._exercise_db,
-                **kwargs
-            )
-            spec._render_search_interface_kwargs = {}
-            spec._render_liked_items_fn = lambda liked_items, **kwargs: search_interface.render_liked_items(
-                liked_items=liked_items,
-                exercise_db=self._exercise_db,
-                **kwargs
-            )
-            spec._render_liked_items_kwargs = {}
             specs[ix] = spec
         return specs
 
@@ -822,7 +819,6 @@ def reward_fn(
         score * 100,  # rescale from [0, 1] to [0, 100]
         metadata,
     )
-
 
 
 def parse_workout_plan_solutions(msg: str) -> List[str]:

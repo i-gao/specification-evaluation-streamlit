@@ -30,9 +30,19 @@ Note that the form will always show unless on_completion modifies the result of 
 """
 
 
+def default_validation(form_values: dict) -> bool:
+    """
+    Default validation function that checks that all fields are filled.
+    """
+    return all(
+        value is not None and value != "" and value != "-"
+        for value in form_values.values()
+    )
+
+
 def presurvey(
     should_show: Callable = None,
-    validate: Callable = None,
+    validate: Callable = default_validation,
     on_completion: Callable = None,
     user_expertise_form: List[FormElement] = None,
     include_trust_question: bool = False,
@@ -71,7 +81,10 @@ def presurvey(
                         break
                 # Check trust question if included
                 if valid and include_trust_question:
-                    if form_values.get("trust") == "-" or form_values.get("trust") == "":
+                    if (
+                        form_values.get("trust") == "-"
+                        or form_values.get("trust") == ""
+                    ):
                         valid = False
             else:
                 valid = validate(form_values)
@@ -84,7 +97,7 @@ def presurvey(
 
 def brainstorming(
     should_show: Callable = None,
-    validate: Callable = None,
+    validate: Callable = default_validation,
     on_completion: Callable = None,
 ):
     """
@@ -104,9 +117,8 @@ def brainstorming(
         submitted = st.form_submit_button("Continue to presurvey", type="primary")
         if submitted:
             form_values = {"notes": notes}
-            # Default validation: check that notes are not empty
             if validate is None:
-                valid = notes is not None and notes.strip() != ""
+                valid = True
             else:
                 valid = validate(form_values)
             if not valid:
@@ -119,7 +131,7 @@ def brainstorming(
 def message_feedback(
     message_index: int,
     should_show: Callable = None,
-    validate: Callable = None,
+    validate: Callable = default_validation,
     on_completion: Callable = None,
 ):
     """
@@ -177,7 +189,7 @@ def message_feedback(
 def message_thumbs_feedback(
     message_index: int,
     should_show: Callable = None,
-    validate: Callable = None,
+    validate: Callable = default_validation,
     on_completion: Callable = None,
 ):
     """
@@ -215,12 +227,12 @@ def message_thumbs_feedback(
         }
 
         # Validate if callback provided
-        if validate is not None:
+        if validate is None:
+            valid = True
+        else:
             valid = validate(feedback)
-            if not valid:
-                return
-
-        # Call completion callback if provided
+        if not valid:
+            return
         if on_completion is not None:
             on_completion(feedback)
 
@@ -236,7 +248,7 @@ def message_thumbs_feedback(
 
 def custom_final_specification(
     should_show: Callable = None,
-    validate: Callable = None,
+    validate: Callable = default_validation,
     on_completion: Callable = None,
     user_specification_form_final: List[FormElement] = None,
 ):
@@ -258,17 +270,10 @@ def custom_final_specification(
 
         if st.form_submit_button("Submit", type="primary"):
             # Default validation: check that all form elements are filled
-            if validate is None:
-                valid = True
-                for form_element in st.session_state.spec.user_specification_form_final:
-                    label = form_element.get("label")
-                    value = form_values.get(label)
-                    if form_element.get("required", True):  # Default to required if not specified
-                        if value is None or value == "" or value == "-":
-                            valid = False
-                            break
-            else:
+            if validate is not None:
                 valid = validate(form_values)
+            else:
+                valid = True
             if not valid:
                 st.error("Please fill in all required fields correctly")
                 return
@@ -279,7 +284,7 @@ def custom_final_specification(
 
 def comparison_scoring(
     should_show: Callable = None,
-    validate: Callable = None,
+    validate: Callable = default_validation,
     on_completion: Callable = None,
 ):
     if should_show is not None and not should_show():
@@ -319,31 +324,13 @@ def comparison_scoring(
         # )
         score_answers["confidence"] = st.radio(
             "Do you think that more exploration (with or without the assistant) could have led you to a better creation?",
-            options=["", "Yes", "Maybe", "No"],
+            options=["-", "Yes", "Maybe", "No"],
         )
 
         if st.form_submit_button("Submit", type="primary"):
             # Default validation: check that all fields are filled
             if validate is None:
                 valid = True
-                # Check free_write
-                if not score_answers.get("free_write") or score_answers.get("free_write", "").strip() == "":
-                    valid = False
-                # Check relative_score
-                if valid and (score_answers.get("relative_score") == "" or score_answers.get("relative_score") is None):
-                    valid = False
-                # Check confidence
-                if valid and (score_answers.get("confidence") == "" or score_answers.get("confidence") is None):
-                    valid = False
-                # Check dataset-specific questions
-                if valid and st.session_state.spec.user_evaluation_form:
-                    for form_element in st.session_state.spec.user_evaluation_form:
-                        label = form_element.get("label")
-                        value = score_answers.get(label)
-                        if form_element.get("required", True):
-                            if value is None or value == "" or value == "-":
-                                valid = False
-                                break
             else:
                 valid = validate(score_answers)
             if not valid:
@@ -357,7 +344,7 @@ def comparison_scoring(
 
 def post_specification_survey(
     should_show: Callable = None,
-    validate: Callable = None,
+    validate: Callable = default_validation,
     on_completion: Callable = None,
 ):
     """
@@ -381,10 +368,7 @@ def post_specification_survey(
         if st.form_submit_button("Submit", type="primary"):
             # Default validation: check that both text areas are filled
             if validate is None:
-                valid = (
-                    form_results.get("must_haves", "").strip() != ""
-                    and form_results.get("nice_to_haves", "").strip() != ""
-                )
+                valid = True
             else:
                 valid = validate(form_results)
             if not valid:
@@ -396,7 +380,7 @@ def post_specification_survey(
 
 def assistant_instruments_survey(
     should_show: Callable = None,
-    validate: Callable = None,
+    validate: Callable = default_validation,
     on_completion: Callable = None,
 ):
     """
@@ -424,10 +408,7 @@ def assistant_instruments_survey(
         if st.form_submit_button("Submit", type="primary"):
             # Default validation: check that all instruments are answered (not "-")
             if validate is None:
-                valid = all(
-                    value != "-" and value != "" and value is not None
-                    for value in form_results.values()
-                )
+                valid = True
             else:
                 valid = validate(form_results)
             if not valid:
@@ -439,9 +420,10 @@ def assistant_instruments_survey(
 
 def final_prediction_evaluation(
     *,
-    likert_label: str = 'How much do you agree with this statement: "I would rather accept the assistant\'s solution as is than continue my search for 5 more minutes."',
-    stars_label: str = "Rate the overall quality.",
-    text_area_label: str = "If you were to continue working the assistant for 5 more minutes, what would you want to change?",
+    likert_label: str = None,
+    stars_label: str = None,
+    slider_label: str = None,
+    text_area_label: str = None,
     submit_key: str = "custom_eval_second_page_form",
 ):
     """
@@ -452,7 +434,9 @@ def final_prediction_evaluation(
     from evaluation.qualitative_eval import INSTRUMENT_LIKERT
 
     # Render the final prediction view
-    st.session_state.spec.render_msg_fn(st.session_state.final_prediction)
+    st.markdown("Below is the assistant's final artifact for the task.")
+    with st.container(border=True, height=700):
+        st.session_state.spec.render_msg_fn(st.session_state.final_prediction)
 
     form_elements = [
         FormElement(
@@ -465,17 +449,42 @@ def final_prediction_evaluation(
             label=NICE_TO_HAVES_QUESTION,
             height=120,
         ),
-        FormElement(
-            input_type="radio",
-            label=likert_label,
-            options=["-"] + INSTRUMENT_LIKERT,
-        ),
-        FormElement(
-            input_type="text_area",
-            label=text_area_label,
-            height=120,
-        ),
     ]
+    if slider_label is not None:
+        form_elements.append(
+            FormElement(
+                input_type="slider",
+                label=slider_label,
+                min_value=0,
+                max_value=100,
+                value=50,
+                step=5,
+                help="0: Unusable, 100: Perfect",
+            ),
+        )
+    if likert_label is not None:
+        form_elements.append(
+            FormElement(
+                input_type="radio",
+                label=likert_label,
+                options=["-"] + INSTRUMENT_LIKERT,
+            ),
+        )
+    if stars_label is not None:
+        form_elements.append(
+            FormElement(
+                input_type="stars",
+                label=stars_label,
+            ),
+        )
+    if text_area_label is not None:
+        form_elements.append(
+            FormElement(
+                input_type="text_area",
+                label=text_area_label,
+                height=120,
+            ),
+        )
 
     with st.form(key=submit_key):
         feedback = {}
@@ -497,11 +506,7 @@ def final_prediction_evaluation(
                         return False, None
                 # Required fields (radio buttons) should not be "-" or empty
                 elif element.get("required", False):
-                    if (
-                        not value
-                        or value == ""
-                        or value == "-"
-                    ):
+                    if not value or value == "" or value == "-":
                         st.error("Please fill in all required fields.")
                         return False, None
             return True, feedback
@@ -511,7 +516,7 @@ def final_prediction_evaluation(
 
 def assistant_ranking_exit_survey(
     should_show: Callable = None,
-    validate: Callable = None,
+    validate: Callable = default_validation,
     on_completion: Callable = None,
 ):
     """
@@ -533,7 +538,7 @@ def assistant_ranking_exit_survey(
 
     num_rounds = len(message_history)
 
-    with st.form(key="assistant_ranking_exit_survey_form"):
+    with st.form(key="assistant_ranking_exit_survey_form", border=False):
         st.markdown("## Assistant Ranking Survey")
         st.markdown(
             f"You interacted with {num_rounds} assistant(s) across {num_rounds} round(s). "
@@ -543,17 +548,21 @@ def assistant_ranking_exit_survey(
         # Store the original spec to restore later
         original_spec = st.session_state.get("spec", None)
 
-        # Display each conversation
+        # Create tabs for each conversation
+        tab_labels = [
+            f"Assistant {round_idx + 1} - Round {round_idx + 1} ({config_dict.get('dataset_name', 'unknown')})"
+            for round_idx, (config_dict, _) in enumerate(message_history)
+        ]
+        tabs = st.tabs(tab_labels)
+
+        # Display each conversation in its tab
         for round_idx, (config_dict, messages) in enumerate(message_history):
             assistant_num = round_idx + 1
             dataset_name = config_dict.get("dataset_name", "unknown")
             spec_index = config_dict.get("spec_index", 0)
             dataset_kwargs = config_dict.get("dataset_kwargs", {})
 
-            with st.expander(
-                f"**Assistant {assistant_num}** - Round {assistant_num} ({dataset_name})",
-                expanded=(round_idx == 0),
-            ):
+            with tabs[round_idx]:
                 # Temporarily load and set the spec for this conversation
                 temp_spec = None
                 try:
@@ -577,7 +586,7 @@ def assistant_ranking_exit_survey(
 
                 # Display the conversation
                 if temp_spec is not None:
-                    with st.container(border=True, height=400):
+                    with st.container(border=True, height=700):
                         components.chat_conversation(
                             messages,
                             show_quick_actions=False,
@@ -589,7 +598,7 @@ def assistant_ranking_exit_survey(
                         )
                 else:
                     # Fallback: display raw messages if spec couldn't be loaded
-                    with st.container(border=True, height=400):
+                    with st.container(border=True, height=700):
                         for msg in messages:
                             if msg.get("content") is not None:
                                 with st.chat_message(msg.get("role", "user")):
@@ -622,13 +631,10 @@ def assistant_ranking_exit_survey(
 
         if st.form_submit_button("Submit", type="primary"):
             # Default validation: ensure all assistants are ranked and explanation is provided
-            if validate is None:
-                valid = (
-                    len(form_values["ranking"]) == num_rounds
-                    and form_values["explanation"].strip() != ""
-                )
-            else:
-                valid = validate(form_values)
+            valid = (
+                len(form_values["ranking"]) == num_rounds
+                and form_values["explanation"].strip() != ""
+            )
 
             if not valid:
                 if len(form_values["ranking"]) != num_rounds:
@@ -646,7 +652,7 @@ def assistant_ranking_exit_survey(
 
 def nasa_tlx_survey(
     should_show: Callable = None,
-    validate: Callable = None,
+    validate: Callable = default_validation,
     on_completion: Callable = None,
     include_pairwise_comparisons: bool = False,
 ):
@@ -693,7 +699,6 @@ def nasa_tlx_survey(
                 )
                 form_results[scale_name] = slider_value
 
-
             # Optional pairwise comparisons for weighting (full NASA-TLX)
             if include_pairwise_comparisons:
                 st.markdown("### Pairwise Comparisons")
@@ -703,15 +708,17 @@ def nasa_tlx_survey(
                 )
 
                 scale_names = list(NASA_TLX_SCALES.keys())
-                
+
                 # Generate all pairwise comparisons (15 total: C(6,2) = 15)
                 all_comparisons = []
                 for i in range(len(scale_names)):
                     for j in range(i + 1, len(scale_names)):
                         scale_a = scale_names[i]
                         scale_b = scale_names[j]
-                        all_comparisons.append((scale_a, scale_b, f"{scale_a} vs {scale_b}"))
-                
+                        all_comparisons.append(
+                            (scale_a, scale_b, f"{scale_a} vs {scale_b}")
+                        )
+
                 # Randomize order but keep it stable across page reloads
                 pairwise_order_key = "nasa_tlx_pairwise_order"
                 if pairwise_order_key not in st.session_state:
@@ -722,9 +729,11 @@ def nasa_tlx_survey(
                 else:
                     # Use the stored order
                     shuffled_comparisons = st.session_state[pairwise_order_key]
-                
+
                 pairwise_results = {}
-                for comparison_idx, (scale_a, scale_b, comparison_key) in enumerate(shuffled_comparisons):
+                for comparison_idx, (scale_a, scale_b, comparison_key) in enumerate(
+                    shuffled_comparisons
+                ):
                     choice = st.segmented_control(
                         "Which contributed more to your workload?",
                         options=["-", scale_a, scale_b],
@@ -733,28 +742,16 @@ def nasa_tlx_survey(
                         key=f"pairwise_{comparison_idx}",
                     )
                     # Convert None to empty string for consistency with validation
-                    pairwise_results[comparison_key] = choice if choice is not None else ""
+                    pairwise_results[comparison_key] = (
+                        choice if choice is not None else ""
+                    )
 
                 form_results["pairwise_comparisons"] = pairwise_results
 
             if st.form_submit_button("Submit", type="primary"):
                 # Default validation: ensure all scales are rated
                 if validate is None:
-                    valid = all(
-                        scale_name in form_results
-                        and isinstance(form_results[scale_name], int)
-                        and NASA_TLX_MIN_VALUE
-                        <= form_results[scale_name]
-                        <= NASA_TLX_MAX_VALUE
-                        for scale_name in NASA_TLX_SCALES.keys()
-                    )
-                    if include_pairwise_comparisons:
-                        valid = valid and all(
-                            value != ""
-                            for value in form_results.get(
-                                "pairwise_comparisons", {}
-                            ).values()
-                        )
+                    valid = True
                 else:
                     valid = validate(form_results)
 

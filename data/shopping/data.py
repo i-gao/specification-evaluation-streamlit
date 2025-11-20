@@ -170,10 +170,6 @@ class ShoppingDataset(SpecificationCollection):
         """
         return [
             FormElement(
-                input_type="text",
-                label="Think of a person you'd like to shop for (yourself, a family member, a friend, etc.). Imagine you are buying a gift for this person.",
-            ),
-            FormElement(
                 input_type="slider",
                 label="How much are you willing to spend? (Budget in dollars)",
                 required=True,
@@ -428,11 +424,17 @@ class ShoppingDataset(SpecificationCollection):
                 [f"{v} {p.plural(k)}" for k, v in prompt_as_str.items()]
             )
 
+            # Import search interface before creating spec
+            from data.shopping.streamlit_search_interface import (
+                render_search_interface,
+                render_liked_items,
+            )
+            
             spec = CustomSpecification(
                 dataset_name=self.dataset_name,
                 index=f"custom_{ix}",
-                initial_specification=f"Buy {prompt_as_str} from H&M tailored for the person you have in mind. You can assume that all products are available in all sizes.",
-                current_specification=f"Buy {prompt_as_str} from H&M tailored for the person you have in mind. You can assume that all products are available in all sizes.",
+                initial_specification=f"Buy {prompt_as_str} from H&M for the person you have in mind. You can assume that all products are available in all sizes.",
+                current_specification=f"Buy {prompt_as_str} from H&M for the person you have in mind. You can assume that all products are available in all sizes.",
                 commonsense_description=COMMONSENSE_DESCRIPTION,
                 user_specification_form_final=self._create_user_specification_form_final(
                     custom_intent
@@ -474,6 +476,10 @@ class ShoppingDataset(SpecificationCollection):
                     **kwargs,
                     db=self._catalog,
                 ),
+                render_search_interface_fn=render_search_interface,
+                render_search_interface_kwargs={"catalog": self._catalog},
+                render_liked_items_fn=render_liked_items,
+                render_liked_items_kwargs={"catalog": self._catalog},
             )
             specs[ix] = spec
         return specs

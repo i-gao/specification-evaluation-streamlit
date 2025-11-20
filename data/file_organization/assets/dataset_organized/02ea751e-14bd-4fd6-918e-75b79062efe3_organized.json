@@ -5,9 +5,6 @@
       "create_date": "2024-12-24 14:18:41",
       "edit_date": "2024-12-26 14:18:41",
       "file_contents_preview": "# Dataset: experiment_data.csv\n# Project Theme: Workshop_Materials_Statistical_Methods\n# Keywords: Workshop_Materials_Statistical_Methods, workshopmaterialsstatisticalmethods, workshop_materials_statistical_methods, workshop-materials-statistical-methods, workshop materials statistical methods\n# Description: Data collected for statistical analysis in workshop materials experiments.",
-      "root": "experiment_data",
-      "extension": ".csv",
-      "theme": "Workshop_Materials_Statistical_Methods",
       "original_filename": "Experiment-Data--v2.csv"
     },
     {
@@ -15,9 +12,6 @@
       "create_date": "2024-12-21 14:18:41",
       "edit_date": "2024-12-21 14:18:41",
       "file_contents_preview": "# Dataset: experiment_data.tsv\n# Theme: Workshop_Materials_Statistical_Methods\n# Keywords: Workshop_Materials_Statistical_Methods, workshopmaterialsstatisticalmethods, workshop_materials_statistical_methods, workshop-materials-statistical-methods, workshop materials statistical methods\n# Description: Academic researcher working on papers, experiments, data analysis, grant proposals, and literature reviews\nID\tMeasurement\tValue\tUnit",
-      "root": "experiment_data",
-      "extension": ".tsv",
-      "theme": "Workshop_Materials_Statistical_Methods",
       "original_filename": "Experiment-Data.tsv"
     },
     {
@@ -25,9 +19,6 @@
       "create_date": "2024-12-22 14:18:41",
       "edit_date": "2024-12-27 14:18:41",
       "file_contents_preview": "# Dataset: experiment_data.csv\n# Project Theme: Workshop_Materials_Statistical_Methods\n# Keywords: Workshop_Materials_Statistical_Methods, workshopmaterialsstatisticalmethods, workshop_materials_statistical_methods, workshop-materials-statistical-methods, workshop materials statistical methods\n# Description: Data collected for statistical analysis in workshop materials experiments.",
-      "root": "experiment_data",
-      "extension": ".csv",
-      "theme": "Workshop_Materials_Statistical_Methods",
       "original_filename": "Experiment-Data--v1.csv"
     },
     {
@@ -35,41 +26,29 @@
       "create_date": "2024-12-21 14:18:41",
       "edit_date": "2024-12-22 14:18:41",
       "file_contents_preview": null,
-      "root": "experiment_data_Workshop_Materials_Statistical_Methods",
-      "extension": ".xlsx",
-      "theme": "Workshop_Materials_Statistical_Methods",
       "original_filename": "experiment_data_Workshop_Materials_Statistical_Methods.xlsx"
     }
   ],
   "Literature Review CRISPR Paper": [
     {
-      "filename": "Lit-Reiew-Notes--v1.docx",
+      "filename": "Lit-Review-Notes--v1.docx",
       "create_date": "2025-04-01 14:18:41",
       "edit_date": "2025-04-01 14:18:41",
       "file_contents_preview": "Literature Review Notes on CRISPR Technology  \nThis document compiles key findings and analyses relevant to the Literature_Review_CRISPR_Paper project.  \nFocused on recent advances and critical evaluations within the literature_review_crispr_paper domain.  \nPrepared as part of ongoing research efforts documented in lit_review_notes.",
-      "root": "lit_review_notes",
-      "extension": ".docx",
-      "theme": "Literature_Review_CRISPR_Paper",
       "original_filename": "lit-review-notes-FINAL.docx"
     },
     {
-      "filename": "Lit-Reiew-Notes.txt",
+      "filename": "Lit-Review-Notes.txt",
       "create_date": "2025-03-29 14:18:41",
       "edit_date": "2025-04-01 14:18:41",
       "file_contents_preview": "# Literature Review Notes on CRISPR Technology  \nThis document compiles key findings and analyses for the Literature_Review_CRISPR_Paper project.  \nKeywords: Literature_Review_CRISPR_Paper, literaturereviewcrisprpaper, literature_review_crispr_paper  \nRoot file: lit_review_notes.txt  \nFocus: Comprehensive review of CRISPR-related research and advancements.",
-      "root": "lit_review_notes",
-      "extension": ".txt",
-      "theme": "Literature_Review_CRISPR_Paper",
       "original_filename": "Lit-Review-Notes.txt"
     },
     {
-      "filename": "Lit-Reiew-Notes--v0.docx",
+      "filename": "Lit-Review-Notes--v0.docx",
       "create_date": "2025-03-30 14:18:41",
       "edit_date": "2025-04-01 14:18:41",
       "file_contents_preview": "Literature Review Notes on CRISPR Technology  \nThis document compiles key findings and analyses relevant to the Literature_Review_CRISPR_Paper project.  \nFocused on recent advances and critical evaluations within the literature_review_crispr_paper domain.  \nPrepared as part of ongoing research efforts documented in lit_review_notes.",
-      "root": "lit_review_notes",
-      "extension": ".docx",
-      "theme": "Literature_Review_CRISPR_Paper",
       "original_filename": "lit-review-notes-DRAFT.docx"
     },
     {
@@ -77,19 +56,13 @@
       "create_date": "2025-03-25 14:18:41",
       "edit_date": "2025-03-25 14:18:41",
       "file_contents_preview": "This document presents a comprehensive Literature Review on CRISPR technologies, focusing on recent advancements and key studies.  \nThe review is part of the crisper_paper_draft project, aiming to consolidate current knowledge and identify research gaps.  \nKeywords such as Literature_Review_CRISPR_Paper guide the thematic structure and ensure relevance to ongoing academic efforts.",
-      "root": "crisper_paper_draft",
-      "extension": ".docx",
-      "theme": "Literature_Review_CRISPR_Paper",
       "original_filename": "crisper paper draft.docx"
     },
     {
-      "filename": "Lit-Reiew-Notes-Literature-Reiew-Crispr-Paper.md",
+      "filename": "Lit-Review-Notes-Literature-Review-Crispr-Paper.md",
       "create_date": "2025-03-28 14:18:41",
       "edit_date": "2025-03-31 14:18:41",
       "file_contents_preview": null,
-      "root": "lit_review_notes_Literature_Review_CRISPR_Paper",
-      "extension": ".md",
-      "theme": "Literature_Review_CRISPR_Paper",
       "original_filename": "litReviewNotesLiteratureReviewCrisprPaper.md"
     }
   ],
@@ -99,9 +72,6 @@
       "create_date": "2025-03-02 14:18:41",
       "edit_date": "2025-03-04 14:18:41",
       "file_contents_preview": "Manuscript Draft for Conference Presentation ICAR 2024  \nThis document outlines the key findings and analysis prepared for the Conference_Presentation_ICAR_2024.  \nThe focus is on presenting experimental results and literature review relevant to the conference theme.  \nAll data and interpretations are aligned with the goals of the conferencepresentationicar2024 project.",
-      "root": "manuscript_draft",
-      "extension": ".docx",
-      "theme": "Conference_Presentation_ICAR_2024",
       "original_filename": "manuscript-draft.docx"
     },
     {
@@ -109,9 +79,6 @@
       "create_date": "2025-02-28 14:18:41",
       "edit_date": "2025-03-05 14:18:41",
       "file_contents_preview": "Manuscript Draft for Conference Presentation ICAR 2024  \nThis document outlines key findings and analyses for the Conference_Presentation_ICAR_2024 project.  \nKeywords: conferencepresentationicar2024, conference_presentation_icar_2024, conference-presentation-icar-2024, conference presentation icar 2024  \nPrepared by academic researcher specializing in papers, experiments, data analysis, grant proposals, and literature reviews.",
-      "root": "manuscript_draft",
-      "extension": ".pdf",
-      "theme": "Conference_Presentation_ICAR_2024",
       "original_filename": "Manuscript-Draft-Final.pdf"
     },
     {
@@ -119,9 +86,6 @@
       "create_date": "2025-02-28 14:18:41",
       "edit_date": "2025-03-03 14:18:41",
       "file_contents_preview": null,
-      "root": "manuscript_draft_Conference_Presentation_ICAR_2024",
-      "extension": ".tex",
-      "theme": "Conference_Presentation_ICAR_2024",
       "original_filename": "manuscriptDraftConferencePresentationIcar2024.tex"
     },
     {
@@ -129,9 +93,6 @@
       "create_date": "2025-03-01 14:18:41",
       "edit_date": "2025-03-06 14:18:41",
       "file_contents_preview": "# experiment_data.csv\n# Project Theme: Conference_Presentation_ICAR_2024\n# Keywords: Conference_Presentation_ICAR_2024, conferencepresentationicar2024, conference_presentation_icar_2024, conference-presentation-icar-2024, conference presentation icar 2024\n# Description: Academic researcher working on papers, experiments, data analysis, grant proposals, and literature reviews\nDate,Experiment_ID,Result,Notes",
-      "root": "experiment_data",
-      "extension": ".csv",
-      "theme": "Conference_Presentation_ICAR_2024",
       "original_filename": "EXPERIMENT DATA.csv"
     },
     {
@@ -139,113 +100,80 @@
       "create_date": "2025-02-26 14:18:41",
       "edit_date": "2025-03-03 14:18:41",
       "file_contents_preview": "Manuscript Draft for Conference Presentation ICAR 2024  \nThis document outlines key findings and analyses for the Conference_Presentation_ICAR_2024 project.  \nKeywords: conferencepresentationicar2024, conference_presentation_icar_2024, conference-presentation-icar-2024, conference presentation icar 2024  \nPrepared by academic researcher specializing in papers, experiments, data analysis, grant proposals, and literature reviews.",
-      "root": "manuscript_draft",
-      "extension": ".pdf",
-      "theme": "Conference_Presentation_ICAR_2024",
       "original_filename": "Manuscript-Draft-Draft.pdf"
     }
   ],
   "Vacation Photos Hawaii 2023": [
     {
-      "filename": "Acation-Photosacation-Photos-Hawaii-(2).png",
+      "filename": "Vacation-Photos-Vacation-Photos-Hawaii-(2).png",
       "create_date": "2025-01-16 14:18:41",
       "edit_date": "2025-01-20 14:18:41",
       "file_contents_preview": null,
-      "root": "vacation_photos_Vacation_Photos_Hawaii_2023",
-      "extension": ".png",
-      "theme": "Vacation_Photos_Hawaii_2023",
       "original_filename": "vacation_photos_Vacation_Photos_Hawaii_2023__(2).png"
     },
     {
-      "filename": "Acation-Photosacation-Photos-Hawaii.heic",
+      "filename": "Vacation-Photos-Vacation-Photos-Hawaii.heic",
       "create_date": "2025-01-17 14:18:41",
       "edit_date": "2025-01-18 14:18:41",
       "file_contents_preview": null,
-      "root": "vacation_photos_Vacation_Photos_Hawaii_2023",
-      "extension": ".heic",
-      "theme": "Vacation_Photos_Hawaii_2023",
       "original_filename": "VACATION PHOTOS VACATION PHOTOS HAWAII 2023.heic"
     },
     {
-      "filename": "Acation-Photosacation-Photos-Hawaii-25.jpeg",
+      "filename": "Vacation-Photos-Vacation-Photos-Hawaii-25.jpeg",
       "create_date": "2025-01-18 14:18:41",
       "edit_date": "2025-01-19 14:18:41",
       "file_contents_preview": null,
-      "root": "vacation_photos_Vacation_Photos_Hawaii_2023",
-      "extension": ".jpeg",
-      "theme": "Vacation_Photos_Hawaii_2023",
       "original_filename": "VACATION PHOTOS VACATION PHOTOS HAWAII 2023 01 18 25.jpeg"
     },
     {
-      "filename": "Acation-Photosacation-Photos-Hawaii.jpg",
+      "filename": "Vacation-Photos-Vacation-Photos-Hawaii.jpg",
       "create_date": "2025-01-20 14:18:41",
       "edit_date": "2025-01-22 14:18:41",
       "file_contents_preview": null,
-      "root": "vacation_photos_Vacation_Photos_Hawaii_2023",
-      "extension": ".jpg",
-      "theme": "Vacation_Photos_Hawaii_2023",
       "original_filename": "vacation_photos_Vacation_Photos_Hawaii_2023.jpg"
     },
     {
-      "filename": "Acation-Photosacation-Photos-Hawaii-(1).png",
+      "filename": "Vacation-Photos-Vacation-Photos-Hawaii-(1).png",
       "create_date": "2025-01-14 14:18:41",
       "edit_date": "2025-01-15 14:18:41",
       "file_contents_preview": null,
-      "root": "vacation_photos_Vacation_Photos_Hawaii_2023",
-      "extension": ".png",
-      "theme": "Vacation_Photos_Hawaii_2023",
       "original_filename": "vacation_photos_Vacation_Photos_Hawaii_2023_01_14__(1).png"
     }
   ],
   "Manuscript Revision Reviewer Comments": [
     {
-      "filename": "Reiewer-Comments.txt",
+      "filename": "Reviewer-Comments.txt",
       "create_date": "2025-08-10 14:18:41",
       "edit_date": "2025-08-11 14:18:41",
       "file_contents_preview": "# reviewer_comments.txt\n\nThis document contains detailed manuscript revision reviewer comments.\nThe focus is on manuscript_revision_reviewer_comments to guide improvements.\nAll feedback is organized under the root theme: reviewer_comments.",
-      "root": "reviewer_comments",
-      "extension": ".txt",
-      "theme": "Manuscript_Revision_Reviewer_Comments",
       "original_filename": "reviewer_comments_2025.txt"
     },
     {
-      "filename": "Reiewer-Comments--v1.docx",
+      "filename": "Reviewer-Comments--v1.docx",
       "create_date": "2025-08-17 14:18:41",
       "edit_date": "2025-08-22 14:18:41",
       "file_contents_preview": "Manuscript Revision Reviewer Comments\n\nThis document contains detailed reviewer comments related to the manuscript revision process.  \nKeywords: manuscriptrevisionreviewercomments, manuscript_revision_reviewer_comments, manuscript revision reviewer comments  \nRoot filename reference: reviewer_comments.docx",
-      "root": "reviewer_comments",
-      "extension": ".docx",
-      "theme": "Manuscript_Revision_Reviewer_Comments",
       "original_filename": "REVIEWER COMMENTS FINAL.docx"
     },
     {
-      "filename": "Reiewer-Comments.pdf",
+      "filename": "Reviewer-Comments.pdf",
       "create_date": "2025-08-16 14:18:41",
       "edit_date": "2025-08-17 14:18:41",
       "file_contents_preview": "Manuscript Revision Reviewer Comments\n\nThis document contains detailed reviewer_comments on the manuscript revision process.  \nThe focus is on addressing key points raised during peer review to improve the manuscript quality.  \nKeywords: manuscript_revision_reviewer_comments, manuscript revision reviewer comments.",
-      "root": "reviewer_comments",
-      "extension": ".pdf",
-      "theme": "Manuscript_Revision_Reviewer_Comments",
       "original_filename": "reviewer_comments.pdf"
     },
     {
-      "filename": "Reision-Responses.docx",
+      "filename": "Revision-Responses.docx",
       "create_date": "2025-08-14 14:18:41",
       "edit_date": "2025-08-16 14:18:41",
       "file_contents_preview": "Manuscript Revision Reviewer Comments  \nProject: revision_responses  \nThis document contains detailed responses addressing the manuscript_revision_reviewer_comments received during the peer review process.  \nThe focus is on clarifying points raised and improving the manuscript accordingly.",
-      "root": "revision_responses",
-      "extension": ".docx",
-      "theme": "Manuscript_Revision_Reviewer_Comments",
       "original_filename": "revision_responses_2025.docx"
     },
     {
-      "filename": "Reiewer-Comments--v0.docx",
+      "filename": "Reviewer-Comments--v0.docx",
       "create_date": "2025-08-15 14:18:41",
       "edit_date": "2025-08-20 14:18:41",
       "file_contents_preview": "Manuscript Revision Reviewer Comments\n\nThis document contains detailed reviewer comments related to the manuscript revision process.  \nKeywords: manuscriptrevisionreviewercomments, manuscript_revision_reviewer_comments, manuscript revision reviewer comments  \nRoot filename reference: reviewer_comments.docx",
-      "root": "reviewer_comments",
-      "extension": ".docx",
-      "theme": "Manuscript_Revision_Reviewer_Comments",
       "original_filename": "REVIEWER COMMENTS DRAFT.docx"
     }
   ],
@@ -255,9 +183,6 @@
       "create_date": "2025-01-04 14:18:41",
       "edit_date": "2025-01-07 14:18:41",
       "file_contents_preview": "Grant Proposal Draft for NSF 2024  \nProject Theme: Grant_Proposal_NSF_2024  \nKeywords: grantproposalnsf2024, grant_proposal_nsf_2024, grant-proposal-nsf-2024, grant proposal nsf 2024  \nThis document outlines the research objectives and methodology for the NSF 2024 grant submission.  \nPrepared by the academic research team focusing on data analysis and experimental design.",
-      "root": "proposal_draft",
-      "extension": ".pdf",
-      "theme": "Grant_Proposal_NSF_2024",
       "original_filename": "proposal-draft.pdf"
     },
     {
@@ -265,9 +190,6 @@
       "create_date": "2024-12-31 14:18:41",
       "edit_date": "2024-12-31 14:18:41",
       "file_contents_preview": null,
-      "root": "budget_plan_Grant_Proposal_NSF_2024",
-      "extension": ".xlsx",
-      "theme": "Grant_Proposal_NSF_2024",
       "original_filename": "budget plan Grant Proposal NSF 2024.xlsx"
     },
     {
@@ -275,9 +197,6 @@
       "create_date": "2025-01-07 14:18:41",
       "edit_date": "2025-01-12 14:18:41",
       "file_contents_preview": "Project Theme Keywords: Grant_Proposal_NSF_2024, grantproposalnsf2024, grant_proposal_nsf_2024, grant-proposal-nsf-2024, grant proposal nsf 2024\nBudget Plan Overview for Grant_Proposal_NSF_2024\nFilename Root: budget_plan\nDate: 2024-06-01\nPrepared by: Academic Researcher",
-      "root": "budget_plan",
-      "extension": ".csv",
-      "theme": "Grant_Proposal_NSF_2024",
       "original_filename": "Budget-Plan--v2.csv"
     },
     {
@@ -285,9 +204,6 @@
       "create_date": "2025-01-01 14:18:41",
       "edit_date": "2025-01-05 14:18:41",
       "file_contents_preview": "Grant Proposal Draft for NSF 2024  \nProject Theme: Grant_Proposal_NSF_2024  \nThis document outlines the research objectives, methodology, and expected outcomes for the grantproposalnsf2024 submission.  \nPrepared as part of the proposal_draft series for academic review and funding consideration.",
-      "root": "proposal_draft",
-      "extension": ".docx",
-      "theme": "Grant_Proposal_NSF_2024",
       "original_filename": "Proposal-Draft.docx"
     },
     {
@@ -295,51 +211,36 @@
       "create_date": "2025-01-05 14:18:41",
       "edit_date": "2025-01-09 14:18:41",
       "file_contents_preview": "Project Theme Keywords: Grant_Proposal_NSF_2024, grantproposalnsf2024, grant_proposal_nsf_2024, grant-proposal-nsf-2024, grant proposal nsf 2024\nBudget Plan Overview for Grant_Proposal_NSF_2024\nFilename Root: budget_plan\nDate: 2024-06-01\nPrepared by: Academic Researcher",
-      "root": "budget_plan",
-      "extension": ".csv",
-      "theme": "Grant_Proposal_NSF_2024",
       "original_filename": "Budget-Plan--v1.csv"
     }
   ],
   "Flight Booking Summer Trip": [
     {
-      "filename": "Literature-Reiew.txt",
+      "filename": "Literature-Review.txt",
       "create_date": "2025-06-11 14:18:41",
       "edit_date": "2025-06-13 14:18:41",
       "file_contents_preview": "This literature_review focuses on the Flight_Booking_Summer_Trip project.  \nKey terms such as flightbookingsummertrip and flight_booking_summer_trip are central to this review.  \nThe analysis aims to synthesize current research relevant to flight booking behaviors during summer trips.  \nThis document will support ongoing experiments and grant proposals within the Flight_Booking_Summer_Trip theme.",
-      "root": "literature_review",
-      "extension": ".txt",
-      "theme": "Flight_Booking_Summer_Trip",
       "original_filename": "Literature-Review.txt"
     },
     {
-      "filename": "Literature-Reiew--v0.docx",
+      "filename": "Literature-Review--v0.docx",
       "create_date": "2025-06-11 14:18:41",
       "edit_date": "2025-06-11 14:18:41",
       "file_contents_preview": "Literature Review: Flight Booking Summer Trip\n\nThis document presents a comprehensive literature review focused on the theme of flight_booking_summer_trip.  \nThe analysis covers recent studies and data relevant to flightbookingsummertrip trends and consumer behavior.  \nInsights gathered here will support ongoing research and grant proposals related to flight booking summer trip patterns.",
-      "root": "literature_review",
-      "extension": ".docx",
-      "theme": "Flight_Booking_Summer_Trip",
       "original_filename": "literature-review--v1.docx"
     },
     {
-      "filename": "Literature-Reiew--v1.docx",
+      "filename": "Literature-Review--v1.docx",
       "create_date": "2025-06-13 14:18:41",
       "edit_date": "2025-06-14 14:18:41",
       "file_contents_preview": "Literature Review: Flight Booking Summer Trip\n\nThis document presents a comprehensive literature review focused on the theme of flight_booking_summer_trip.  \nThe analysis covers recent studies and data relevant to flightbookingsummertrip trends and consumer behavior.  \nInsights gathered here will support ongoing research and grant proposals related to flight booking summer trip patterns.",
-      "root": "literature_review",
-      "extension": ".docx",
-      "theme": "Flight_Booking_Summer_Trip",
       "original_filename": "literature-review--v2.docx"
     },
     {
-      "filename": "Literature-Reiew.pdf",
+      "filename": "Literature-Review.pdf",
       "create_date": "2025-06-09 14:18:41",
       "edit_date": "2025-06-14 14:18:41",
       "file_contents_preview": "Literature Review on Flight_Booking_Summer_Trip  \nThis document explores key studies and data related to flight booking behaviors during summer trips.  \nThe analysis focuses on trends identified under the keywords: flightbookingsummertrip, flight_booking_summer_trip, and flight booking summer trip.  \nFindings will support ongoing research and grant proposals within the literature_review framework.",
-      "root": "literature_review",
-      "extension": ".pdf",
-      "theme": "Flight_Booking_Summer_Trip",
       "original_filename": "literature-review.pdf"
     }
   ],
@@ -349,9 +250,6 @@
       "create_date": "2025-03-14 14:18:41",
       "edit_date": "2025-03-15 14:18:41",
       "file_contents_preview": null,
-      "root": "experiment_data_Paper_Draft_Microbial_Metabolism",
-      "extension": ".xlsx",
-      "theme": "Paper_Draft_Microbial_Metabolism",
       "original_filename": "Experiment-Data-Paper-Draft-Microbial-Metabolism--v1.xlsx"
     },
     {
@@ -359,9 +257,6 @@
       "create_date": "2025-03-13 14:18:41",
       "edit_date": "2025-03-17 14:18:41",
       "file_contents_preview": "# Dataset: experiment_data.csv\n# Project Theme: Paper_Draft_Microbial_Metabolism\n# Keywords: Paper_Draft_Microbial_Metabolism, paperdraftmicrobialmetabolism, paper_draft_microbial_metabolism, paper-draft-microbial-metabolism, paper draft microbial metabolism\n# Description: Experimental data supporting microbial metabolism research for paper drafting and analysis",
-      "root": "experiment_data",
-      "extension": ".csv",
-      "theme": "Paper_Draft_Microbial_Metabolism",
       "original_filename": "Experiment-Data.csv"
     },
     {
@@ -369,9 +264,6 @@
       "create_date": "2025-03-16 14:18:41",
       "edit_date": "2025-03-18 14:18:41",
       "file_contents_preview": "Manuscript Draft: Microbial Metabolism  \nThis document presents the latest findings and analyses related to microbial metabolic pathways.  \nKeywords: Paper_Draft_Microbial_Metabolism, paperdraftmicrobialmetabolism, paper_draft_microbial_metabolism  \nPrepared as part of the manuscript_draft project for ongoing research and publication efforts.",
-      "root": "manuscript_draft",
-      "extension": ".pdf",
-      "theme": "Paper_Draft_Microbial_Metabolism",
       "original_filename": "Manuscript-Draft--v2.pdf"
     },
     {
@@ -379,9 +271,6 @@
       "create_date": "2025-03-14 14:18:41",
       "edit_date": "2025-03-18 14:18:41",
       "file_contents_preview": "Manuscript Draft: Microbial Metabolism  \nThis document presents the latest findings and analyses related to microbial metabolic pathways.  \nKeywords: Paper_Draft_Microbial_Metabolism, paperdraftmicrobialmetabolism, paper_draft_microbial_metabolism  \nPrepared as part of the manuscript_draft project for ongoing research and publication efforts.",
-      "root": "manuscript_draft",
-      "extension": ".pdf",
-      "theme": "Paper_Draft_Microbial_Metabolism",
       "original_filename": "Manuscript-Draft--v1.pdf"
     },
     {
@@ -389,9 +278,6 @@
       "create_date": "2025-03-16 14:18:41",
       "edit_date": "2025-03-19 14:18:41",
       "file_contents_preview": null,
-      "root": "experiment_data_Paper_Draft_Microbial_Metabolism",
-      "extension": ".xlsx",
-      "theme": "Paper_Draft_Microbial_Metabolism",
       "original_filename": "Experiment-Data-Paper-Draft-Microbial-Metabolism--v2.xlsx"
     }
   ],
@@ -401,9 +287,6 @@
       "create_date": "2025-06-19 14:18:41",
       "edit_date": "2025-06-23 14:18:41",
       "file_contents_preview": null,
-      "root": "PDFReaderSetup",
-      "extension": ".dmg",
-      "theme": null,
       "original_filename": "Pdfreadersetup.dmg"
     },
     {
@@ -411,31 +294,22 @@
       "create_date": "2025-03-15 14:18:41",
       "edit_date": "2025-03-17 14:18:41",
       "file_contents_preview": "Manuscript Draft: Microbial Metabolism\n\nThis document presents the initial draft of our research paper focused on microbial metabolism.  \nKey themes include metabolic pathways, microbial interactions, and biochemical processes.  \nThe manuscript draft aims to integrate experimental data and literature insights to advance understanding in this field.",
-      "root": "manuscript_draft",
-      "extension": ".docx",
-      "theme": "Paper_Draft_Microbial_Metabolism",
       "original_filename": "Manuscript-Draft.docx"
     }
   ],
   "Data Analysis Gene Expression Raw": [
     {
-      "filename": "Raw-Expression-Data--v0.txt",
+      "filename": "Raw-Expression-Data-Draft.txt",
       "create_date": "2024-12-28 14:18:41",
       "edit_date": "2024-12-30 14:18:41",
       "file_contents_preview": "# Project: Data_Analysis_Gene_Expression_Raw\n# Keywords: Data_Analysis_Gene_Expression_Raw, dataanalysisgeneexpressionraw, data_analysis_gene_expression_raw, data-analysis-gene-expression-raw, data analysis gene expression raw\n# Source: raw_expression_data\n# Description: Initial raw gene expression data for downstream analysis and interpretation.",
-      "root": "raw_expression_data",
-      "extension": ".txt",
-      "theme": "Data_Analysis_Gene_Expression_Raw",
       "original_filename": "raw_expression_data_DRAFT.txt"
     },
     {
-      "filename": "Raw-Expression-Data--v1.txt",
+      "filename": "Raw-Expression-Data-Final.txt",
       "create_date": "2024-12-30 14:18:41",
       "edit_date": "2024-12-31 14:18:41",
       "file_contents_preview": "# Project: Data_Analysis_Gene_Expression_Raw\n# Keywords: Data_Analysis_Gene_Expression_Raw, dataanalysisgeneexpressionraw, data_analysis_gene_expression_raw, data-analysis-gene-expression-raw, data analysis gene expression raw\n# Source: raw_expression_data\n# Description: Initial raw gene expression data for downstream analysis and interpretation.",
-      "root": "raw_expression_data",
-      "extension": ".txt",
-      "theme": "Data_Analysis_Gene_Expression_Raw",
       "original_filename": "raw_expression_data_FINAL.txt"
     },
     {
@@ -443,9 +317,6 @@
       "create_date": "2024-12-28 14:18:41",
       "edit_date": "2024-12-28 14:18:41",
       "file_contents_preview": null,
-      "root": "raw_expression_data_Data_Analysis_Gene_Expression_Raw",
-      "extension": ".xlsx",
-      "theme": "Data_Analysis_Gene_Expression_Raw",
       "original_filename": "Raw-Expression-Data-Data-Analysis-Gene-Expression-Raw.xlsx"
     },
     {
@@ -453,9 +324,6 @@
       "create_date": "2024-12-31 14:18:41",
       "edit_date": "2025-01-02 14:18:41",
       "file_contents_preview": "# Project Theme: Data_Analysis_Gene_Expression_Raw\n# Keywords: Data_Analysis_Gene_Expression_Raw, dataanalysisgeneexpressionraw, data_analysis_gene_expression_raw, data-analysis-gene-expression-raw, data analysis gene expression raw\n# Source: raw_expression_data.csv\nGeneID,Sample1,Sample2,Sample3,Sample4",
-      "root": "raw_expression_data",
-      "extension": ".csv",
-      "theme": "Data_Analysis_Gene_Expression_Raw",
       "original_filename": "rawExpressionDataDraft.csv"
     },
     {
@@ -463,9 +331,6 @@
       "create_date": "2025-01-02 14:18:41",
       "edit_date": "2025-01-07 14:18:41",
       "file_contents_preview": "# Project Theme: Data_Analysis_Gene_Expression_Raw\n# Keywords: Data_Analysis_Gene_Expression_Raw, dataanalysisgeneexpressionraw, data_analysis_gene_expression_raw, data-analysis-gene-expression-raw, data analysis gene expression raw\n# Source: raw_expression_data.csv\nGeneID,Sample1,Sample2,Sample3,Sample4",
-      "root": "raw_expression_data",
-      "extension": ".csv",
-      "theme": "Data_Analysis_Gene_Expression_Raw",
       "original_filename": "rawExpressionDataFinal.csv"
     },
     {
@@ -473,9 +338,6 @@
       "create_date": "2024-12-27 14:18:41",
       "edit_date": "2024-12-27 14:18:41",
       "file_contents_preview": "# Project Theme: Data_Analysis_Gene_Expression_Raw\n# Keywords: Data_Analysis_Gene_Expression_Raw, dataanalysisgeneexpressionraw, data_analysis_gene_expression_raw, data-analysis-gene-expression-raw, data analysis gene expression raw\n# Source: raw_expression_data.tsv\nGeneID\tSample1\tSample2\tSample3\tSample4",
-      "root": "raw_expression_data",
-      "extension": ".tsv",
-      "theme": "Data_Analysis_Gene_Expression_Raw",
       "original_filename": "Raw-Expression-Data.tsv"
     }
   ],
@@ -485,9 +347,6 @@
       "create_date": "2024-11-16 14:18:41",
       "edit_date": "2024-11-18 14:18:41",
       "file_contents_preview": "# Dataset: Experiment_Data_Photosynthesis_March\n# Keywords: experimentdataphotosynthesismarch, experiment_data_photosynthesis_march, experiment-data-photosynthesis-march, experiment data photosynthesis march\n# Source: raw_data\nDate,Light_Intensity,CO2_Concentration,Oxygen_Production\n2024-03-01,150,400,5.2",
-      "root": "raw_data",
-      "extension": ".csv",
-      "theme": "Experiment_Data_Photosynthesis_March",
       "original_filename": "Raw-Data.csv"
     },
     {
@@ -495,9 +354,6 @@
       "create_date": "2024-11-20 14:18:41",
       "edit_date": "2024-11-22 14:18:41",
       "file_contents_preview": "Experiment Notes: Photosynthesis Data Analysis - March\n\nThis document contains detailed records and analysis related to the Experiment_Data_Photosynthesis_March project.  \nAll data and observations are organized under the root directory: experiment_notes.  \nKeywords: experimentdataphotosynthesismarch, experiment_data_photosynthesis_march, experiment data photosynthesis march.",
-      "root": "experiment_notes",
-      "extension": ".docx",
-      "theme": "Experiment_Data_Photosynthesis_March",
       "original_filename": "experiment notes.docx"
     },
     {
@@ -505,9 +361,6 @@
       "create_date": "2024-11-16 14:18:41",
       "edit_date": "2024-11-17 14:18:41",
       "file_contents_preview": "# experiment_notes.txt\n# Project: Experiment_Data_Photosynthesis_March\n# Keywords: experimentdataphotosynthesismarch, experiment_data_photosynthesis_march\n# Notes and data related to photosynthesis experiments conducted in March.",
-      "root": "experiment_notes",
-      "extension": ".txt",
-      "theme": "Experiment_Data_Photosynthesis_March",
       "original_filename": "Experiment-Notes.txt"
     },
     {
@@ -515,9 +368,6 @@
       "create_date": "2024-11-22 14:18:41",
       "edit_date": "2024-11-26 14:18:41",
       "file_contents_preview": null,
-      "root": "raw_data_Experiment_Data_Photosynthesis_March",
-      "extension": ".xlsx",
-      "theme": "Experiment_Data_Photosynthesis_March",
       "original_filename": "Raw-Data-Experiment-Data-Photosynthesis-March--v2.xlsx"
     },
     {
@@ -525,9 +375,6 @@
       "create_date": "2024-11-20 14:18:41",
       "edit_date": "2024-11-25 14:18:41",
       "file_contents_preview": null,
-      "root": "raw_data_Experiment_Data_Photosynthesis_March",
-      "extension": ".xlsx",
-      "theme": "Experiment_Data_Photosynthesis_March",
       "original_filename": "Raw-Data-Experiment-Data-Photosynthesis-March--v1.xlsx"
     }
   ]

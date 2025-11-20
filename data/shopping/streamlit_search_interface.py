@@ -417,7 +417,7 @@ def render_search_results(results_df: pd.DataFrame, catalog: Catalog, max_result
                 
 
 
-def render_search_interface(catalog: Optional[Catalog] = None, num_results: int = 21):
+def render_search_interface(catalog: Optional[Catalog] = None, num_results: int = 30):
     """
     Main function to render the complete search interface as a reusable component.
     
@@ -470,7 +470,7 @@ def render_search_interface(catalog: Optional[Catalog] = None, num_results: int 
     should_search = search_button or (query and query != st.session_state.last_search_query)
     if should_search:
         with st.spinner("Searching catalog..."):
-            results_df = searcher.search(query, filters=filters, top_k=num_results)
+            results_df = searcher.search(query, filters=filters, top_k=100)
             # Store results in session state
             st.session_state.last_search_query = query
             st.session_state.last_search_results = results_df
@@ -483,7 +483,7 @@ def render_search_interface(catalog: Optional[Catalog] = None, num_results: int 
             results_df = searcher.search(
                 st.session_state.last_search_query or "",
                 filters=filters,
-                top_k=num_results
+                top_k=100
             )
             st.session_state.last_search_results = results_df
             st.session_state.last_search_filters = filters

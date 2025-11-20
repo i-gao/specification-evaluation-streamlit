@@ -8,7 +8,7 @@ Allows users to design their ideal email organization (y*) by:
 - Allowing users to edit/rename existing folders
 """
 
-from typing import List, Dict, Any, Optional, Set
+from typing import List, Dict, Optional
 import streamlit as st
 from datetime import datetime
 
@@ -75,11 +75,10 @@ def render_search_interface(emails_data: Optional[List[Dict]] = None, **kwargs):
     folders = st.session_state.email_organization_folders
     assignments = st.session_state.email_organization_assignments
     
-    st.markdown("## Design Your Ideal Email Organization")
     st.markdown("Assign each email to a folder. You can create new folders or use existing ones.")
     
     # Folder management section
-    with st.expander("📁 Manage Folders", expanded=False):
+    with st.expander("📁 Manage Folders", expanded=True):
         st.markdown("### Existing Folders")
         for i, folder in enumerate(folders):
             col1, col2 = st.columns([3, 1])
@@ -296,4 +295,48 @@ def render_search_interface(emails_data: Optional[List[Dict]] = None, **kwargs):
     # Store assignments in a format that can be retrieved
     # The assignments dict maps email_id -> folder_name
     # This can be used to construct y* later
+
+
+def assignments_to_policy(assignments: Dict[str, str]) -> str:
+    """
+    Convert email assignments dict to policy format.
+    
+    Args:
+        assignments: Dict mapping email_id -> folder_name
+        
+    Returns:
+        Policy string wrapped in <policy></policy> tags
+    """
+    import json
+    policy_rules = []
+    for email_id, folder_name in assignments.items():
+        policy_rules.append({
+            "conditions": f'email_id "{email_id}"',
+            "folder": folder_name
+        })
+    user_policy = json.dumps(policy_rules)
+    return f"<policy>{user_policy}</policy>"
+
+
+def render_user_policy(assignments: Dict[str, str], emails_data: List[Dict]):
+    """
+    Render the user's organization policy (similar to how liked items are rendered).
+    
+    Args:
+        assignments: Dict mapping email_id -> folder_name
+        emails_data: List of email dictionaries
+    """
+    if not assignments:
+        st.markdown("*No organization assignments were made during exploration.*")
+        return
+    
+    st.markdown(f"You organized {len(assignments)} email(s) during exploration.")
+    
+    # Convert assignments to policy and render it
+    user_policy_str = assignments_to_policy(assignments)
+    
+    # Use the spec's render_msg_fn to display the policy results
+    # This will show the emails organized by folder
+    from data.email_organization.streamlit_render import render_email_policy_results
+    render_email_policy_results(user_policy_str, emails_data)
 

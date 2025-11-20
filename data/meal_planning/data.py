@@ -460,6 +460,12 @@ class MealPlanningDataset(SpecificationCollection):
             ]
             initial_specification = f"Generate a meal plan for yourself for the next {len(DAYS_OF_THE_WEEK)} days ({', '.join([d.capitalize() for d in DAYS_OF_THE_WEEK])}). Only plan for 1 person (yourself)."
 
+            # Import search interface before creating spec
+            from data.meal_planning.streamlit_search_interface import (
+                render_search_interface,
+                render_liked_items,
+            )
+            
             spec = CustomSpecification(
                 dataset_name=self.dataset_name,
                 index=f"custom_{ix}",
@@ -507,6 +513,10 @@ class MealPlanningDataset(SpecificationCollection):
                 render_evaluation_kwargs={
                     "num_items_per_comparison": getattr(self, "eval_num_items_per_comparison", 5),
                 },
+                render_search_interface_fn=render_search_interface,
+                render_search_interface_kwargs={"recipe_db": self._recipe_db},
+                render_liked_items_fn=render_liked_items,
+                render_liked_items_kwargs={"recipe_db": self._recipe_db},
             )
             specs[ix] = spec
         return specs

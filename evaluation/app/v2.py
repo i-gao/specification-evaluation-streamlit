@@ -21,6 +21,7 @@ from evaluation.app.control_flow import (
     interaction_countdown,
     brainstorm_countdown,
     search_exploration_countdown,
+    search_exploration_button,
 )
 import evaluation.app.authentication as authentication
 import evaluation.app.forms as forms
@@ -301,6 +302,7 @@ def header():
             )
             and "search_exploration_start_time" in st.session_state
         ):
+            search_exploration_button()
             search_exploration_countdown()
 
 
@@ -315,7 +317,7 @@ def authentication_screen():
 
     st.title("Welcome to your AI-assisted Creative Space!")
     st.write(
-        "In this experiment, you will work together with an AI to co-create useful artifacts for yourself."
+        "In this experiment, you will work together with an AI assistant to co-create useful artifacts for yourself."
     )
 
     authentication.require_token()
@@ -333,7 +335,7 @@ def welcome_screen():
             "## In this experiment, you will work together with an AI to co-create useful artifacts for yourself."
         )
         st.write(
-            f"You will work on {st.session_state.total_rounds} different tasks with the same AI assistant. Each task takes around {st.session_state.interaction_budget // 60} minutes."
+            f"You will work on {st.session_state.total_rounds} tasks, each with a different AI assistant. Each task takes around {st.session_state.interaction_budget // 60} minutes."
         )
         st.write("Here's a preview of the tasks you will work on:")
 
@@ -642,45 +644,53 @@ def main():
 
     # Since chat_flow makes some changes to control flow without changing the screen,
     # We need to check and change screen here
+    new_screen = None
+    
     if st.session_state.round_index == -1 and st.session_state.exit_survey_completed:
         # round index is -1, which means we've gone through all rounds
         # exit_survey is done, so we go to end
-        st.session_state.current_screen = "end_screen"
+        new_screen = "end_screen"
     elif (
         st.session_state.round_index == -1
         and not st.session_state.exit_survey_completed
     ):
         # round index is -1, which means we've gone through all rounds
         # exit_survey not done, so we go to exit_survey
-        st.session_state.current_screen = "exit_survey_screen"
+        new_screen = "exit_survey_screen"
     elif (
         st.session_state.interaction_completed
         and not st.session_state.final_evaluation_completed
     ):
         # interaction is completed, but final evaluation is not, so we go to evaluation
-        st.session_state.current_screen = "evaluation_screen"
+        new_screen = "evaluation_screen"
     elif (
         st.session_state.interaction_started
         and not st.session_state.interaction_completed
     ):
         # interaction is started, but not completed, so we go to chat
-        st.session_state.current_screen = "chat_screen"
+        new_screen = "chat_screen"
     elif (
         st.session_state.instructions_completed
         and not st.session_state.interaction_started
     ):
         # Route through brainstorming controller, which will skip itself if unconfigured or already completed
         if not st.session_state.brainstorming_completed:
-            st.session_state.current_screen = "brainstorming_screen"
+            new_screen = "brainstorming_screen"
         else:
-            st.session_state.current_screen = "presurvey_screen"
+            new_screen = "presurvey_screen"
     elif (
         st.session_state.onboarding_completed
         and not st.session_state.instructions_completed
     ):
         # onboarding is completed, but instructions are not completed
         # so we go to dataset screen, which will then mark instructions completed
-        st.session_state.current_screen = "dataset_screen"
+        new_screen = "dataset_screen"
+    elif not st.session_state.onboarding_completed:
+        # Still in welcome/onboarding
+        new_screen = "welcome_screen"
+    
+    if new_screen is not None:
+        st.session_state.current_screen = new_screen
 
     welcome_screen()
     with st.container(

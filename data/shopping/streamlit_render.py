@@ -7,6 +7,11 @@ import random
 from evaluation.qualitative_eval import COMPARISON_LIKERT, INSTRUMENT_LIKERT
 import inflect
 
+# Session state key prefixes used by this render module that should be cleared between rounds
+RENDER_SESSION_STATE_KEY_PREFIXES = [
+    # Shopping doesn't use prefixed keys in render_eval - all keys are in form_results
+]
+
 
 def comparison_to_md(
     y1: str, y2: str, db: Any, validity_fn=None, validity_kwargs=None
@@ -383,9 +388,6 @@ def render_eval(
                 ):
                     st.error("Please select at least one option for each category")
                     return False, None
-                if len(must_haves_nice_to_haves) == 0:
-                    st.error("Please fill out all fields")
-                    return False, None
                 final_prediction_rank = rank.index(final_prediction_index)
                 st.session_state.form_results["final_evaluation"].update(
                     {
@@ -394,7 +396,6 @@ def render_eval(
                         "styles_favorites": styles_favorites,
                         "colors_favorites": colors_favorites,
                         "prices_favorites": prices_favorites,
-                        "must_haves_nice_to_haves": must_haves_nice_to_haves,
                     }
                 )
                 st.rerun()

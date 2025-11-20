@@ -27,7 +27,7 @@ def get_policy(policy_name: str, **kwargs):
         "continual_clarify_llm": "new_baselines.single_llm.ClarifyLLM",
         "execution_llm": "new_baselines.single_llm.ExecutionLLM",
         "clarify_llm": "new_baselines.single_llm.ClarifyThenExecuteLLM",
-        "alternate_clarify_llm": "new_baselines.single_llm.AlternateClarifyThenExecuteLLM",
+        "alternate_clarify_llm": "new_baselines.single_llm.AlternateClarifyAndExecuteLLM",
         "prompted_llm": "new_baselines.single_llm.PromptedLLM",
         "break_it_down_llm": "new_baselines.brainstorm_llm.BreakItDownLLM",
         "tom_llm": "new_baselines.tom_llm.TomLLM",

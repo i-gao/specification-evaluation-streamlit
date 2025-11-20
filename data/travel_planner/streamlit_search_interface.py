@@ -718,7 +718,7 @@ def render_liked_travel_items_footer(liked_list: List[str], travel_db: TravelDB,
             st.caption(f"... and {len(liked_list) - 20} more items")
 
 
-def render_search_interface(travel_db: Optional[TravelDB] = None, city: Optional[str] = None, num_results: int = 21):
+def render_search_interface(travel_db: Optional[TravelDB] = None, city: Optional[str] = None, num_results: int = 30):
     """
     Main function to render the complete travel search interface as a reusable component.
     
@@ -782,7 +782,7 @@ def render_search_interface(travel_db: Optional[TravelDB] = None, city: Optional
         
         if should_search:
             with st.spinner("Searching restaurants..."):
-                results_df = searcher.search(query, filters=filters, top_k=num_results)
+                results_df = searcher.search(query, filters=filters, top_k=100)
                 st.session_state.last_restaurants_search_query = query
                 st.session_state.last_restaurants_search_results = results_df
                 st.session_state.last_restaurants_search_filters = filters
@@ -792,7 +792,7 @@ def render_search_interface(travel_db: Optional[TravelDB] = None, city: Optional
                 results_df = searcher.search(
                     st.session_state.last_restaurants_search_query or "",
                     filters=filters,
-                    top_k=num_results
+                    top_k=100
                 )
                 st.session_state.last_restaurants_search_results = results_df
                 st.session_state.last_restaurants_search_filters = filters
@@ -821,7 +821,7 @@ def render_search_interface(travel_db: Optional[TravelDB] = None, city: Optional
         
         if should_search:
             with st.spinner("Searching attractions..."):
-                results_df = searcher.search(query, filters=filters, top_k=num_results)
+                results_df = searcher.search(query, filters=filters, top_k=100)
                 st.session_state.last_attractions_search_query = query
                 st.session_state.last_attractions_search_results = results_df
                 st.session_state.last_attractions_search_filters = filters
@@ -831,7 +831,7 @@ def render_search_interface(travel_db: Optional[TravelDB] = None, city: Optional
                 results_df = searcher.search(
                     st.session_state.last_attractions_search_query or "",
                     filters=filters,
-                    top_k=num_results
+                    top_k=100
                 )
                 st.session_state.last_attractions_search_results = results_df
                 st.session_state.last_attractions_search_filters = filters
@@ -860,7 +860,7 @@ def render_search_interface(travel_db: Optional[TravelDB] = None, city: Optional
         
         if should_search:
             with st.spinner("Searching accommodations..."):
-                results_df = searcher.search(query, filters=filters, top_k=num_results)
+                results_df = searcher.search(query, filters=filters, top_k=100)
                 st.session_state.last_accommodations_search_query = query
                 st.session_state.last_accommodations_search_results = results_df
                 st.session_state.last_accommodations_search_filters = filters
@@ -870,7 +870,7 @@ def render_search_interface(travel_db: Optional[TravelDB] = None, city: Optional
                 results_df = searcher.search(
                     st.session_state.last_accommodations_search_query or "",
                     filters=filters,
-                    top_k=num_results
+                    top_k=100
                 )
                 st.session_state.last_accommodations_search_results = results_df
                 st.session_state.last_accommodations_search_filters = filters

@@ -13,11 +13,11 @@ if str(Path(__file__).parent.parent.parent) not in sys.path:
         str(Path(__file__).parent.parent.parent)
     )  # evaluation/app/ -> evaluation/ -> root
 
-from data.dataset import FixedSpecification, CustomSpecification
+from data.dataset import CustomSpecification
 from user_simulator import get_simulator
 from data import get_dataset, get_spec
 from new_baselines import get_policy
-from evaluation.interaction_types import save_interaction, Grade
+from evaluation.interaction_types import save_interaction
 from utils import seed_everything
 from utils.model import is_openai_model
 from evaluation.namer import get_experiment_name
@@ -45,7 +45,7 @@ For each round:
     - shows: free-write textbox with countdown
     - flag: brainstorming_started
     - flag: brainstorming_completed
-3. Presurvey
+3. Presurvey (domain expertise survey)
     - shows: presurvey form
     - flag: presurvey_completed
 4. Interaction
@@ -54,21 +54,15 @@ For each round:
     - flag: interaction_completed
     3a. Post-user message, pre-assistant response feedback (optional survey)
         - flag: waiting_for_message_feedback
-5. Final specification (survey)
-    - shows: final specification form
-    - flag: final_specification_completed
-6. Final generation
-    - shows: nothing
-    - flag: final_prediction is not None
-7. Final prediction evaluation (optional survey)
-    - shows: final prediction and final evaluation form
-    - flag: final_evaluation_completed
-8. Chat evaluation (optional survey)
-    - shows: chat history and chat evaluation form
-    - flag: chat_evaluation_completed
+5. Chat evaluation (cognitive load survey)
+6. (optional) final specification survey
+7. Final prediction evaluation (initial)
+8. y0/yhat evaluation
+9. Search exploration
+10. Final prediction evaluation (final)
 
 End:
-9. Exit survey (optional survey)
+11. Exit survey (optional survey)
     - shows: exit survey form
     - flag: exit_survey_completed
 
@@ -101,10 +95,10 @@ SESSION_STATE_ROUND_DEFAULTS = {
     "final_specification_completed": False,
     "post_specification_survey_completed": False,
     "final_evaluation_completed": False,
+    "final_evaluation_first_completed": False,
     "chat_evaluation_completed": False,
     "y0_yhat_evaluation_completed": False,
     "search_exploration_completed": False,
-    "final_comparison_completed": False,
     "waiting_for_message_feedback": False,
     "waiting_for_spinner": False,
     "messages": [],
@@ -178,6 +172,12 @@ def initialize_session_state(
     st.session_state.onboarding_completed = False
     st.session_state.exit_survey_completed = False
 
+    # Initialize screen timestamps tracking (persists across rounds)
+    if "screen_timestamps" not in st.session_state:
+        st.session_state.screen_timestamps = []
+    if "current_screen_start_time" not in st.session_state:
+        st.session_state.current_screen_start_time = None
+
     reset_session_state_for_round(round_index=0)
 
 
@@ -231,7 +231,7 @@ def reset_session_state_for_round(round_index, save_user_progress: bool = True):
         exit_survey_path = f"streamlit_logs/exit_surveys/{token}.json"
         try:
             st.session_state.connection.read(exit_survey_path)
-            st.session_state.exit_survey_completed = True
+            complete_exit_survey()
         except FileNotFoundError:
             pass
 
@@ -251,52 +251,101 @@ def reset_session_state_for_round(round_index, save_user_progress: bool = True):
     # Reset dataset page state
     if "dataset_page" in st.session_state:
         del st.session_state["dataset_page"]
-    
-    # Clean up search interface session state variables
-    # Try to get the keys from each dataset's search interface
+
+    # Clean up dataset-specific session state variables
     # We need to check all possible datasets since we don't know which one was used in the previous round
-    all_search_interface_keys = set()
-    try:
-        from data.shopping.streamlit_search_interface import SEARCH_INTERFACE_SESSION_STATE_KEYS as shopping_keys
-        all_search_interface_keys.update(shopping_keys)
-    except (ImportError, AttributeError):
-        pass
-    try:
-        from data.meal_planning.streamlit_search_interface import SEARCH_INTERFACE_SESSION_STATE_KEYS as meal_keys
-        all_search_interface_keys.update(meal_keys)
-    except (ImportError, AttributeError):
-        pass
-    try:
-        from data.travel_planner.streamlit_search_interface import SEARCH_INTERFACE_SESSION_STATE_KEYS as travel_keys
-        all_search_interface_keys.update(travel_keys)
-    except (ImportError, AttributeError):
-        pass
-    try:
-        from data.email_organization.streamlit_search_interface import SEARCH_INTERFACE_SESSION_STATE_KEYS as email_keys
-        all_search_interface_keys.update(email_keys)
-    except (ImportError, AttributeError):
-        pass
-    try:
-        from data.file_organization.streamlit_search_interface import SEARCH_INTERFACE_SESSION_STATE_KEYS as file_keys
-        all_search_interface_keys.update(file_keys)
-    except (ImportError, AttributeError):
-        pass
-    try:
-        from data.workout_planning.streamlit_search_interface import SEARCH_INTERFACE_SESSION_STATE_KEYS as workout_keys
-        all_search_interface_keys.update(workout_keys)
-    except (ImportError, AttributeError):
-        pass
-    
+    # Collect exact keys from search interfaces and prefixes from render modules
+    all_exact_keys = set()
+    all_key_prefixes = set()
+
+    # Collect search interface exact keys
+    datasets_to_check = [
+        (
+            "shopping",
+            "streamlit_search_interface",
+            "SEARCH_INTERFACE_SESSION_STATE_KEYS",
+        ),
+        (
+            "meal_planning",
+            "streamlit_search_interface",
+            "SEARCH_INTERFACE_SESSION_STATE_KEYS",
+        ),
+        (
+            "travel_planner",
+            "streamlit_search_interface",
+            "SEARCH_INTERFACE_SESSION_STATE_KEYS",
+        ),
+        (
+            "email_organization",
+            "streamlit_search_interface",
+            "SEARCH_INTERFACE_SESSION_STATE_KEYS",
+        ),
+        (
+            "file_organization",
+            "streamlit_search_interface",
+            "SEARCH_INTERFACE_SESSION_STATE_KEYS",
+        ),
+        (
+            "workout_planning",
+            "streamlit_search_interface",
+            "SEARCH_INTERFACE_SESSION_STATE_KEYS",
+        ),
+    ]
+
+    for dataset_name, module_name, constant_name in datasets_to_check:
+        try:
+            module = __import__(
+                f"data.{dataset_name}.{module_name}", fromlist=[constant_name]
+            )
+            keys = getattr(module, constant_name, None)
+            if keys:
+                all_exact_keys.update(keys)
+        except (ImportError, AttributeError):
+            pass
+
+    # Collect render module key prefixes
+    render_datasets_to_check = [
+        ("email_organization", "streamlit_render", "RENDER_SESSION_STATE_KEY_PREFIXES"),
+        ("file_organization", "streamlit_render", "RENDER_SESSION_STATE_KEY_PREFIXES"),
+        ("shopping", "streamlit_render", "RENDER_SESSION_STATE_KEY_PREFIXES"),
+        ("workout_planning", "streamlit_render", "RENDER_SESSION_STATE_KEY_PREFIXES"),
+        ("meal_planning", "streamlit_render", "RENDER_SESSION_STATE_KEY_PREFIXES"),
+        ("travel_planner", "streamlit_render", "RENDER_SESSION_STATE_KEY_PREFIXES"),
+        ("design2code", "streamlit_render", "RENDER_SESSION_STATE_KEY_PREFIXES"),
+    ]
+
+    for dataset_name, module_name, constant_name in render_datasets_to_check:
+        try:
+            module = __import__(
+                f"data.{dataset_name}.{module_name}", fromlist=[constant_name]
+            )
+            prefixes = getattr(module, constant_name, None)
+            if prefixes:
+                all_key_prefixes.update(prefixes)
+        except (ImportError, AttributeError):
+            pass
+
     # Also clean up search exploration specific keys (search_exploration_completed is in defaults, so it will be reset)
     search_exploration_keys = [
         "search_exploration_instructions_acknowledged",
         "search_exploration_start_time",
     ]
-    
-    # Remove all search interface and exploration keys
-    for key in list(all_search_interface_keys) + search_exploration_keys:
+    all_exact_keys.update(search_exploration_keys)
+
+    # Remove all exact keys
+    for key in all_exact_keys:
         if key in st.session_state:
             del st.session_state[key]
+
+    # Remove all session state keys that start with any of the prefixes
+    keys_to_remove = []
+    for key in st.session_state.keys():
+        for prefix in all_key_prefixes:
+            if key.startswith(prefix):
+                keys_to_remove.append(key)
+                break
+    for key in keys_to_remove:
+        del st.session_state[key]
 
     # Set session state variables to defaults
     # Use deep copy to prevent modifying the original SESSION_STATE_ROUND_DEFAULTS
@@ -379,21 +428,117 @@ def reset_session_state_for_round(round_index, save_user_progress: bool = True):
 ########### Update control flow variables ######################
 
 
+def log_control_flow_transition(
+    transition_name: str, from_state: str = None, to_state: str = None
+):
+    """
+    Log a control flow transition. Records when a control flow state changes.
+
+    Args:
+        transition_name: The name of the transition/function being called (e.g., "finish_onboarding")
+        from_state: The previous state (optional, for clarity)
+        to_state: The new state (optional, for clarity)
+    """
+    print(
+        f"LOGGING CONTROL FLOW TRANSITION: {transition_name} (from: {from_state}, to: {to_state})"
+    )
+    current_time = time.time()
+
+    # Initialize control_flow_transitions if it doesn't exist
+    if "control_flow_transitions" not in st.session_state:
+        st.session_state.control_flow_transitions = []
+
+    # Record the transition
+    st.session_state.control_flow_transitions.append(
+        {
+            "transition": transition_name,
+            "from_state": from_state,
+            "to_state": to_state,
+            "timestamp": current_time,
+            "round_index": st.session_state.get("round_index", None),
+        }
+    )
+
+
+def log_screen_transition(new_screen: str):
+    """
+    Log a screen transition. Records when a screen is entered and when the previous screen was exited.
+
+    Args:
+        new_screen: The name of the screen being entered
+    """
+    print("LOGGING SCREEN TRANSITION TO", new_screen)
+    current_time = time.time()
+
+    # If we have a previous screen, mark it as exited
+    if st.session_state.get("current_screen_start_time") is not None:
+        previous_screen = st.session_state.get("current_screen", None)
+        if previous_screen is not None:
+            # Find the last entry for this screen that hasn't been exited yet
+            for entry in reversed(st.session_state.get("screen_timestamps", [])):
+                if (
+                    entry["screen"] == previous_screen
+                    and entry.get("exited_at") is None
+                ):
+                    entry["exited_at"] = current_time
+                    entry["duration_seconds"] = current_time - entry["entered_at"]
+                    break
+
+    # Record the new screen entry
+    if "screen_timestamps" not in st.session_state:
+        st.session_state.screen_timestamps = []
+
+    st.session_state.screen_timestamps.append(
+        {
+            "screen": new_screen,
+            "entered_at": current_time,
+            "exited_at": None,
+            "round_index": st.session_state.get("round_index", None),
+        }
+    )
+    st.session_state.current_screen = new_screen
+    st.session_state.current_screen_start_time = current_time
+
+
 def finish_onboarding():
-    """ """
+    """Mark onboarding as completed"""
+    if st.session_state.onboarding_completed:
+        return
+    log_control_flow_transition(
+        "finish_onboarding",
+        from_state="onboarding_completed=False",
+        to_state="onboarding_completed=True",
+    )
     st.session_state.onboarding_completed = True
     st.rerun()
 
 
+def complete_instructions():
+    """Mark instructions as completed"""
+    if st.session_state.instructions_completed:
+        return
+    log_control_flow_transition(
+        "complete_instructions",
+        from_state="instructions_completed=False",
+        to_state="instructions_completed=True",
+    )
+    st.session_state.instructions_completed = True
+
+
 def start_brainstorming():
     """Start the brainstorming stage if configured"""
-    st.session_state.instructions_completed = True
+    complete_instructions()
     if getattr(st.session_state, "brainstorm_time", None) is None:
         # Skip brainstorming if no time is configured
         complete_brainstorming()
         return
     if st.session_state.brainstorming_started:
         return
+    log_control_flow_transition(
+        "start_brainstorming",
+        from_state="brainstorming_started=False",
+        to_state="brainstorming_started=True",
+    )
     st.session_state.brainstorming_started = True
     st.session_state.brainstorm_start_time = time.time()
     st.rerun()
@@ -403,26 +548,53 @@ def complete_brainstorming():
     """Mark brainstorming complete and proceed"""
     if st.session_state.brainstorming_completed:
         return
+    log_control_flow_transition(
+        "complete_brainstorming",
+        from_state="brainstorming_completed=False",
+        to_state="brainstorming_completed=True",
+    )
     st.session_state.brainstorming_completed = True
     # Proceed to presurvey immediately after brainstorming completes
     start_presurvey()
 
 
 def start_presurvey():
-    """ """
+    """Start the presurvey stage"""
     if st.session_state.presurvey_completed:
         return
+    log_control_flow_transition(
+        "start_presurvey",
+        from_state="presurvey_completed=False",
+        to_state="presurvey_started",
+    )
     st.rerun()
 
 
+def complete_presurvey():
+    """Mark presurvey as completed"""
+    if st.session_state.presurvey_completed:
+        return
+    log_control_flow_transition(
+        "complete_presurvey",
+        from_state="presurvey_completed=False",
+        to_state="presurvey_completed=True",
+    )
+    st.session_state.presurvey_completed = True
+
+
 def start_interaction():
-    """ """
+    """Start the interaction stage"""
     if st.session_state.interaction_started:
         return
     assert len(st.session_state.messages) == 0, (
         "Messages must be empty to start an interaction"
     )
-    st.session_state.presurvey_completed = True
+    complete_presurvey()
+    log_control_flow_transition(
+        "start_interaction",
+        from_state="interaction_started=False",
+        to_state="interaction_started=True",
+    )
     st.session_state.interaction_started = True
     st.session_state.interaction_start_time = time.time()
     st.session_state.messages.append(
@@ -437,10 +609,101 @@ def start_interaction():
 
 
 def end_interaction(end_reason: str):
-    """ """
+    """End the interaction stage"""
+    if st.session_state.interaction_completed:
+        return
+    log_control_flow_transition(
+        "end_interaction",
+        from_state="interaction_completed=False",
+        to_state="interaction_completed=True",
+    )
     st.session_state.interaction_completed = True
     st.session_state.end_reason = end_reason
     st.rerun()
+
+
+def complete_chat_evaluation():
+    """Mark chat evaluation as completed"""
+    if st.session_state.chat_evaluation_completed:
+        return
+    log_control_flow_transition(
+        "complete_chat_evaluation",
+        from_state="chat_evaluation_completed=False",
+        to_state="chat_evaluation_completed=True",
+    )
+    st.session_state.chat_evaluation_completed = True
+
+
+def complete_post_specification_survey():
+    """Mark post specification survey as completed"""
+    if st.session_state.get("post_specification_survey_completed", False):
+        return
+    log_control_flow_transition(
+        "complete_post_specification_survey",
+        from_state="post_specification_survey_completed=False",
+        to_state="post_specification_survey_completed=True",
+    )
+    st.session_state.post_specification_survey_completed = True
+
+
+def complete_final_specification():
+    """Mark final specification as completed"""
+    if st.session_state.final_specification_completed:
+        return
+    log_control_flow_transition(
+        "complete_final_specification",
+        from_state="final_specification_completed=False",
+        to_state="final_specification_completed=True",
+    )
+    st.session_state.final_specification_completed = True
+
+
+def complete_y0_yhat_evaluation():
+    """Mark y0/yhat evaluation as completed"""
+    if st.session_state.y0_yhat_evaluation_completed:
+        return
+    log_control_flow_transition(
+        "complete_y0_yhat_evaluation",
+        from_state="y0_yhat_evaluation_completed=False",
+        to_state="y0_yhat_evaluation_completed=True",
+    )
+    st.session_state.y0_yhat_evaluation_completed = True
+
+
+def complete_search_exploration():
+    """Mark search exploration as completed"""
+    if st.session_state.search_exploration_completed:
+        return
+    log_control_flow_transition(
+        "complete_search_exploration",
+        from_state="search_exploration_completed=False",
+        to_state="search_exploration_completed=True",
+    )
+    st.session_state.search_exploration_completed = True
+
+
+def complete_final_evaluation():
+    """Mark final evaluation as completed"""
+    if st.session_state.final_evaluation_completed:
+        return
+    log_control_flow_transition(
+        "complete_final_evaluation",
+        from_state="final_evaluation_completed=False",
+        to_state="final_evaluation_completed=True",
+    )
+    st.session_state.final_evaluation_completed = True
+
+
+def complete_exit_survey():
+    """Mark exit survey as completed"""
+    if st.session_state.exit_survey_completed:
+        return
+    log_control_flow_transition(
+        "complete_exit_survey",
+        from_state="exit_survey_completed=False",
+        to_state="exit_survey_completed=True",
+    )
+    st.session_state.exit_survey_completed = True
 
 
 ######### HELPER FUNCTIONS #########
@@ -516,6 +779,39 @@ def save_session_data(save_user_progress: bool = True, **kwargs):
         messages=st.session_state.messages,
         tool_history=st.session_state.tool_history,
     )
+
+    # Prepare extra_metadata with screen timestamps
+    # Close any open screen entries before saving
+    current_time = time.time()
+    screen_timestamps = st.session_state.get("screen_timestamps", []).copy()
+    for entry in screen_timestamps:
+        if entry.get("exited_at") is None:
+            entry["exited_at"] = current_time
+            entry["duration_seconds"] = current_time - entry["entered_at"]
+
+    # Filter to include timestamps for the current round, or global screens (round_index None or -1)
+    # when saving the last round
+    current_round_index = st.session_state.round_index
+    round_screen_timestamps = [
+        entry
+        for entry in screen_timestamps
+        if entry.get("round_index") == current_round_index
+        or (current_round_index == -1 and entry.get("round_index") in [None, -1])
+    ]
+
+    # Filter control flow transitions for the current round
+    control_flow_transitions = st.session_state.get("control_flow_transitions", [])
+    round_control_flow_transitions = [
+        entry
+        for entry in control_flow_transitions
+        if entry.get("round_index") == current_round_index
+        or (current_round_index == -1 and entry.get("round_index") in [None, -1])
+    ]
+
+    extra_metadata = kwargs.get("extra_metadata", {})
+    extra_metadata["screen_timestamps"] = round_screen_timestamps
+    extra_metadata["control_flow_transitions"] = round_control_flow_transitions
+    kwargs["extra_metadata"] = extra_metadata
 
     # Save the interaction
     return save_interaction(
@@ -847,20 +1143,48 @@ def interaction_countdown():
     )
 
 
+def search_exploration_button():
+    """
+    Show "Finished exploring" button next to the countdown
+    """
+    button_clicked = st.button("Finished exploring", type="primary")
+    search_exploration_time = getattr(st.session_state, "search_exploration_time", None)
+    # Calculate remaining time
+    elapsed_time = time.time() - st.session_state.search_exploration_start_time
+    remaining_time = max(0, search_exploration_time - elapsed_time) if search_exploration_time else 0
+
+    if button_clicked:
+        # Validate that enough time has passed
+        if remaining_time > 0:
+            minutes = int(remaining_time // 60)
+            seconds = int(remaining_time % 60)
+            search_duration_minutes = search_exploration_time / 60
+            st.error(
+                f"Please spend at least {search_duration_minutes:.1f} minutes exploring before continuing. "
+                f"You have {minutes}:{seconds:02d} remaining."
+            )
+        else:
+            # Time has elapsed, proceed
+            complete_search_exploration()
+            st.rerun()
+
+
 @st.fragment(run_every=2)
 def search_exploration_countdown():
     """
     Countdown for search exploration stage, displayed in the header.
     Duration is loaded from st.session_state.search_exploration_time (in seconds).
+    Also shows the "Finished exploring" button when countdown is active.
     """
     if st.session_state.get("search_exploration_start_time") is None:
         return
-    
+
     # Get search duration from config - return early if not set
     search_exploration_time = getattr(st.session_state, "search_exploration_time", None)
     if search_exploration_time is None:
         return
-    
+
+    # Show countdown
     components.countdown(
         start_time=st.session_state.search_exploration_start_time,
         target_time=search_exploration_time,
@@ -927,22 +1251,28 @@ def chat_flow(
                         end_interaction("user_end")
             # Show frustration button if enabled and end button is not shown
             elif show_frustration_button:
-                if st.button("End Conversation", type="primary", key="frustration_button"):
+                if st.button("Give Up", type="primary"):
                     # Get the last assistant message
                     last_assistant_msg = _get_last_msg_by_role("assistant")
                     click_time = time.time()
-                    
+
                     # Log to form results
                     if "frustration_feedback" not in st.session_state.form_results:
                         st.session_state.form_results["frustration_feedback"] = []
-                    st.session_state.form_results["frustration_feedback"].append({
-                        "last_assistant_message": last_assistant_msg,
-                        "click_time": click_time,
-                        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(click_time)),
-                    })
-                    
+                    st.session_state.form_results["frustration_feedback"].append(
+                        {
+                            "last_assistant_message": last_assistant_msg,
+                            "click_time": click_time,
+                            "timestamp": time.strftime(
+                                "%Y-%m-%d %H:%M:%S", time.localtime(click_time)
+                            ),
+                        }
+                    )
+
                     # Show popup message
-                    st.toast("Please work with the assistant to complete the task. If you are satisfied, tell the assistant to end the conversation.", icon=":material/progress_activity:")
+                    st.toast(
+                        "Please complete the task. If you are happy with the result, tell the assistant to end the conversation."
+                    )
 
     # Display message feedback form if appropriate
     # Note: the feedback time currently DOES count towards the interaction budget
@@ -953,7 +1283,11 @@ def chat_flow(
         # Check to make sure it's really appropriate to wait for feedback
         msg_to_evaluate = _get_last_msg_by_role("assistant")
         msg_index = _get_last_msg_index_by_role("assistant")
-        if (_get_current_speaker() != "assistant") or (msg_to_evaluate is None) or (msg_index is None):
+        if (
+            (_get_current_speaker() != "assistant")
+            or (msg_to_evaluate is None)
+            or (msg_index is None)
+        ):
             st.session_state.waiting_for_message_feedback = False
             st.rerun()
 
@@ -1016,145 +1350,9 @@ def chat_flow(
 ################## EVALUATION FLOW ######################
 
 
-def _run_post_specification_survey(post_specification_survey_form: Callable = None):
-    """
-    Display the post-specification survey form (must-haves and nice-to-haves).
-    This runs separately only if it wasn't shown with chat_evaluation.
-    """
-    if not st.session_state.chat_evaluation_completed:
-        return
-    if st.session_state.get("post_specification_survey_completed", False):
-        return
-    if post_specification_survey_form is None:
-        st.session_state.post_specification_survey_completed = True
-        return
-
-    def should_show():
-        return not st.session_state.get("post_specification_survey_completed", False)
-
-    def on_completion(feedback):
-        if "post_specification_survey" not in st.session_state.form_results:
-            st.session_state.form_results["post_specification_survey"] = {}
-        st.session_state.form_results["post_specification_survey"].update(feedback)
-        st.session_state.post_specification_survey_completed = True
-        st.rerun()
-
-    with st.container(key="narrow_body"):
-        post_specification_survey_form(
-            should_show=should_show,
-            on_completion=on_completion,
-        )
-
-
-def _run_final_specification(
-    custom_final_specification_form: Callable = None,
-):
-    """
-    Display the form to finalize specification.
-    """
-    if not st.session_state.chat_evaluation_completed:
-        return
-    if not st.session_state.get("post_specification_survey_completed", True):
-        return
-    if st.session_state.final_specification_completed:
-        return
-    if not isinstance(st.session_state.spec, CustomSpecification):
-        st.session_state.final_specification_completed = True
-        return
-    if not st.session_state.spec.user_specification_form_final:
-        st.session_state.final_specification_completed = True
-        return
-    if custom_final_specification_form is None:
-        st.session_state.final_specification_completed = True
-        return
-
-    def should_show():
-        return not st.session_state.final_specification_completed
-
-    def on_completion(feedback):
-        if st.session_state.spec.user_specification_callback is not None:
-            st.session_state.spec.user_specification_callback(feedback)
-        st.session_state.form_results["final_specification"] = feedback
-        st.session_state.final_specification_completed = True
-        st.rerun()
-
-    with st.container(key="narrow_body"):
-        st.markdown("## Wrapping up the task...")
-        st.markdown("Please answer these final questions about yourself.")
-        custom_final_specification_form(
-            should_show=should_show,
-            on_completion=on_completion,
-            user_specification_form_final=st.session_state.spec.user_specification_form_final,
-        )
-
-
-def _run_final_prediction():
-    """
-    Run the final prediction for a custom specification.
-    """
-    if not st.session_state.final_specification_completed:
-        return
-    if not st.session_state.get("post_specification_survey_completed", True):
-        return
-    if st.session_state.get("final_prediction", None) is not None:
-        return
-    lock_interface()
-    with st.container(key="narrow_body"):
-        st.markdown("## Wrapping up the task...")
-        with st.spinner(
-            "The assistant is generating final solutions based on your chat session...",
-            show_time=True,
-        ):
-            st.session_state.final_prediction = (
-                st.session_state.policy.get_test_prediction()
-            )
-    unlock_interface()
-
-
-def _run_fixed_evaluation(fixed_final_evaluation_form: Callable = None):
-    """
-    Run the final evaluation for a fixed specification.
-    This looks like just calling the save_session_data function with the final prediction,
-    which runs the reward_fn.
-    """
-    if not st.session_state.final_specification_completed:
-        return
-    if not st.session_state.get("post_specification_survey_completed", True):
-        return
-    if st.session_state.final_evaluation_completed:
-        return
-    if st.session_state.get("final_prediction", None) is None:
-        return
-    if not isinstance(st.session_state.spec, FixedSpecification):
-        raise ValueError("Fixed evaluation can only be run for fixed specifications")
-
-    results = save_session_data(skip_grading=False)
-    st.session_state.final_grade = results.final_grade
-    st.session_state.final_evaluation_completed = True
-    st.session_state.score_history.append(
-        (
-            st.session_state.final_grade.score,
-            st.session_state.final_grade.prediction,
-            st.session_state.final_grade.eval_metadata,
-        )
-    )
-
-    components.score_tracker()
-    st.write("Your final score is: ", st.session_state.final_grade.score)
-
-    if fixed_final_evaluation_form is not None:
-
-        def on_completion(feedback):
-            st.session_state.form_results["final_evaluation"] = feedback
-            st.rerun()
-
-        fixed_final_evaluation_form(
-            on_completion=on_completion,
-        )
-
-    else:
-        if st.button("Next round", type="primary"):
-            st.rerun()
+# Note: _run_post_specification_survey, _run_final_specification, _run_final_prediction,
+# and _run_fixed_evaluation have been moved to evaluation_control_flow.py
+# They are now accessed via run_fixed_evaluation_flow() and run_custom_evaluation_flow()
 
 
 @st.fragment
@@ -1167,317 +1365,136 @@ def _run_search_exploration():
     """
     if st.session_state.search_exploration_completed:
         return
-    
+
     # Get search duration from config - skip if not set
     search_exploration_time = st.session_state.get("search_exploration_time", None)
     if search_exploration_time is None:
         # Skip search exploration if not configured
-        st.session_state.search_exploration_completed = True
+        complete_search_exploration()
         return
-    
+
     # Check if spec has search interface
     if not isinstance(st.session_state.spec, CustomSpecification):
-        st.session_state.search_exploration_completed = True
+        complete_search_exploration()
         return
-    
+
     if st.session_state.spec._render_search_interface_fn is None:
         # No search interface for this dataset, skip this stage
-        st.session_state.search_exploration_completed = True
+        complete_search_exploration()
         return
-    
+
     # Check if instructions have been acknowledged
     if "search_exploration_instructions_acknowledged" not in st.session_state:
         st.session_state.search_exploration_instructions_acknowledged = False
-    
+
     # Show instructions page first
     if not st.session_state.search_exploration_instructions_acknowledged:
         search_duration_minutes = search_exploration_time / 60
-        st.markdown("## Search Exploration Instructions")
-        st.markdown(
-            f"""
-            You will now have **{search_duration_minutes:.1f} minutes** to explore the database yourself using the search interface.
+        dataset_name = st.session_state.get("dataset_selector", None)
+
+        # Get dataset-specific instructions
+        if dataset_name == "email_organization":
+            instructions = f"""
+            You will now have **{search_duration_minutes:.1f} minutes** to explore the emails by yourself.
+            
+            During this time, you can:
+            - Browse through the emails in your inbox
+            - Create folders to organize emails
+            - Assign emails to folders to design your ideal email organization
+            
+            **Please take your time to explore thoroughly and think about how you would like to organize these emails.**
+            """
+        elif dataset_name == "file_organization":
+            instructions = f"""
+            You will now have **{search_duration_minutes:.1f} minutes** to explore the files by yourself.
+            
+            During this time, you can:
+            - Browse through the files in your system
+            - Create folders to organize files
+            - Assign files to folders to design your ideal file organization
+            
+            **Please take your time to explore thoroughly and think about how you would like to organize these files.**
+            """
+        else:
+            # Default instructions for shopping, meal_planning, travel_planner, workout_planning, etc.
+            instructions = f"""
+            You will now have **{search_duration_minutes:.1f} minutes** to explore the options available to you by yourself.
             
             During this time, you can:
             - Search for items using natural language queries
             - Apply filters to narrow down results
-            - Click the ❤️ button on items you like to add them to your liked list
-            
-            After the exploration time is complete, you will be asked to compare the assistant's final prediction 
-            with the items you liked during your exploration.
+            - Click the :material/favorite: button on items you like to add them to your liked list
             
             **Please take your time to explore thoroughly.**
             """
-        )
-        
-        if st.button("I understand, start exploration", type="primary", key="start_search_exploration"):
-            st.session_state.search_exploration_instructions_acknowledged = True
-            st.session_state.search_exploration_start_time = time.time()
-            st.rerun()
-        return
-    
+
+        with st.container(key="narrow_body"):
+            st.markdown("## Free exploration")
+            st.markdown(instructions)
+
+            if st.button(
+                "I understand, start exploration",
+                type="primary",
+                key="start_search_exploration",
+            ):
+                st.session_state.search_exploration_instructions_acknowledged = True
+                st.session_state.search_exploration_start_time = time.time()
+                st.rerun()
+            return
+
     # Initialize search start time if not already set
     if "search_exploration_start_time" not in st.session_state:
         st.session_state.search_exploration_start_time = time.time()
-    
-    # Calculate remaining time
-    elapsed_time = time.time() - st.session_state.search_exploration_start_time
-    remaining_time = max(0, search_exploration_time - elapsed_time)
-    
-    # Show continue button at the top (under specification banner), but validate time has elapsed
-    button_clicked = st.button("Finished exploring", type="primary", key="continue_from_search")
-    if button_clicked:
-        # Validate that enough time has passed
-        if remaining_time > 0:
-            minutes = int(remaining_time // 60)
-            seconds = int(remaining_time % 60)
-            search_duration_minutes = search_exploration_time / 60
-            st.error(
-                f"Please spend at least {search_duration_minutes:.1f} minutes exploring before continuing. "
-                f"You have {minutes}:{seconds:02d} remaining."
-            )
-            # Don't return - continue to render the search interface below
-        
-        else:
-            # Time has elapsed, proceed
-            st.session_state.search_exploration_completed = True
-            st.rerun()
-    
-    st.markdown("---")
-    
-    # Render the search interface (countdown is shown in header via search_exploration_countdown)
+
+    # Render the search interface (countdown and "Finished exploring" button are shown in header via search_exploration_countdown)
     st.session_state.spec.render_search_interface()
-
-
-def _run_final_comparison(custom_final_evaluation_form: Callable = None):
-    """
-    Run the final comparison stage showing liked items, then final prediction, then questions.
-    """
-    if st.session_state.final_comparison_completed:
-        return
-    
-    final_prediction = st.session_state.final_prediction
-    assert final_prediction is not None, "final_prediction is not set"
-    
-    st.markdown("Review the items you liked during exploration, then compare with the assistant's final prediction.")
-    
-    # Get liked items based on dataset
-    dataset_name = st.session_state.dataset_selector
-    liked_items = None
-    
-    if dataset_name == "shopping":
-        liked_items = st.session_state.get("liked_products", set())
-    elif dataset_name == "meal_planning":
-        liked_items = st.session_state.get("liked_recipes", set())
-    elif dataset_name == "travel_planner":
-        liked_items = st.session_state.get("liked_travel_items", set())
-    elif dataset_name == "workout_planning":
-        liked_items = st.session_state.get("liked_exercises", set())
-    
-    # Display liked items first using product cards
-    st.markdown("### Your Liked Items")
-    if isinstance(st.session_state.spec, CustomSpecification) and st.session_state.spec._render_liked_items_fn is not None:
-        # The spec should already have the DB instance in its kwargs or as an attribute
-        st.session_state.spec.render_liked_items(liked_items)
-    else:
-        st.markdown("*No search interface available for this dataset.*")
-
-    # Final evaluation form
-    from evaluation.app.forms import final_prediction_evaluation
-    
-    completed, feedback = final_prediction_evaluation(
-        likert_label='After exploring more options, do you regret the assistant\'s final prediction?',
-        stars_label="Rate the overall quality of the final prediction.",
-        text_area_label="What would you change about the final prediction after your exploration?",
-    )
-    
-    # If custom_final_evaluation_form is provided, display it
-    if custom_final_evaluation_form is not None:
-        def on_completion(feedback):
-            st.session_state.form_results["final_evaluation"].update(feedback)
-        custom_final_evaluation_form(on_completion=on_completion)
-    
-    # If completed, mark as done and save
-    if completed:
-        st.session_state.final_comparison_completed = True
-        st.session_state.final_evaluation_completed = True
-        if feedback is None:
-            feedback = {}
-        if "final_evaluation" not in st.session_state.form_results:
-            st.session_state.form_results["final_evaluation"] = {}
-        st.session_state.form_results["final_evaluation"].update(feedback)
-        
-        # Try to compute a Grade
-        try:
-            is_valid, validity_metadata = st.session_state.spec.validity_fn(
-                st.session_state.final_prediction
-            )
-            score = st.session_state.form_results["final_evaluation"].get("score", None)
-            st.session_state.final_grade = Grade(
-                prediction=st.session_state.final_prediction,
-                score=score,
-                correct=is_valid,
-                eval_metadata=validity_metadata,
-            )
-        except Exception:
-            st.session_state.final_grade = None
-        
-        save_session_data(skip_grading=True)
-
-
-def _run_custom_evaluation(custom_final_evaluation_form: Callable = None):
-    """
-    Run the final evaluation for a custom specification.
-    Four-stage flow:
-    1. Chat evaluation (handled separately in evaluation_flow)
-    2. y0/yhat evaluation
-    3. Search exploration
-    4. Final comparison
-    """
-    if not st.session_state.final_specification_completed:
-        return
-    if st.session_state.final_evaluation_completed:
-        return
-    if st.session_state.get("final_prediction", None) is None:
-        return
-    if not isinstance(st.session_state.spec, CustomSpecification):
-        raise ValueError("Custom evaluation can only be run for custom specifications")
-
-    # Ensure timer start and evaluation state
-    if st.session_state.evaluation_start_time is None:
-        st.session_state.evaluation_start_time = time.time()
-    if "final_evaluation" not in st.session_state.form_results:
-        st.session_state.form_results["final_evaluation"] = {}
-
-    final_prediction = st.session_state.final_prediction
-    assert final_prediction is not None, "final_prediction is not set"
-
-    # Stage 2: y0/yhat evaluation
-    if not st.session_state.y0_yhat_evaluation_completed:
-        render_fn = getattr(st.session_state.spec, "render_y0_yhat_evaluation", None)
-        if not callable(render_fn):
-            # Fallback to legacy name for backwards compatibility
-            render_fn = getattr(st.session_state.spec, "render_evaluation", None)
-        
-        if not callable(render_fn):
-            st.error("This dataset does not implement render_y0_yhat_evaluation(final_prediction).")
-            st.stop()
-
-        try:
-            y0_yhat_done, _ = render_fn(final_prediction)
-        except Exception as e:
-            st.error(f"Error in dataset render_y0_yhat_evaluation: {e}")
-            st.stop()
-
-        if y0_yhat_done:
-            st.session_state.y0_yhat_evaluation_completed = True
-            st.rerun()
-        return
-
-    # Stage 3: Search exploration
-    if not st.session_state.search_exploration_completed:
-        _run_search_exploration()  # Duration loaded from st.session_state.search_exploration_time (in seconds)
-        return
-
-    # Stage 4: Final comparison
-    _run_final_comparison(custom_final_evaluation_form=custom_final_evaluation_form)
 
 
 def _run_chat_evaluation(
     chat_evaluation_form: Callable = None,
-    post_specification_survey_form: Callable = None,
 ):
     """
     Run the chat evaluation.
-    Also displays the post-specification survey form on the same page when both are needed.
     """
     if st.session_state.chat_evaluation_completed:
         return
-    
+
     # Check if we need to show the chat evaluation form
-    show_chat_eval = (
-        chat_evaluation_form is not None
-        and not st.session_state.chat_evaluation_completed
-    )
-    
-    # Check if we need to show the post-specification survey form
-    show_post_survey = (
-        post_specification_survey_form is not None
-        and not st.session_state.get("post_specification_survey_completed", False)
-    )
-    
-    # If neither form needs to be shown, mark as completed and return
-    if not show_chat_eval and not show_post_survey:
-        if not st.session_state.chat_evaluation_completed:
-            st.session_state.chat_evaluation_completed = True
-        if not st.session_state.get("post_specification_survey_completed", False):
-            st.session_state.post_specification_survey_completed = True
+    if chat_evaluation_form is None:
+        complete_chat_evaluation()
         return
-    
-    # If chat evaluation is not needed but post survey is, let _run_post_specification_survey handle it
-    if not show_chat_eval and show_post_survey:
-        if not st.session_state.chat_evaluation_completed:
-            st.session_state.chat_evaluation_completed = True
-        return
-    
-    # Show both forms on the same page
-    if show_chat_eval:
-        def should_show_chat():
-            return not st.session_state.chat_evaluation_completed
 
-        def on_completion_chat(feedback):
-            st.session_state.chat_evaluation_completed = True
-            st.session_state.form_results["chat_evaluation"] = feedback
-            # Check if we can proceed (both forms completed)
-            if st.session_state.get("post_specification_survey_completed", False):
-                st.rerun()
-            else:
-                st.rerun()  # Rerun to show post survey if not completed
+    def should_show_chat():
+        return not st.session_state.chat_evaluation_completed
 
-        def validate_chat(feedback):
-            return all(item != "-" for item in feedback.values())
+    def on_completion_chat(feedback):
+        complete_chat_evaluation()
+        st.session_state.form_results["chat_evaluation"] = feedback
+        st.rerun()
 
-        def should_show_post():
-            return not st.session_state.get("post_specification_survey_completed", False)
+    def validate_chat(feedback):
+        return all(item != "-" for item in feedback.values())
 
-        def on_completion_post(feedback):
-            if "post_specification_survey" not in st.session_state.form_results:
-                st.session_state.form_results["post_specification_survey"] = {}
-            st.session_state.form_results["post_specification_survey"].update(feedback)
-            st.session_state.post_specification_survey_completed = True
-            # Check if we can proceed (both forms completed)
-            if st.session_state.chat_evaluation_completed:
-                st.rerun()
-            else:
-                st.rerun()  # Rerun to show chat evaluation if not completed
-
-        # Display the chat history
-        st.markdown("Review your chat session with the assistant.")
-        with st.container(border=True, height=700):
-            components.chat_conversation(
-                st.session_state.messages,
-                show_raw_message=False,
-                empty_message_text="No messages were recorded in this chat session.",
-                show_response_time=True,
-            )
-
-        st.markdown(
-            "Based on how the assistant responded to your messages, answer the questions below."
+    # Display the chat history
+    st.markdown("Review your chat session with the assistant.")
+    with st.container(border=True, height=600):
+        components.chat_conversation(
+            st.session_state.messages,
+            show_raw_message=False,
+            empty_message_text="No messages were recorded in this chat session.",
+            show_response_time=True,
         )
 
-        # Display chat evaluation form
-        chat_evaluation_form(
-            should_show=should_show_chat,
-            on_completion=on_completion_chat,
-            validate=validate_chat,
-        )
-        
-        # Display post-specification survey form on the same page
-        if show_post_survey:
-            st.markdown("---")
-            post_specification_survey_form(
-                should_show=should_show_post,
-                on_completion=on_completion_post,
-            )
+    st.markdown(
+        "Based on how the assistant responded to your messages, answer the questions below."
+    )
+
+    # Display chat evaluation form
+    chat_evaluation_form(
+        should_show=should_show_chat,
+        on_completion=on_completion_chat,
+        validate=validate_chat,
+    )
 
 
 def evaluation_flow(
@@ -1495,33 +1512,34 @@ def evaluation_flow(
     if not st.session_state.interaction_completed:
         return
 
+    # Step 1: Chat evaluation (for both custom and fixed)
     _run_chat_evaluation(
         chat_evaluation_form=chat_evaluation_form,
-        post_specification_survey_form=post_specification_survey_form,
     )
-    # Only run post_specification_survey separately if it wasn't shown with chat_evaluation
-    _run_post_specification_survey(
-        post_specification_survey_form=post_specification_survey_form
-    )
-    
-    _run_final_specification(
-        custom_final_specification_form=custom_final_specification_form,
-    )
-    _run_final_prediction()
 
-    if isinstance(st.session_state.spec, FixedSpecification):
-        _run_fixed_evaluation(fixed_final_evaluation_form=fixed_final_evaluation_form)
-    elif isinstance(st.session_state.spec, CustomSpecification):
-        _run_custom_evaluation(
-            custom_final_evaluation_form=custom_final_evaluation_form
+    # For custom specs, skip post_specification_survey and use custom flow
+    if isinstance(st.session_state.spec, CustomSpecification):
+        from evaluation.app.evaluation_control_flow import run_custom_evaluation_flow
+
+        run_custom_evaluation_flow(
+            custom_final_specification_form=custom_final_specification_form,
+            custom_final_evaluation_form=custom_final_evaluation_form,
+            show_liked_items=True,
+        )
+    else:
+        # For fixed specs, use the fixed evaluation flow
+        from evaluation.app.evaluation_control_flow import run_fixed_evaluation_flow
+
+        run_fixed_evaluation_flow(
+            fixed_final_evaluation_form=fixed_final_evaluation_form,
         )
 
-    if (
-        st.session_state.chat_evaluation_completed
-        and st.session_state.final_evaluation_completed
-    ):
+    print("Final evaluation completed:", st.session_state.final_evaluation_completed)
+
+    if st.session_state.final_evaluation_completed:
         save_session_data(skip_grading=True)  # just in case
         reset_session_state_for_round(st.session_state.round_index + 1)
+        st.rerun()
 
 
 def exit_survey_flow(exit_survey_form: Callable = None):
@@ -1529,14 +1547,13 @@ def exit_survey_flow(exit_survey_form: Callable = None):
     Exit survey flow
     """
     if exit_survey_form is None:
-        st.session_state.exit_survey_completed = True
+        complete_exit_survey()
         return
 
     def should_show():
         return not st.session_state.exit_survey_completed
 
     def on_completion(feedback):
-        st.session_state.exit_survey_completed = True
         st.session_state.form_results["exit_survey"] = feedback
 
         token = authentication.check_token()
@@ -1545,7 +1562,7 @@ def exit_survey_flow(exit_survey_form: Callable = None):
             user_exit_survey_path, json.dumps(st.session_state.form_results)
         )
 
-        st.session_state.exit_survey_completed = True
+        complete_exit_survey()
         st.rerun()
 
     exit_survey_form(should_show=should_show, on_completion=on_completion)

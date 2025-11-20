@@ -11,6 +11,12 @@ import random
 from utils.streamlit_types import FormElement, form_element_to_streamlit
 from data.reward import pairwise_win_rate
 
+# Session state key prefixes used by this render module that should be cleared between rounds
+RENDER_SESSION_STATE_KEY_PREFIXES = [
+    "travel_options_order_",
+    "travel_comparison_",
+]
+
 from data.travel_planner.reward_utils.tp_utils.func import (
     extract_from_to,
     extract_before_parenthesis,
@@ -310,7 +316,7 @@ def _render_carousel(
     else:
         options = predicted_options + y0_options
 
-    state_key = f"options_order_{name}"
+    state_key = f"travel_options_order_{name}"
     if state_key not in st.session_state:
         # Store stable order as indices into the current options list
         order = list(range(len(options)))
@@ -370,18 +376,33 @@ def render_comparison(
     metadata1: Dict[str, Any],
     metadata2: Dict[str, Any],
 ) -> None:
+    # Randomize which plan goes on which side (stable across reruns)
+    side_key = "travel_comparison_side_assignment"
+    if side_key not in st.session_state:
+        # Randomly assign: True means y1 on left (Plan A), False means y2 on left (Plan A)
+        st.session_state[side_key] = random.choice([True, False])
+    y1_on_left = st.session_state[side_key]
+
+    # Assign plans to left/right based on randomization
+    plan_a = y1 if y1_on_left else y2
+    plan_b = y2 if y1_on_left else y1
+    valid_a = valid1 if y1_on_left else valid2
+    valid_b = valid2 if y1_on_left else valid1
+    metadata_a = metadata1 if y1_on_left else metadata2
+    metadata_b = metadata2 if y1_on_left else metadata1
+    
     # Render in two tabs
     tab1, tab2 = st.tabs(["Plan A", "Plan B"])
     with tab1:
-        if valid1 is not None:
-            if valid1:
+        if valid_a is not None:
+            if valid_a:
                 st.markdown(":small[:green[:material/check: Plan A is valid]]")
             else:
                 st.markdown(":small[:red[:material/close: Plan A invalid]]\n\n")
                 constraints_md = "\n\n".join(
                     [
                         f":small[:red[- {constraint}]]"
-                        for constraint in (metadata1 or {}).get(
+                        for constraint in (metadata_a or {}).get(
                             "violated_constraints", []
                         )
                         if constraint is not None
@@ -389,18 +410,18 @@ def render_comparison(
                 )
                 if constraints_md:
                     st.markdown(constraints_md)
-        render_travel_plan_streamlit(y1, db, people_number)
+        render_travel_plan_streamlit(plan_a, db, people_number)
 
     with tab2:
-        if valid2 is not None:
-            if valid2:
+        if valid_b is not None:
+            if valid_b:
                 st.markdown(":small[:green[:material/check: Plan B is valid]]")
             else:
                 st.markdown(":small[:red[:material/close: Plan B invalid]]\n\n")
                 constraints_md = "\n\n".join(
                     [
                         f":small[:red[- {constraint}]]"
-                        for constraint in (metadata2 or {}).get(
+                        for constraint in (metadata_b or {}).get(
                             "violated_constraints", []
                         )
                         if constraint is not None
@@ -408,7 +429,7 @@ def render_comparison(
                 )
                 if constraints_md:
                     st.markdown(constraints_md)
-        render_travel_plan_streamlit(y2, db, people_number)
+        render_travel_plan_streamlit(plan_b, db, people_number)
 
 
 def render_travel_plan_streamlit(

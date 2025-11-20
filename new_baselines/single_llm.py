@@ -373,7 +373,7 @@ You know the following basic information about the task:
         """Get the message for clarification phase."""
         return """You are currently in CLARIFICATION mode.
 
-IMPORTANT: You MUST ask ALL clarifying questions BEFORE showing any results or starting to execute the task. Ask all questions you need upfront.
+IMPORTANT: You MUST ask ALL clarifying questions BEFORE showing any results or starting to execute the task. Ask all questions you need upfront. You will not have the chance to ask questions later.
 
 When you have finished asking all your clarifying questions and are ready to start executing the task, include the special token <SWITCH_TO_EXECUTE> at the end of your message. This will signal that you are ready to switch to execution mode on the next turn."""
 
