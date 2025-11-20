@@ -112,11 +112,15 @@ class ShoppingDataset(SpecificationCollection):
             },
         ]
 
-    def _create_user_expertise_form(self) -> List[FormElement]:
+    def _create_user_expertise_form(self, is_custom: bool = False, product_types: List[str] = None) -> List[FormElement]:
         """
         Create user expertise form elements for fashion and shopping knowledge.
+        
+        Args:
+            is_custom: If True, adds questions about the specific product types (for custom specs).
+            product_types: Optional list of product types being shopped for (e.g., ["hoodie", "pants"]).
         """
-        return [
+        form_elements = [
             FormElement(
                 input_type="radio",
                 label="How frequently do you read/watch about fashion OR browse in-person/online for clothes?",
@@ -132,12 +136,37 @@ class ShoppingDataset(SpecificationCollection):
                 help="This helps us understand your experience level with fashion and shopping",
             )
         ]
+        
+        # Add product-specific questions for custom specs (one question per product type)
+        if is_custom and product_types is not None:
+            # Get unique product types
+            unique_product_types = list(set(product_types))
+            p = inflect.engine()
+            for product_type in unique_product_types:
+                plural_product_type = p.plural(product_type)
+                form_elements.append(
+                    FormElement(
+                        input_type="radio",
+                        label=f"How familiar are you with types of {plural_product_type}?",
+                        options=[
+                            "I have never shopped for this type of product",
+                            "I have some experience with this type of product",
+                            "I am familiar with this type of product",
+                            "I am very familiar with this type of product",
+                            "I shop for this type of product regularly",
+                        ],
+                        required=True,
+                        help=f"This helps us understand your familiarity with {plural_product_type}",
+                    )
+                )
+        
+        return form_elements
 
-    def _create_user_specification_form_initial(
+    def _create_user_specification_form_final(
         self, intent_data: Dict = None
     ) -> List[FormElement]:
         """
-        Create initial form elements for budget and demographics.
+        Create final form elements for budget and demographics.
         """
         return [
             FormElement(
@@ -342,7 +371,7 @@ class ShoppingDataset(SpecificationCollection):
                 state_files=[filename],
                 files_to_clean=[filename],
                 container_ids=[container_id],
-                user_expertise_form=self._create_user_expertise_form(),
+                user_expertise_form=self._create_user_expertise_form(is_custom=False),
             )
             specs[ix] = spec
         return specs
@@ -405,10 +434,9 @@ class ShoppingDataset(SpecificationCollection):
                 initial_specification=f"Buy {prompt_as_str} from H&M tailored for the person you have in mind. You can assume that all products are available in all sizes.",
                 current_specification=f"Buy {prompt_as_str} from H&M tailored for the person you have in mind. You can assume that all products are available in all sizes.",
                 commonsense_description=COMMONSENSE_DESCRIPTION,
-                user_specification_form_initial=self._create_user_specification_form_initial(
+                user_specification_form_final=self._create_user_specification_form_final(
                     custom_intent
                 ),
-                user_specification_form_final=[],
                 user_specification_callback=user_specification_callback,
                 user_specification_callback_kwargs=[
                     "_validity_kwargs",
@@ -438,7 +466,7 @@ class ShoppingDataset(SpecificationCollection):
                 state_files=[filename],
                 files_to_clean=[filename],
                 container_ids=[container_id],
-                user_expertise_form=self._create_user_expertise_form(),
+                user_expertise_form=self._create_user_expertise_form(is_custom=True, product_types=prompt),
                 _y0_mapping=custom_intent["y0"],
                 _prompt=prompt,
                 _extractor_lookup=self._extractor_lookup,
@@ -706,7 +734,7 @@ def output_to_txt(
 def output_to_streamlit(
     msg: str, db: Catalog, render_cart: bool = True, render_items: bool = True
 ) -> None:
-    msg = msg.replace("$", "\$")
+    msg = msg.replace("$", "\$").replace("~", "\~")
 
     predicted_products = parse_for_answer_tags(
         msg, keyword="cart", return_none_if_not_found=True

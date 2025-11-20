@@ -1,6 +1,6 @@
 from typing import Dict, Any
 
-from utils.misc import parse_json
+from utils.misc import parse_json, parse_for_answer_tags
 from data.workout_planning.db import (
     ExerciseDB,
     DAYS_OF_THE_WEEK,
@@ -35,7 +35,16 @@ def parse_workout_plan(
         }
     }
     """
-    workout_plan = parse_json(yhat)
+    # First try to parse from <workout_plan> tags
+    workout_plan_content = parse_for_answer_tags(
+        yhat, keyword="workout_plan", return_none_if_not_found=True
+    )
+    if workout_plan_content:
+        workout_plan = parse_json(workout_plan_content)
+    else:
+        # Fall back to parsing JSON directly (for backward compatibility)
+        workout_plan = parse_json(yhat)
+    
     if workout_plan is None:
         return None
 
@@ -44,7 +53,7 @@ def parse_workout_plan(
         # lower case all the keys
         workout_plan = {
             k.lower(): (
-                {ki.lower(): vi for ki, vi in v.items()} if type(v) == dict else {}
+                {ki.lower(): vi for ki, vi in v.items()} if isinstance(v, dict) else {}
             )
             for k, v in workout_plan.items()
         }

@@ -754,3 +754,266 @@ def render_eval(
         }
     }
 
+
+def _render_unsorted_folder(files: List[Dict]):
+    """
+    Render an unsorted folder showing files in a simple list format.
+    Matches the file rendering format used in render_file_policy_results.
+    
+    Args:
+        files: List of file dictionaries
+    """
+    st.markdown("### 📁 Your Desktop Folder")
+    st.markdown("These are your unorganized files:")
+    
+    # Add CSS for Windows Explorer-like styling (same as render_file_policy_results)
+    st.markdown("""
+        <style>
+        .file-item {
+            padding: 6px 8px;
+            border-bottom: 1px solid #eee;
+            margin: 0;
+            font-size: 14px;
+        }
+        .file-item:hover {
+            background-color: #f0f0f0;
+        }
+        .file-grid {
+            display: grid;
+            grid-template-columns: 50px 2fr 140px 140px;
+            gap: 12px;
+            padding: 8px 12px;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .file-grid:last-child {
+            border-bottom: none;
+        }
+        .file-grid-header {
+            font-weight: 600;
+            background-color: #f5f5f5;
+            padding: 10px 12px;
+            border-bottom: 2px solid #ddd;
+            color: #333;
+            font-size: 13px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .file-grid-container {
+            overflow-x: auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .file-name {
+            font-size: 14px;
+            color: #333;
+        }
+        .file-date {
+            font-size: 13px;
+            color: #666;
+        }
+        .original-name {
+            font-size: 12px;
+            color: #888;
+            font-style: italic;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+    
+    # Sort files by edit_date (newest first), fallback to create_date
+    def parse_file_date(file_dict):
+        """Parse file date string to datetime for sorting."""
+        date_str = file_dict.get("edit_date", "") or file_dict.get("create_date", "")
+        if not date_str:
+            return datetime.min
+        try:
+            for fmt in ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d", "%m/%d/%Y %H:%M:%S", "%m/%d/%Y"]:
+                try:
+                    return datetime.strptime(date_str.strip(), fmt)
+                except ValueError:
+                    continue
+        except Exception:
+            pass
+        return datetime.min
+    
+    sorted_files = sorted(files, key=parse_file_date, reverse=True)
+    
+    # Wrap file grids in a container for proper overflow handling
+    st.markdown('<div class="file-grid-container">', unsafe_allow_html=True)
+    
+    # Header row (column headers)
+    st.markdown("""
+    <div class="file-grid file-grid-header">
+        <div></div>
+        <div>Name</div>
+        <div>Date Created</div>
+        <div>Date Modified</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # File rows
+    for file in sorted_files:
+        filename = file.get("filename", "")
+        create_date = file.get("create_date", "")
+        edit_date = file.get("edit_date", "")
+        file_preview = file.get("file_contents_preview", "")
+        
+        # Format dates (show date and time if available)
+        if create_date:
+            create_display = create_date[:16] if len(create_date) > 10 else create_date[:10]
+        else:
+            create_display = ""
+        if edit_date:
+            edit_display = edit_date[:16] if len(edit_date) > 10 else edit_date[:10]
+        else:
+            edit_display = ""
+        
+        # Determine file icon based on extension
+        file_ext = filename.split('.')[-1].lower() if '.' in filename else ""
+        file_icon = "📄"
+        if file_ext in ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp']:
+            file_icon = "🖼️"
+        elif file_ext in ['pdf']:
+            file_icon = "📕"
+        elif file_ext in ['doc', 'docx']:
+            file_icon = "📘"
+        elif file_ext in ['xls', 'xlsx', 'csv']:
+            file_icon = "📊"
+        elif file_ext in ['txt', 'md', 'rtf']:
+            file_icon = "📝"
+        elif file_ext in ['py', 'js', 'java', 'cpp', 'c', 'ts', 'html', 'css']:
+            file_icon = "💻"
+        elif file_ext in ['zip', 'rar', '7z', 'tar', 'gz']:
+            file_icon = "📦"
+        elif file_ext in ['mp3', 'mp4', 'avi', 'wav', 'flac']:
+            file_icon = "🎵"
+        
+        # Show filename (no original_filename in unsorted view since files haven't been renamed yet)
+        name_display = f'<span class="file-name">{filename}</span>'
+        
+        # Add preview if available
+        if file_preview:
+            # Truncate preview for inline display
+            preview_display = file_preview[:200] + "..." if len(file_preview) > 200 else file_preview
+            # Escape HTML in preview to prevent rendering issues
+            preview_display = preview_display.replace("<", "&lt;").replace(">", "&gt;")
+            name_display += f'<br><span class="original-name" style="font-size: 11px; color: #888; font-style: normal; margin-top: 4px; display: block;">{preview_display}</span>'
+        
+        st.markdown(f"""
+        <div class="file-grid file-item">
+            <div style="font-size: 20px;">{file_icon}</div>
+            <div>{name_display}</div>
+            <div class="file-date">{create_display}</div>
+            <div class="file-date">{edit_display}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Close the file grid container
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+def render_custom_task_explanation(files_data: List[Dict] = None):
+    """
+    Render the custom task explanation for file organization.
+    Shows what a Desktop folder is, what file attributes are, how renaming works, and an example policy.
+    
+    Args:
+        files_data: Optional list of file dictionaries for examples. If None, creates sample data.
+    """
+    st.markdown("### What you need to prompt the assistant to do")
+    st.markdown(
+        "Your Desktop folder is messy --- it has accumulated a lot of files over time. In this task, **your goal is to get the assistant to organize those files.** To do so, the assistant will write some rules that automatically organize your files into folders. The assistant might also rename some files so that filenames are more descriptive."
+    )
+    
+    # Create example files if none provided
+    if files_data is None:
+        example_files = [
+            {
+                "filename": "meeting_notes_2024.txt",
+                "create_date": "2024-01-15 10:30:00",
+                "edit_date": "2024-01-15 11:00:00",
+                "file_contents_preview": "Meeting notes from our team discussion about the project.",
+            },
+            {
+                "filename": "PROJECT_PLAN.docx",
+                "create_date": "2024-01-10 09:00:00",
+                "edit_date": "2024-01-14 16:30:00",
+                "file_contents_preview": "This document outlines our project plan and timeline.",
+            },
+            {
+                "filename": "report-final-v2.pdf",
+                "create_date": "2024-01-12 14:20:00",
+                "edit_date": "2024-01-13 15:45:00",
+                "file_contents_preview": "Final report version 2 with all updates included.",
+            },
+        ]
+    else:
+        # Use first few files from provided data
+        example_files = files_data[:3] if len(files_data) >= 3 else files_data
+    
+    st.markdown("### What are the parts of a file?")
+    st.markdown(
+        "Each file has several attributes you can use to create organization rules:"
+    )
+    st.markdown(
+        "- **Filename:** The name of the file (including extension)\n"
+        "- **Content:** The text content inside the file\n"
+        "- **Date Created:** When the file was first created\n"
+        "- **Date Modified:** When the file was last edited"
+    )
+    st.markdown("For example, you might want to ask the assistant to group all files with 'meeting' in their name or content into a folder titled `Meetings`.")
+    
+    with st.container(border=True):
+        _render_unsorted_folder(example_files)
+
+    st.markdown("### How can files be renamed?")
+    st.markdown(
+        "In addition to organizing files into folders, you can also ask the assistant to rename files according to a consistent naming scheme. "
+        "For example, you might want all filenames to be lowercase, or include the creation date in the filename (e.g. `2024-01-15_meeting_notes.txt`)."
+    )
+
+    st.markdown("### Example: Organizing files with a policy")
+    st.markdown(
+        "Here's an example of how a policy can organize your files into folders and rename them. "
+        "The assistant will create a policy that looks for patterns in your files and organizes them accordingly."
+    )
+
+    with st.container(border=True):
+        example_policy = {
+            "moving_rules": [
+                {
+                    "conditions": {
+                        "name_contains": ["meeting", "notes"],
+                        "content_contains": ["meeting"]
+                    },
+                    "folder": "Meetings"
+                },
+                {
+                    "conditions": {
+                        "name_contains": ["project", "plan"],
+                        "content_contains": ["project"]
+                    },
+                    "folder": "Projects"
+                }
+            ],
+            "naming_policy": {
+                "case": "lower",
+                "delimiter": "_",
+                "include_date": True,
+                "date_format": "%Y-%m-%d"
+            }
+        }
+        example_msg = f"Here's my file organization policy:\n\n<policy>{json.dumps(example_policy)}</policy>"
+
+        st.info(
+            "*Example:* A file organization policy that groups files into folders and renames them"
+        )
+        render_file_policy_results(example_msg, example_files)
+
+    st.markdown(
+        "Think about how you want to organize your files. The assistant should create a policy that groups related files together "
+        "and applies consistent naming conventions based on patterns you identify in the filenames or content."
+    )
+

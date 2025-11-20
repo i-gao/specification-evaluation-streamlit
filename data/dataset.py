@@ -311,7 +311,6 @@ class CustomSpecification(Specification):
 
     def __init__(
         self,
-        user_specification_form_initial: List[FormElement] = None,
         user_specification_form_final: List[FormElement] = None,
         user_specification_callback: Optional[
             Callable[[List[FormElement], dict], dict]
@@ -334,7 +333,6 @@ class CustomSpecification(Specification):
     ) -> None:
         """
         specification args:
-            user_specification_form_initial: List[FormElement] = FormElements which asks the user to specify the task
             user_specification_form_final: List[FormElement] = FormElements which asks the user to specify the task
             user_specification_callback: Callable[[List[FormElement], dict, dict], dict] = a function that takes the result of the user_specification_form,
                 the callback kwargs, and returns an updated dict of attributes (probably validity_kwargs and y0)
@@ -361,7 +359,6 @@ class CustomSpecification(Specification):
         super().__init__(**kwargs)
 
         # save attributes
-        self.user_specification_form_initial = user_specification_form_initial
         self.user_specification_form_final = user_specification_form_final
         self._user_specification_callback = user_specification_callback
         self._user_specification_callback_kwargs = user_specification_callback_kwargs

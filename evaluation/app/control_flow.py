@@ -99,6 +99,7 @@ SESSION_STATE_ROUND_DEFAULTS = {
     "interaction_started": False,
     "interaction_completed": False,
     "final_specification_completed": False,
+    "post_specification_survey_completed": False,
     "final_evaluation_completed": False,
     "chat_evaluation_completed": False,
     "y0_yhat_evaluation_completed": False,
@@ -278,6 +279,11 @@ def reset_session_state_for_round(round_index, save_user_progress: bool = True):
     try:
         from data.file_organization.streamlit_search_interface import SEARCH_INTERFACE_SESSION_STATE_KEYS as file_keys
         all_search_interface_keys.update(file_keys)
+    except (ImportError, AttributeError):
+        pass
+    try:
+        from data.workout_planning.streamlit_search_interface import SEARCH_INTERFACE_SESSION_STATE_KEYS as workout_keys
+        all_search_interface_keys.update(workout_keys)
     except (ImportError, AttributeError):
         pass
     
@@ -682,6 +688,19 @@ def _get_last_msg_by_role(role: str):
     return None
 
 
+def _get_last_msg_index_by_role(role: str):
+    """
+    Get the index of the last message sent by the specified role.
+    Returns None if no message with that role is found.
+    """
+    if len(st.session_state.messages) == 0:
+        return None
+    for i in range(len(st.session_state.messages) - 1, -1, -1):
+        if st.session_state.messages[i]["role"] == role:
+            return i
+    return None
+
+
 def _get_completed_segment_costs() -> tuple:
     """
     Return (user_completed_seconds, assistant_completed_seconds) from recorded segments.
@@ -913,7 +932,8 @@ def chat_flow(
 
         # Check to make sure it's really appropriate to wait for feedback
         msg_to_evaluate = _get_last_msg_by_role("assistant")
-        if (_get_current_speaker() != "assistant") or (msg_to_evaluate is None):
+        msg_index = _get_last_msg_index_by_role("assistant")
+        if (_get_current_speaker() != "assistant") or (msg_to_evaluate is None) or (msg_index is None):
             st.session_state.waiting_for_message_feedback = False
             st.rerun()
 
@@ -936,7 +956,11 @@ def chat_flow(
             st.session_state.messages[-1]["sent_time"] = time.time()
             st.rerun()
 
-        message_feedback_form(should_show=should_show, on_completion=on_completion)
+        message_feedback_form(
+            message_index=msg_index,
+            should_show=should_show,
+            on_completion=on_completion,
+        )
 
     # Call generate() to get assistant response
     if (
@@ -972,11 +996,45 @@ def chat_flow(
 ################## EVALUATION FLOW ######################
 
 
-def _run_final_specification(custom_final_specification_form: Callable = None):
+def _run_post_specification_survey(post_specification_survey_form: Callable = None):
     """
-    Display the form to finalize specification
+    Display the post-specification survey form (must-haves and nice-to-haves).
+    This runs separately only if it wasn't shown with chat_evaluation.
     """
     if not st.session_state.chat_evaluation_completed:
+        return
+    if st.session_state.get("post_specification_survey_completed", False):
+        return
+    if post_specification_survey_form is None:
+        st.session_state.post_specification_survey_completed = True
+        return
+
+    def should_show():
+        return not st.session_state.get("post_specification_survey_completed", False)
+
+    def on_completion(feedback):
+        if "post_specification_survey" not in st.session_state.form_results:
+            st.session_state.form_results["post_specification_survey"] = {}
+        st.session_state.form_results["post_specification_survey"].update(feedback)
+        st.session_state.post_specification_survey_completed = True
+        st.rerun()
+
+    with st.container(key="narrow_body"):
+        post_specification_survey_form(
+            should_show=should_show,
+            on_completion=on_completion,
+        )
+
+
+def _run_final_specification(
+    custom_final_specification_form: Callable = None,
+):
+    """
+    Display the form to finalize specification.
+    """
+    if not st.session_state.chat_evaluation_completed:
+        return
+    if not st.session_state.get("post_specification_survey_completed", True):
         return
     if st.session_state.final_specification_completed:
         return
@@ -1016,6 +1074,8 @@ def _run_final_prediction():
     """
     if not st.session_state.final_specification_completed:
         return
+    if not st.session_state.get("post_specification_survey_completed", True):
+        return
     if st.session_state.get("final_prediction", None) is not None:
         return
     lock_interface()
@@ -1038,6 +1098,8 @@ def _run_fixed_evaluation(fixed_final_evaluation_form: Callable = None):
     which runs the reward_fn.
     """
     if not st.session_state.final_specification_completed:
+        return
+    if not st.session_state.get("post_specification_survey_completed", True):
         return
     if st.session_state.final_evaluation_completed:
         return
@@ -1188,6 +1250,8 @@ def _run_final_comparison(custom_final_evaluation_form: Callable = None):
         liked_items = st.session_state.get("liked_recipes", set())
     elif dataset_name == "travel_planner":
         liked_items = st.session_state.get("liked_travel_items", set())
+    elif dataset_name == "workout_planning":
+        liked_items = st.session_state.get("liked_exercises", set())
     
     # Display liked items first using product cards
     st.markdown("### Your Liked Items")
@@ -1298,39 +1362,102 @@ def _run_custom_evaluation(custom_final_evaluation_form: Callable = None):
     _run_final_comparison(custom_final_evaluation_form=custom_final_evaluation_form)
 
 
-def _run_chat_evaluation(chat_evaluation_form: Callable = None):
+def _run_chat_evaluation(
+    chat_evaluation_form: Callable = None,
+    post_specification_survey_form: Callable = None,
+):
     """
-    Run the chat evaluation
+    Run the chat evaluation.
+    Also displays the post-specification survey form on the same page when both are needed.
     """
     if st.session_state.chat_evaluation_completed:
         return
-    if chat_evaluation_form is None:
-        st.session_state.chat_evaluation_completed = True
+    
+    # Check if we need to show the chat evaluation form
+    show_chat_eval = (
+        chat_evaluation_form is not None
+        and not st.session_state.chat_evaluation_completed
+    )
+    
+    # Check if we need to show the post-specification survey form
+    show_post_survey = (
+        post_specification_survey_form is not None
+        and not st.session_state.get("post_specification_survey_completed", False)
+    )
+    
+    # If neither form needs to be shown, mark as completed and return
+    if not show_chat_eval and not show_post_survey:
+        if not st.session_state.chat_evaluation_completed:
+            st.session_state.chat_evaluation_completed = True
+        if not st.session_state.get("post_specification_survey_completed", False):
+            st.session_state.post_specification_survey_completed = True
         return
+    
+    # If chat evaluation is not needed but post survey is, let _run_post_specification_survey handle it
+    if not show_chat_eval and show_post_survey:
+        if not st.session_state.chat_evaluation_completed:
+            st.session_state.chat_evaluation_completed = True
+        return
+    
+    # Show both forms on the same page
+    if show_chat_eval:
+        def should_show_chat():
+            return not st.session_state.chat_evaluation_completed
 
-    # Display the chat history
-    st.markdown("Review your chat session with the assistant.")
-    with st.container(border=True, height=700):
-        components.chat_conversation(
-            st.session_state.messages,
-            show_raw_message=False,
-            empty_message_text="No messages were recorded in this chat session.",
-            show_response_time=True,
+        def on_completion_chat(feedback):
+            st.session_state.chat_evaluation_completed = True
+            st.session_state.form_results["chat_evaluation"] = feedback
+            # Check if we can proceed (both forms completed)
+            if st.session_state.get("post_specification_survey_completed", False):
+                st.rerun()
+            else:
+                st.rerun()  # Rerun to show post survey if not completed
+
+        def validate_chat(feedback):
+            return all(item != "-" for item in feedback.values())
+
+        def should_show_post():
+            return not st.session_state.get("post_specification_survey_completed", False)
+
+        def on_completion_post(feedback):
+            if "post_specification_survey" not in st.session_state.form_results:
+                st.session_state.form_results["post_specification_survey"] = {}
+            st.session_state.form_results["post_specification_survey"].update(feedback)
+            st.session_state.post_specification_survey_completed = True
+            # Check if we can proceed (both forms completed)
+            if st.session_state.chat_evaluation_completed:
+                st.rerun()
+            else:
+                st.rerun()  # Rerun to show chat evaluation if not completed
+
+        # Display the chat history
+        st.markdown("Review your chat session with the assistant.")
+        with st.container(border=True, height=700):
+            components.chat_conversation(
+                st.session_state.messages,
+                show_raw_message=False,
+                empty_message_text="No messages were recorded in this chat session.",
+                show_response_time=True,
+            )
+
+        st.markdown(
+            "Based on how the assistant responded to your messages, answer the questions below."
         )
 
-    st.markdown(
-        "Based on how the assistant responded to your messages, answer the questions below."
-    )
-
-    def on_completion(feedback):
-        st.session_state.chat_evaluation_completed = True
-        st.session_state.form_results["chat_evaluation"] = feedback
-        st.rerun()
-
-    def validate(feedback):
-        return all(item != "-" for item in feedback.values())
-
-    chat_evaluation_form(on_completion=on_completion, validate=validate)
+        # Display chat evaluation form
+        chat_evaluation_form(
+            should_show=should_show_chat,
+            on_completion=on_completion_chat,
+            validate=validate_chat,
+        )
+        
+        # Display post-specification survey form on the same page
+        if show_post_survey:
+            st.markdown("---")
+            post_specification_survey_form(
+                should_show=should_show_post,
+                on_completion=on_completion_post,
+            )
 
 
 def evaluation_flow(
@@ -1340,6 +1467,7 @@ def evaluation_flow(
     custom_final_evaluation_form: Callable = None,
     fixed_final_evaluation_form: Callable = None,
     chat_evaluation_form: Callable = None,
+    post_specification_survey_form: Callable = None,
 ):
     """
     Evaluation flow upon the completion of an interaction
@@ -1347,10 +1475,17 @@ def evaluation_flow(
     if not st.session_state.interaction_completed:
         return
 
-    _run_chat_evaluation(chat_evaluation_form=chat_evaluation_form)
-
+    _run_chat_evaluation(
+        chat_evaluation_form=chat_evaluation_form,
+        post_specification_survey_form=post_specification_survey_form,
+    )
+    # Only run post_specification_survey separately if it wasn't shown with chat_evaluation
+    _run_post_specification_survey(
+        post_specification_survey_form=post_specification_survey_form
+    )
+    
     _run_final_specification(
-        custom_final_specification_form=custom_final_specification_form
+        custom_final_specification_form=custom_final_specification_form,
     )
     _run_final_prediction()
 

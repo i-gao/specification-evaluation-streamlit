@@ -1,23 +1,292 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Callable
 import streamlit as st
 import uuid
 import re
+import random
 from data.workout_planning.db import DAYS_OF_THE_WEEK, TIMES_OF_DAY
 from data.workout_planning.parser import parse_workout_plan
 from evaluation.qualitative_eval import COMPARISON_LIKERT
-from data.reward import likert_to_win_rate
+from data.reward import likert_to_win_rate, pairwise_win_rate
 
 
-def render_eval(*, final_prediction: str, y0: Optional[str], db):
+def render_eval(*, final_prediction: str, y0: Optional[str], db, num_items_per_comparison: int = 5, **kwargs):
     """
-    Render evaluation UI: show A vs B comparison and collect Likert-scale preferences.
+    Render evaluation UI: first rank exercises, then show A vs B comparison and collect Likert-scale preferences.
     Returns (completed, feedback_dict_or_none).
     """
-    # Comparison view
+    ranking_done = rank_exercises(final_prediction=final_prediction, y0=y0, db=db, num_items_per_comparison=num_items_per_comparison)
+    if not ranking_done:
+        return False, None
+
+    comparison_done = render_comparison(final_prediction=final_prediction, y0=y0, db=db)
+    if not comparison_done:
+        return False, None
+
+    # Compute the final score
+    prediction_rankings = [
+        list(
+            st.session_state.form_results["final_evaluation"]["exercise"][
+                "predicted_ranks"
+            ].values()
+        )
+    ]
+    y0_rankings = [
+        list(
+            st.session_state.form_results["final_evaluation"]["exercise"][
+                "y0_ranks"
+            ].values()
+        )
+    ]
+    p_exercise_wins = pairwise_win_rate(prediction_rankings, y0_rankings)
+    other_wins, total = likert_to_win_rate(
+        [
+            st.session_state.form_results["final_evaluation"]["goals_preference"],
+            st.session_state.form_results["final_evaluation"]["schedule_preference"],
+            st.session_state.form_results["final_evaluation"]["equipment_preference"],
+            st.session_state.form_results["final_evaluation"]["injury_preference"],
+            st.session_state.form_results["final_evaluation"]["difficulty_preference"],
+        ],
+        return_total=True,
+    )
+    p_wins = (p_exercise_wins + other_wins) / (total + 1)
+    st.session_state.form_results["final_evaluation"]["score"] = p_wins
+
+    return True, None
+
+
+def rank_exercises(*, final_prediction: str, y0: Optional[str], db, num_items_per_comparison: int = 5):
+    """
+    Rank exercises from both plans using a carousel.
+    Returns True when ranking is complete.
+    """
+    predicted = parse_workout_plan(final_prediction, db, leave_invalid=True)
+    parsed_y0 = (
+        parse_workout_plan(y0, db, leave_invalid=True) if y0 is not None else None
+    )
+
+    done = "exercise" in st.session_state.form_results["final_evaluation"]
+    if not done:
+        # Extract all exercises from both plans
+        predicted_exercises = []
+        for day in DAYS_OF_THE_WEEK:
+            if day not in predicted:
+                continue
+            for time_of_day in TIMES_OF_DAY:
+                if time_of_day not in predicted[day] or predicted[day][time_of_day] is None:
+                    continue
+                for exercise in predicted[day][time_of_day]:
+                    if not exercise.get("invalid", False):
+                        predicted_exercises.append(exercise)
+
+        y0_exercises = []
+        if parsed_y0 is not None:
+            for day in DAYS_OF_THE_WEEK:
+                if day not in parsed_y0:
+                    continue
+                for time_of_day in TIMES_OF_DAY:
+                    if time_of_day not in parsed_y0[day] or parsed_y0[day][time_of_day] is None:
+                        continue
+                    for exercise in parsed_y0[day][time_of_day]:
+                        if not exercise.get("invalid", False):
+                            y0_exercises.append(exercise)
+
+        _render_carousel(
+            predicted_exercises,
+            y0_exercises,
+            num_items_per_comparison=num_items_per_comparison,
+        )
+        return False
+
+    return True
+
+
+@st.fragment
+def _render_carousel(
+    predicted: List[Dict[str, Any]],
+    y0: List[Dict[str, Any]],
+    name: str = "exercise",
+    md_fn: Callable = None,
+    filter_fn: Callable[[Dict[str, Any]], bool] = None,
+    num_items_per_comparison: int = 5,
+):
+    """
+    Args:
+        predicted: list of predicted exercises
+        y0: list of y0 exercises
+        name: name of the thing being ranked. Used for saving to session state.
+        md_fn: function to render the exercise
+        filter_fn: function to filter the exercises
+        num_items_per_comparison: number of exercises to show
+
+    Adds to session state:
+        - ranking: a dict mapping a rank (0-indexed) to an exercise identifier
+        - y0_ranks: a dict mapping exercise identifier to a rank
+        - predicted_ranks: a dict mapping exercise identifier to a rank
+    """
+    if md_fn is None:
+        def md_fn(exercise):
+            return _exercise_details(exercise)
+
+    predicted = [
+        p for p in predicted if p is not None and (filter_fn is None or filter_fn(p))
+    ]
+    # Create unique identifiers for exercises (exercise_name + variation_name)
+    predicted = list({
+        f"{d['exercise_name']} - {d.get('variation_name', 'default')}": d 
+        for d in predicted
+    }.values())
+
+    y0 = [p for p in y0 if p is not None and (filter_fn is None or filter_fn(p))]
+    y0 = list({
+        f"{d['exercise_name']} - {d.get('variation_name', 'default')}": d 
+        for d in y0
+    }.values())
+
+    if len(predicted) == 0:
+        # set difference is the entire y0, and y0 auto-wins
+        dummy_rank = {i: f"{y['exercise_name']} - {y.get('variation_name', 'default')}" for i, y in enumerate(y0)}
+        st.session_state.form_results["final_evaluation"][name] = {
+            "ranking": dummy_rank,
+            "y0_ranks": {v: k for k, v in dummy_rank.items()},
+            "predicted_ranks": {},
+        }
+        st.rerun()
+
+    # find the set difference
+    predicted_names = set([f"{p['exercise_name']} - {p.get('variation_name', 'default')}" for p in predicted])
+    y0_names = set([f"{p['exercise_name']} - {p.get('variation_name', 'default')}" for p in y0])
+    diff_names = (predicted_names - y0_names).union(y0_names - predicted_names)
+    if not diff_names:
+        # don't render anything
+        return
+
+    predicted_options = [p for p in predicted if f"{p['exercise_name']} - {p.get('variation_name', 'default')}" in diff_names]
+    y0_options = [p for p in y0 if f"{p['exercise_name']} - {p.get('variation_name', 'default')}" in diff_names]
+    if num_items_per_comparison is not None and len(diff_names) > num_items_per_comparison:
+        # try to get a roughly balanced set of options
+        if len(predicted_options) < num_items_per_comparison / 2:
+            options = predicted_options + y0_options[: num_items_per_comparison - len(predicted_options)]
+        elif len(y0_options) < num_items_per_comparison / 2:
+            options = predicted_options[: num_items_per_comparison - len(y0_options)] + y0_options
+        else:
+            options = (
+                predicted_options[: num_items_per_comparison // 2 + num_items_per_comparison % 2]
+                + y0_options[: num_items_per_comparison // 2]
+            )
+    else:
+        options = predicted_options + y0_options
+
+    # Stabilize the options order across reruns within this fragment
+    state_key = f"options_order_{name}"
+    if state_key not in st.session_state:
+        # Store stable order as indices into the current options list
+        order = list(range(len(options)))
+        random.shuffle(order)
+        st.session_state[state_key] = order
+    order = st.session_state[state_key]
+    # Reorder options according to stored order, truncating/expanding safely
+    if len(order) != len(options):
+        order = list(range(len(options)))
+        st.session_state[state_key] = order
+    options = [options[i] for i in order]
+
+    # display the carousel
+    from evaluation.app.components import carousel
+
+    def display_fn(i):
+        exercise = options[i]
+        st.markdown(f"### {exercise['exercise_name']}")
+        if exercise.get('variation_name'):
+            st.markdown(f"**Variation:** {exercise['variation_name']}")
+        # Display exercise image if available (YouTube thumbnail)
+        youtube_url = exercise.get("URL")
+        if youtube_url and youtube_url != "nan":
+            video_id = youtube_url.split("/")[-1]
+            image_url = f"https://img.youtube.com/vi/{video_id}/0.jpg"
+            st.image(image_url, width=400)
+        st.markdown(
+            md_fn(exercise),
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("### Review the assistant's recommendations")
+    st.markdown(f"The assistant has recommended {len(options)} {name}s for you.")
+    carousel([lambda i=i: display_fn(i) for i in range(len(options))], height=550)
+
+    with st.form(key=f"ranking_form_{name}"):
+        rank = st.multiselect(
+            f"Rank the {name} above from MOST to LEAST preferred.",
+            [i for i in range(len(options))],
+            default=[],
+            format_func=lambda x: f"{name.upper()} {x + 1}: {options[x]['exercise_name']} - {options[x].get('variation_name', 'default')}",
+        )
+        submit = st.form_submit_button("Submit", type="primary")
+        if submit:
+            if len(rank) != len(options):
+                st.error("Please rank all options")
+                return
+            ranking = {i: f"{options[i]['exercise_name']} - {options[i].get('variation_name', 'default')}" for i in rank}
+            st.session_state.form_results["final_evaluation"][name] = {
+                "ranking": ranking,
+                "y0_ranks": {v: k for k, v in ranking.items() if v in y0_names},
+                "predicted_ranks": {
+                    v: k for k, v in ranking.items() if v in predicted_names
+                },
+            }
+            st.rerun()
+
+
+def _exercise_details(exercise: Dict[str, Any]) -> str:
+    """Render exercise details as markdown with better spacing."""
+    lines = []
+    
+    # Basic information - each on its own line
+    if exercise.get("difficulty_level"):
+        lines.append(f"**Difficulty:** {exercise['difficulty_level']}")
+    if exercise.get("target_muscle_group"):
+        lines.append(f"**Target:** {exercise['target_muscle_group']}")
+    if exercise.get("prime_mover_muscle"):
+        lines.append(f"**Prime mover:** {exercise['prime_mover_muscle']}")
+    if exercise.get("primary_exercise_classification"):
+        lines.append(f"**Type:** {exercise['primary_exercise_classification']}")
+    if exercise.get("primary_equipment"):
+        lines.append(f"**Equipment:** {exercise['primary_equipment']}")
+    
+    # Add spacing before exercise details
+    if lines and (exercise.get("num_sets") or exercise.get("time_per_set") or exercise.get("num_reps_per_set")):
+        lines.append("")
+    
+    # Exercise details - each on its own line
+    if exercise.get("num_sets"):
+        lines.append(f"**Sets:** {exercise['num_sets']}")
+    if exercise.get("time_per_set"):
+        lines.append(f"**Time per set:** {exercise['time_per_set']}s")
+    if exercise.get("num_reps_per_set"):
+        lines.append(f"**Reps:** {exercise['num_reps_per_set']}")
+    
+    # YouTube link (if available)
+    youtube_url = exercise.get("URL")
+    if youtube_url and youtube_url != "nan":
+        if lines:
+            lines.append("")
+        lines.append(f"Youtube video: [[link]]({youtube_url})")
+    
+    return "\n".join(lines)
+
+
+def render_comparison(*, final_prediction: str, y0: Optional[str], db):
+    """
+    Render comparison view and collect Likert-scale preferences.
+    Returns True when comparison is complete.
+    """
     parsed_pred = parse_workout_plan(final_prediction, db, leave_invalid=True)
     parsed_y0 = (
         parse_workout_plan(y0, db, leave_invalid=True) if y0 is not None else None
     )
+    
+    # if both are invalid, just return True
+    if parsed_pred is None and parsed_y0 is None:
+        return True
 
     with st.container(border=True):
         st.markdown("## Compare these workout plans")
@@ -58,30 +327,31 @@ def render_eval(*, final_prediction: str, y0: Optional[str], db):
 
         submit = st.form_submit_button("Submit", type="primary")
         if submit:
-            responses = [
-                difficulty_preference,
-                goals_preference,
-                schedule_preference,
-                equipment_preference,
-                injury_preference,
-            ]
-            if any(v is None or v == "-" for v in responses):
+            if any(
+                v is None or v == "-"
+                for v in [
+                    goals_preference,
+                    schedule_preference,
+                    equipment_preference,
+                    injury_preference,
+                    difficulty_preference,
+                ]
+            ):
                 st.error("Please fill out all fields")
-                return False, None
+                return False
 
             st.session_state.form_results["final_evaluation"].update(
                 {
-                    "difficulty_preference": difficulty_preference,
                     "goals_preference": goals_preference,
                     "schedule_preference": schedule_preference,
                     "equipment_preference": equipment_preference,
                     "injury_preference": injury_preference,
-                    "score": likert_to_win_rate(responses),
+                    "difficulty_preference": difficulty_preference,
                 }
             )
-            return True, None
+            return True
 
-    return False, None
+    return False
 
 def render_workout_plan_streamlit(plan: Any) -> None:
     """

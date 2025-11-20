@@ -77,6 +77,7 @@ If a slot in the meal plan is left empty or if the slot is omitted entirely, it 
 
 MSG_FMT_INSTRUCTIONS = """Always wrap recipe titles in <recipe></recipe>, e.g.: '<recipe>Chicken Parmesan</recipe>'. This will append a widget describing the recipe at the end of your message so the user can view the recipe. You should always do this by default."""
 
+
 def get_commonsense_description():
     """Get the commonsense description, dynamically using the number of days."""
     days_str = ", ".join([d.capitalize() for d in DAYS_OF_THE_WEEK])
@@ -90,6 +91,7 @@ The meal plan covers {days_str}. All servings leftover at the end of {last_day} 
 
 The environment provides a Jupyter notebook and a CSV of recipes from AllRecipes.com. Meal plans must use recipes from the provided AllRecipes catalog. Using other recipes is not allowed. """
 
+
 COMMONSENSE_DESCRIPTION = get_commonsense_description()
 
 
@@ -102,6 +104,7 @@ In this task, **your goal is to get the assistant to write you a perfect meal pr
 
 The plan must work with your schedule, dietary restrictions, and preferences.
 """
+
 
 CUSTOM_INSTRUCTIONS = get_custom_instructions()
 
@@ -203,9 +206,11 @@ class MealPlanningDataset(SpecificationCollection):
         custom_indexes: Optional[List[int]] = None,
         persist_docker_container: bool = True,
         auto_patch_eat_before_cook: bool = True,
+        eval_num_items_per_comparison: int = 5,
         **kwargs,
     ) -> None:
         super().__init__(dev=dev, **kwargs)
+        self.eval_num_items_per_comparison = eval_num_items_per_comparison
 
         self._docker_image = docker_image
         self._persist_docker_container = persist_docker_container
@@ -235,7 +240,10 @@ class MealPlanningDataset(SpecificationCollection):
 
         # No ystars
         self._ystars = {}
-        y0_mapping_raw = json.load(open(f"{DATASET_ROOT}/assets/y0_mapping.json"))
+        y0_mapping_raw = {
+            k: json.load(open(f"{DATASET_ROOT}/assets/{k}.json"))
+            for k in ["vegetarian", "gluten-free", "normal", "vegan"]
+        }
         # Filter y0s to only include days in DAYS_OF_THE_WEEK
         self._y0_mapping = self._filter_y0_mapping(y0_mapping_raw)
 
@@ -265,7 +273,7 @@ class MealPlanningDataset(SpecificationCollection):
             if y0_value is None:
                 filtered_mapping[key] = None
                 continue
-            
+
             # Parse the y0 if it's a string
             if isinstance(y0_value, str):
                 try:
@@ -278,19 +286,19 @@ class MealPlanningDataset(SpecificationCollection):
             else:
                 filtered_mapping[key] = y0_value
                 continue
-            
+
             # Filter to only include days in DAYS_OF_THE_WEEK
             filtered_y0 = {
                 day.lower(): y0_dict.get(day.lower(), y0_dict.get(day, {}))
                 for day in DAYS_OF_THE_WEEK
             }
-            
+
             # Convert back to string if original was string
             if isinstance(y0_value, str):
                 filtered_mapping[key] = json.dumps(filtered_y0)
             else:
                 filtered_mapping[key] = filtered_y0
-        
+
         return filtered_mapping
 
     def _load_fixed_specs(
@@ -458,7 +466,6 @@ class MealPlanningDataset(SpecificationCollection):
                 initial_specification=initial_specification,
                 current_specification=initial_specification,
                 commonsense_description=get_commonsense_description(),
-                user_specification_form_initial=[],
                 user_specification_form_final=self._create_user_specification_form_final(),
                 user_specification_callback=user_specification_callback,
                 user_specification_callback_kwargs=[
@@ -497,6 +504,9 @@ class MealPlanningDataset(SpecificationCollection):
                     **kwargs,
                     db=self._recipe_db,
                 ),
+                render_evaluation_kwargs={
+                    "num_items_per_comparison": getattr(self, "eval_num_items_per_comparison", 5),
+                },
             )
             specs[ix] = spec
         return specs
@@ -1130,7 +1140,7 @@ def parse_meal_plan_solutions_and_options(msg: str) -> List[str]:
 def output_to_streamlit(
     msg: str, db: RecipeDB, auto_patch_eat_before_cook: bool = False
 ) -> None:
-    msg = msg.replace("$", "\$")
+    msg = msg.replace("$", "\$").replace("~", "\~")
     # Parse meal plan JSON
     js, start_end = parse_json(msg, return_start_end=True)
 

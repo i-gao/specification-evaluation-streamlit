@@ -1,0 +1,291 @@
+{
+    "sunday": {
+        "breakfast": [
+            {
+                "action": "cook",
+                "recipe_title": "Chimichurri Roasted Potatoes"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Chimichurri Roasted Potatoes"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "cook",
+                "recipe_title": "Chourico Stew"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Chimichurri Roasted Potatoes"
+            }
+        ],
+        "snack": [
+            {
+                "action": "cook",
+                "recipe_title": "Crispy Vegetable Pakoras"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Crispy Vegetable Pakoras"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "cook",
+                "recipe_title": "Grilled Spatchcocked Greek Chicken"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Grilled Spatchcocked Greek Chicken"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Chimichurri Roasted Potatoes"
+            }
+        ]
+    },
+    "monday": {
+        "breakfast": [
+            {
+                "action": "cook",
+                "recipe_title": "Tex Mex Air Fryer Hash Browns"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Tex Mex Air Fryer Hash Browns"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Chourico Stew"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Grilled Spatchcocked Greek Chicken"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Chimichurri Roasted Potatoes"
+            }
+        ],
+        "snack": [],
+        "dinner": [
+            {
+                "action": "eat",
+                "recipe_title": "Crispy Vegetable Pakoras"
+            }
+        ]
+    },
+    "tuesday": {
+        "breakfast": [
+            {
+                "action": "eat",
+                "recipe_title": "Tex Mex Air Fryer Hash Browns"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Chourico Stew"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Grilled Spatchcocked Greek Chicken"
+            }
+        ],
+        "snack": [
+            {
+                "action": "eat",
+                "recipe_title": "Crispy Vegetable Pakoras"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "cook",
+                "recipe_title": "Pakistani Lamb Chops"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Pakistani Lamb Chops"
+            }
+        ]
+    },
+    "wednesday": {
+        "breakfast": [
+            {
+                "action": "eat",
+                "recipe_title": "Tex Mex Air Fryer Hash Browns"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Chourico Stew"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Pakistani Lamb Chops"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Pakistani Lamb Chops"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Crispy Vegetable Pakoras"
+            }
+        ],
+        "snack": [
+            {
+                "action": "cook",
+                "recipe_title": "Perfectly Dry Roasted Chickpeas"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Perfectly Dry Roasted Chickpeas"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Perfectly Dry Roasted Chickpeas"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "cook",
+                "recipe_title": "Ghormeh Sabzi (Persian Herb Stew)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Ghormeh Sabzi (Persian Herb Stew)"
+            }
+        ]
+    },
+    "thursday": {
+        "breakfast": [
+            {
+                "action": "cook",
+                "recipe_title": "Aranitas (Shredded Green Plantain Patties)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Aranitas (Shredded Green Plantain Patties)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Chourico Stew"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Ghormeh Sabzi (Persian Herb Stew)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Perfectly Dry Roasted Chickpeas"
+            }
+        ],
+        "snack": [
+            {
+                "action": "eat",
+                "recipe_title": "Perfectly Dry Roasted Chickpeas"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Perfectly Dry Roasted Chickpeas"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "cook",
+                "recipe_title": "Grillhaxe (Grilled Eisbein, Pork Shanks)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Grillhaxe (Grilled Eisbein, Pork Shanks)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Grillhaxe (Grilled Eisbein, Pork Shanks)"
+            }
+        ]
+    },
+    "friday": {
+        "breakfast": [
+            {
+                "action": "cook",
+                "recipe_title": "Sweet Tea Peaches"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Sweet Tea Peaches"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Sweet Tea Peaches"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Grillhaxe (Grilled Eisbein, Pork Shanks)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Grillhaxe (Grilled Eisbein, Pork Shanks)"
+            }
+        ],
+        "snack": [
+            {
+                "action": "eat",
+                "recipe_title": "Perfectly Dry Roasted Chickpeas"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "eat",
+                "recipe_title": "Aranitas (Shredded Green Plantain Patties)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Chourico Stew"
+            }
+        ]
+    },
+    "saturday": {
+        "breakfast": [
+            {
+                "action": "eat",
+                "recipe_title": "Sweet Tea Peaches"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Grillhaxe (Grilled Eisbein, Pork Shanks)"
+            }
+        ],
+        "snack": [
+            {
+                "action": "eat",
+                "recipe_title": "Perfectly Dry Roasted Chickpeas"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "eat",
+                "recipe_title": "Grillhaxe (Grilled Eisbein, Pork Shanks)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Chourico Stew"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Aranitas (Shredded Green Plantain Patties)"
+            }
+        ]
+    }
+}

@@ -9,7 +9,7 @@ import streamlit as st
 
 from data.dataset import (
     SpecificationCollection,
-    FixedSpecification,
+    LinearFixedSpecification,
     CustomSpecification,
 )
 from data.actions import get_jupyter_actions
@@ -19,8 +19,8 @@ from utils.streamlit_types import FormElement
 from utils.misc import (
     parse_json,
     subset_data,
-    add_section,
     replace_tags_with_link,
+    parse_for_answer_tags,
 )
 from data.workout_planning.db import (
     ExerciseDB,
@@ -34,7 +34,8 @@ DEV_FRAC = 0.1
 DATASET_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 PREDICTION_FMT_INSTRUCTIONS = (
-    """You MUST use ONLY exercises in the database, and you MUST structure your plan as a JSON string with the following structure:
+    """You MUST use ONLY exercises in the database, and you MUST structure your plan as a JSON string wrapped in <workout_plan></workout_plan> tags with the following structure:
+<workout_plan>
 {
     "sunday": {
         "early morning (6-9am)": [
@@ -52,6 +53,7 @@ PREDICTION_FMT_INSTRUCTIONS = (
     },
     ...
 }
+</workout_plan>
 """.strip()
     + f"\nThe outer keys are the days of the week (choose from {DAYS_OF_THE_WEEK}), and the inner keys are the times of day (choose from {TIMES_OF_DAY})."
     + """Each slot is either null or a list of dictionaries. The dictionaries have the following fields:
@@ -169,9 +171,9 @@ class WorkoutPlanningDataset(SpecificationCollection):
             ),
         ]
 
-    def _create_user_specification_form_initial(self) -> List[FormElement]:
+    def _create_user_specification_form_final(self) -> List[FormElement]:
         """
-        Create initial form elements for basic workout planning requirements.
+        Create final form elements for detailed workout planning requirements.
         """
         return [
             FormElement(
@@ -181,14 +183,7 @@ class WorkoutPlanningDataset(SpecificationCollection):
                 default="No",
                 required=True,
                 help="A full gym includes equipment like dumbbells, barbells, resistance bands, treadmills, etc.",
-            )
-        ]
-
-    def _create_user_specification_form_final(self) -> List[FormElement]:
-        """
-        Create final form elements for detailed workout planning requirements.
-        """
-        return [
+            ),
             FormElement(
                 input_type="radio",
                 label="What is the maximum number of workouts you want to do per week?",
@@ -250,12 +245,14 @@ class WorkoutPlanningDataset(SpecificationCollection):
         fixed_indexes: Optional[List[int]] = None,
         custom_indexes: Optional[List[int]] = None,
         persist_docker_container: bool = True,
+        eval_num_items_per_comparison: int = 5,
         **kwargs,
     ) -> None:
         super().__init__(dev=dev, **kwargs)
+        self.eval_num_items_per_comparison = eval_num_items_per_comparison
 
         # Load all the profiles
-        profiles = dill.load(open(f"{DATASET_ROOT}/assets/full-profiles.pkl", "rb"))
+        profiles = json.load(open(f"{DATASET_ROOT}/assets/full-profiles.json", "r"))
         profiles = subset_data(profiles, DEV_FRAC, 1.0, dev)
         self._profiles = profiles
         self.fixed_length = len(self._profiles)
@@ -297,7 +294,7 @@ class WorkoutPlanningDataset(SpecificationCollection):
 
     def _load_fixed_specs(
         self, indexes: Optional[List[int]] = None
-    ) -> Dict[int, FixedSpecification]:
+    ) -> Dict[int, LinearFixedSpecification]:
         if indexes is None:
             return {}
 
@@ -306,21 +303,15 @@ class WorkoutPlanningDataset(SpecificationCollection):
         for ix in indexes:
             profile = self._profiles[ix]
 
-            # constraints & theta
-            constraints = [
-                Constraint.from_dict(c, extractor_lookup=self._extractor_lookup)
-                for c in profile["constraints"]
-            ]
-
-            theta = "Below is a summary of the client's hard and soft constraints."
-            theta += "\n\n" + add_section(
-                "Hard constraints (must be satisfied)", profile["hard_description"]
-            )
-            theta += "\n\n" + add_section(
-                "Soft constraints (most important to least important)",
-                profile["soft_description"].replace("\n", "\n<chunk>\n"),
-            )
-            theta += "\n<chunk>\nNote that barring rest day constraints, more workouts per week will be more effective."
+            # constraints
+            constraints = []
+            constraint_dicts = profile["constraints"]
+            for c_dict in constraint_dicts:
+                constraint = Constraint.from_dict(c_dict, extractor_lookup=self._extractor_lookup)
+                # Preserve is_factoid flag from dict to constraint's _kwargs
+                if c_dict.get("is_factoid", False):
+                    constraint._kwargs["is_factoid"] = True
+                constraints.append(constraint)
 
             if self._persist_docker_container and self._docker_image is not None:
                 from llm_sandbox import SandboxSession
@@ -338,36 +329,56 @@ class WorkoutPlanningDataset(SpecificationCollection):
             )
 
             signature = (
-                "Design a workout plan for the following client: " + profile["text"]
+                "Self-description: " + profile["text"]
             )
-            # signature += "\n\nBased on this information, here are the client's hard constraints:\n" + profile["hard_description"]
 
-            # Split constraints into hard and soft
-            hard_constraints = [c for c in constraints if c.is_hard]
-            soft_constraints = [c for c in constraints if not c.is_hard]
+            # Construct all_weights: hard constraints get large weights (99999), soft get profile weights
+            # Use absolute value; linear_reward will handle sign correction for penalty constraints
+            # Factoid constraints (is_factoid=True) get weight 0
+            all_weights = []
+            soft_weight_idx = 0
+            for constraint in constraints:
+                # Check if this is a factoid constraint (stored in _kwargs)
+                is_factoid = constraint._kwargs.get("is_factoid", False)
+                if is_factoid:
+                    all_weights.append(0.0)  # Factoid constraints have weight 0
+                    if not constraint.is_hard:
+                        soft_weight_idx += 1  # Still count soft factoids in the index
+                elif constraint.is_hard:
+                    all_weights.append(99999.0)  # Large weight for hard constraints
+                else:
+                    if soft_weight_idx < len(profile["weights"]):
+                        all_weights.append(abs(float(profile["weights"][soft_weight_idx])))
+                    else:
+                        all_weights.append(1.0)  # Default weight if missing
+                    soft_weight_idx += 1
+
+            # Create parse_y_fn wrapper that captures exercise_db
+            def parse_workout_plan_wrapper(
+                yhat: str, raise_errors: bool = False
+            ) -> Optional[Any]:
+                """Parse workout plan from string."""
+                return parse_workout_plan(
+                    yhat,
+                    self._exercise_db,
+                    raise_errors=raise_errors,
+                )
 
             # specification
-            spec = FixedSpecification(
+            spec = LinearFixedSpecification(
                 dataset_name=self.dataset_name,
                 index=f"fixed_{ix}",
-                full_specification=theta,
                 initial_specification=signature,
                 commonsense_description=COMMONSENSE_INSTRUCTIONS,
-                validity_fn=validity_fn,
-                validity_kwargs={
-                    "hard_constraints": hard_constraints,
-                    "exercise_db": self._exercise_db,
-                },
-                # validity_fn_tool_name=None,  # Not provided
-                # validity_fn_tool_description=None,  # Not provided
-                reward_fn=reward_fn,
-                reward_kwargs={
-                    "soft_constraints": soft_constraints,
-                    "weights": profile["weights"],
-                    "exercise_db": self._exercise_db,
-                },
-                # reward_fn_tool_name=None,  # Not provided
-                # reward_fn_tool_description=None,  # Not provided
+                features=constraints,
+                weights=all_weights,
+                parse_y_fn=parse_workout_plan_wrapper,
+                parse_solutions_fn=parse_workout_plan_solutions,
+                parse_solutions_and_options_fn=parse_workout_plan_solutions_and_options,
+                validity_fn_tool_name="check_workout_plan_validity",
+                validity_fn_tool_description="Check if the workout plan satisfies all hard constraints",
+                reward_fn_tool_name="score_workout_plan",
+                reward_fn_tool_description="Score the workout plan based on preference constraints",
                 ystar=None,  # No ystar for workout planning
                 # metric_name=None,  # Not provided
                 # baseline_scores=None,  # Not provided
@@ -438,7 +449,6 @@ class WorkoutPlanningDataset(SpecificationCollection):
                 index=f"custom_{ix}",
                 initial_specification="Design a workout plan for your next week.",
                 commonsense_description=COMMONSENSE_INSTRUCTIONS,
-                user_specification_form_initial=self._create_user_specification_form_initial(),
                 user_specification_form_final=self._create_user_specification_form_final(),
                 user_specification_callback=user_specification_callback,
                 user_specification_callback_kwargs=[
@@ -472,7 +482,23 @@ class WorkoutPlanningDataset(SpecificationCollection):
                 render_evaluation_fn=lambda **kwargs: renderer.render_eval(
                     **kwargs, db=self._exercise_db
                 ),
+                render_evaluation_kwargs={
+                    "num_items_per_comparison": self.eval_num_items_per_comparison,
+                },
             )
+            # Add search interface functions
+            from data.workout_planning import streamlit_search_interface as search_interface
+            spec._render_search_interface_fn = lambda **kwargs: search_interface.render_search_interface(
+                exercise_db=self._exercise_db,
+                **kwargs
+            )
+            spec._render_search_interface_kwargs = {}
+            spec._render_liked_items_fn = lambda liked_items, **kwargs: search_interface.render_liked_items(
+                liked_items=liked_items,
+                exercise_db=self._exercise_db,
+                **kwargs
+            )
+            spec._render_liked_items_kwargs = {}
             specs[ix] = spec
         return specs
 
@@ -799,6 +825,67 @@ def reward_fn(
 
 
 
+def parse_workout_plan_solutions(msg: str) -> List[str]:
+    """Parse complete workout plan solutions from string (does not include individual exercise mentions)."""
+    to_return = []
+    # First try to parse from <workout_plan> tags
+    workout_plan_content = parse_for_answer_tags(
+        msg, keyword="workout_plan", return_none_if_not_found=True
+    )
+    if workout_plan_content:
+        js = parse_json(workout_plan_content)
+        if js is not None and len(js) > 0:
+            to_return.append(json.dumps(js))
+    else:
+        # Fall back to parsing JSON directly (for backward compatibility)
+        js = parse_json(msg)
+        if js is not None and len(js) > 0:
+            to_return.append(json.dumps(js))
+    return to_return
+
+
+def parse_workout_plan_solutions_and_options(msg: str) -> List[str]:
+    """Parse both complete workout plan solutions and individual exercise mentions from string."""
+    to_return = []
+    # First try to parse from <workout_plan> tags
+    workout_plan_content = parse_for_answer_tags(
+        msg, keyword="workout_plan", return_none_if_not_found=True
+    )
+    if workout_plan_content:
+        js = parse_json(workout_plan_content)
+        if js is not None and len(js) > 0:
+            to_return.append(json.dumps(js))
+
+    # Parse exercise mentions
+    mentioned_exercises = parse_for_answer_tags(
+        msg, keyword="exercise", return_all=True, return_none_if_not_found=True
+    )
+    if mentioned_exercises is not None:
+        mentioned_exercises = [
+            exercise.strip()
+            for mentions in mentioned_exercises
+            for exercise in mentions.split(",")
+            if exercise.strip()
+        ]
+        mentioned_exercises = list(dict.fromkeys(mentioned_exercises))
+        # Create a minimal workout plan with just one exercise for each mentioned exercise
+        for exercise_name in mentioned_exercises:
+            # Create a workout plan with the exercise on one day
+            to_return.append(
+                json.dumps(
+                    {
+                        DAYS_OF_THE_WEEK[0]: {
+                            TIMES_OF_DAY[0]: [
+                                {
+                                    "exercise_name": exercise_name,
+                                }
+                            ]
+                        }
+                    }
+                )
+            )
+    return to_return
+
 
 def output_to_streamlit(msg: str, db: ExerciseDB) -> str:
     """
@@ -806,7 +893,7 @@ def output_to_streamlit(msg: str, db: ExerciseDB) -> str:
     """
     from utils.misc import parse_for_answer_tags
 
-    msg = msg.replace("$", "\$")
+    msg = msg.replace("$", "\$").replace("~", "\~")
     # Parse workout plan JSON
     js, start_end = parse_json(msg, return_start_end=True)
 

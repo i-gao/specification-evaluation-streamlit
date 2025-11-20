@@ -291,9 +291,15 @@ class TravelPlannerDataset(SpecificationCollection):
             },
         ]
 
-    def _create_user_expertise_form(self) -> List[FormElement]:
-        """Create user expertise form for travel planning."""
-        return [
+    def _create_user_expertise_form(self, dest: str = None, state: str = None) -> List[FormElement]:
+        """
+        Create user expertise form for travel planning.
+        
+        Args:
+            dest: Optional destination city. If provided, adds a question about knowledge of that city.
+            state: Optional state name. If provided along with dest, includes state in the question.
+        """
+        form_elements = [
             FormElement(
                 input_type="radio",
                 label="How familiar are you with planning vacations?",
@@ -307,6 +313,30 @@ class TravelPlannerDataset(SpecificationCollection):
                 required=True,
             )
         ]
+        
+        # Add city-specific question if destination is provided (for custom specs)
+        if dest is not None:
+            if state is not None:
+                city_label = f"{dest}, {state}"
+            else:
+                city_label = dest
+            form_elements.append(
+                FormElement(
+                    input_type="radio",
+                    label=f"What do you know about {city_label}?",
+                    options=[
+                        "I have never heard of this city",
+                        "I know a little bit about this city",
+                        "I am somewhat familiar with this city",
+                        "I am very familiar with this city",
+                        "I have visited this city before",
+                    ],
+                    required=True,
+                    help=f"This helps us understand your familiarity with {city_label}",
+                )
+            )
+        
+        return form_elements
 
     def _create_user_evaluation_form(self) -> List[FormElement]:
         """Create the user evaluation form for travel planning."""
@@ -368,9 +398,11 @@ class TravelPlannerDataset(SpecificationCollection):
         fixed_indexes: Optional[List[int]] = None,
         custom_indexes: Optional[List[int]] = None,
         persist_docker_container: bool = True,
+        eval_num_items_per_comparison: int = 5,
         **kwargs,
     ) -> None:
         super().__init__(dev=dev, **kwargs)
+        self.eval_num_items_per_comparison = eval_num_items_per_comparison
 
         # Load all the problems
         split = "train" if dev else "validation"
@@ -531,7 +563,7 @@ class TravelPlannerDataset(SpecificationCollection):
                 state_files=[filename],
                 files_to_clean=[filename],
                 container_ids=[container_id],
-                user_expertise_form=self._create_user_expertise_form(),
+                user_expertise_form=self._create_user_expertise_form(dest=task["dest"]),
                 db=self._travel_db,
                 people_number=task.get("people_number", 1),
             )
@@ -601,13 +633,16 @@ class TravelPlannerDataset(SpecificationCollection):
                 root_dir=os.path.join(DATASET_ROOT, "assets"),
             )
 
+            # Get state for destination city
+            dest_state = self._travel_db.get_city_state(task["dest"])
+            dest_with_state = f"{task['dest']}, {dest_state}" if dest_state else task["dest"]
+            
             # Create custom specification
-            initial_specification = f"Plan a trip from {task['org']} to {task['dest']} over {task['days']} days from {task['date'][0]} to {task['date'][-1]}, with a budget of ${task['budget']}"
+            initial_specification = f"Plan a trip from {task['org']} to {dest_with_state} over {task['days']} days from {task['date'][0]} to {task['date'][-1]}, with a budget of ${task['budget']}"
             spec = CustomSpecification(
                 initial_specification=initial_specification,
                 current_specification=initial_specification,
                 commonsense_description=COMMONSENSE_DESCRIPTION,
-                user_specification_form_initial=[],
                 user_specification_form_final=self._create_user_specification_form_final(),
                 user_specification_callback=user_specification_callback,
                 user_specification_callback_kwargs=[
@@ -637,7 +672,7 @@ class TravelPlannerDataset(SpecificationCollection):
                 state_files=[filename],
                 files_to_clean=[filename],
                 container_ids=[container_id],
-                user_expertise_form=self._create_user_expertise_form(),
+                user_expertise_form=self._create_user_expertise_form(dest=task["dest"], state=dest_state),
                 db=self._travel_db,
                 render_evaluation_fn=lambda **kwargs: renderer.render_eval(
                     **kwargs, db=self._travel_db
@@ -646,6 +681,7 @@ class TravelPlannerDataset(SpecificationCollection):
                     "people_number": 1,
                     "y0": f"<travel_plan>{json.dumps(fixed_task['annotated_plan']) if isinstance(fixed_task['annotated_plan'], dict) else fixed_task['annotated_plan']}</travel_plan>",
                     "dest": task["dest"],
+                    "num_items_per_comparison": getattr(self, "eval_num_items_per_comparison", 5),
                 },
                 dataset_name=self.dataset_name,
                 driving_options=task["driving_info"],
@@ -1186,7 +1222,7 @@ def output_to_streamlit(
 ) -> None:
     from utils.misc import parse_for_answer_tags
 
-    msg = msg.replace("$", "\$")
+    msg = msg.replace("$", "\$").replace("~", "\~")
 
     # Parse travel plan JSON
     js, start_end = parse_json(msg, return_start_end=True)

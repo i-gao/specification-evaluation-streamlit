@@ -7,7 +7,7 @@ import pandas as pd
 import sys
 import os
 from data.database import Database
-
+from ast import literal_eval
 
 # Global constants
 DAYS_OF_THE_WEEK = [
@@ -243,6 +243,7 @@ class Recipe:
     diet: List[str] = field(default_factory=list)
     intolerances: List[str] = field(default_factory=list)
     equipment: List[str] = field(default_factory=list)
+    image_url: Optional[str] = None
 
     # Optional fields (with defaults)
     saturated_fat: Optional[float] = None
@@ -267,10 +268,10 @@ class RecipeDB(Database):
 
     def __init__(self, file_path: str = f"{DATASET_ROOT}/assets/recipes.csv"):
         df = pd.read_csv(file_path)
-        df['ingredients'] = df['ingredients'].apply(eval)
-        df['diet'] = df['diet'].apply(eval)
-        df['intolerances'] = df['intolerances'].apply(eval)
-        df['equipment'] = df['equipment'].apply(eval)
+        df["ingredients"] = df["ingredients"].apply(literal_eval)
+        df["diet"] = df["diet"].apply(literal_eval)
+        df["intolerances"] = df["intolerances"].apply(literal_eval)
+        df["equipment"] = df["equipment"].apply(literal_eval)
         super().__init__(
             {
                 "recipes": (
@@ -311,14 +312,26 @@ class RecipeDB(Database):
         """
         Get a recipe by name.
         """
-        df = self.tables['recipes']
-        matches = df[df['title'] == name]
+        df = self.tables["recipes"]
+        matches = df[df["title"] == name]
         if len(matches) == 0:
-            matches = df[df['title'] == name.title()]
+            matches = df[df["title"] == name.title()]
         if len(matches) == 0:
             return None
         d = matches.iloc[0].to_dict()
         return Recipe(**d)
+
+    def get_image_by_name(self, name: str) -> str:
+        """
+        Get the image URL for a recipe by name.
+        """
+        df = self.tables["recipes"]
+        matches = df[df["title"] == name]
+        if len(matches) == 0:
+            matches = df[df["title"] == name.title()]
+        if len(matches) == 0:
+            return None
+        return matches.iloc[0]["image_url"]
 
     @cached_property
     def stats(self):
@@ -342,7 +355,7 @@ class RecipeDB(Database):
         diet_counts = {
             diet: sum(
                 diet in recipe.diet
-                for recipe in self.tables['recipes'].values()
+                for recipe in self.tables["recipes"].values()
                 if recipe.diet is not None
             )
             for diet in DIETS
@@ -354,7 +367,7 @@ class RecipeDB(Database):
         intolerance_counts = {
             intolerance: sum(
                 intolerance in recipe.intolerances
-                for recipe in self.tables['recipes'].values()
+                for recipe in self.tables["recipes"].values()
                 if recipe.intolerances is not None
             )
             for intolerance in INTOLERANCES
@@ -366,7 +379,7 @@ class RecipeDB(Database):
         equipment_counts = {
             equipment: sum(
                 equipment in recipe.equipment
-                for recipe in self.tables['recipes'].values()
+                for recipe in self.tables["recipes"].values()
                 if recipe.equipment is not None
             )
             for equipment in EQUIPMENT

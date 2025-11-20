@@ -133,10 +133,10 @@ def render_fixed_task_explanation():
     st.markdown(COMMONSENSE_DESCRIPTION)
 
 
-def render_custom_task_explanation():
+def render_custom_task_explanation(emails_data: List[Dict] = None):
     """Render the custom task explanation for email organization."""
-    st.markdown(FIXED_INSTRUCTIONS)
-    st.markdown(COMMONSENSE_DESCRIPTION)
+    from data.email_organization.streamlit_render import render_custom_task_explanation as render_custom_explanation
+    render_custom_explanation(emails_data=emails_data)
 
 
 def check_email_policy_validity(
@@ -236,9 +236,13 @@ class EmailOrganizationDataset(SpecificationCollection):
         self,
         dev: bool = False,
         fixed_indexes: Optional[List[int]] = None,
+        eval_num_comparisons: int = 5,
+        eval_num_items_per_comparison: int = 5,
         **kwargs,
     ) -> None:
         super().__init__(dev=dev, **kwargs)
+        self.eval_num_comparisons = eval_num_comparisons
+        self.eval_num_items_per_comparison = eval_num_items_per_comparison
 
         # Find all fixed email CSV files in the assets directory
         emails_dir = os.path.join(DATASET_ROOT, "assets", "emails")
@@ -815,7 +819,11 @@ class EmailOrganizationDataset(SpecificationCollection):
                 ],
                 emails_data=emails_data,
                 render_evaluation_fn=render_email_eval,
-                render_evaluation_kwargs={"emails_data": emails_data},
+                render_evaluation_kwargs={
+                    "emails_data": emails_data,
+                    "num_comparisons": self.eval_num_comparisons,
+                    "num_items_per_comparison": self.eval_num_items_per_comparison,
+                },
                 render_search_interface_fn=render_email_search_interface,
                 render_search_interface_kwargs={"emails_data": emails_data},
             )

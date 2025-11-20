@@ -8,8 +8,9 @@ from evaluation.qualitative_eval import COMPARISON_LIKERT
 from data.reward import likert_to_win_rate, pairwise_win_rate
 
 
-def render_eval(*, final_prediction: str, y0: str, db: RecipeDB):
-    ranking_done = rank_recipes(final_prediction=final_prediction, y0=y0, db=db)
+def render_eval(*, final_prediction: str, y0: str, db: RecipeDB, num_items_per_comparison: int = 5, **kwargs):
+    ranking_done = rank_recipes(final_prediction=final_prediction, y0=y0, db=db, num_items_per_comparison=num_items_per_comparison)
+    print("Ranking done:", ranking_done)
     if not ranking_done:
         return False, None
 
@@ -53,7 +54,7 @@ def render_eval(*, final_prediction: str, y0: str, db: RecipeDB):
     return True, None
 
 
-def rank_recipes(*, final_prediction: str, y0: str, db: RecipeDB):
+def rank_recipes(*, final_prediction: str, y0: str, db: RecipeDB, num_items_per_comparison: int = 5):
     predicted = parse_meal_plan(final_prediction, db)
     y0 = parse_meal_plan(y0, db)
 
@@ -76,7 +77,7 @@ def rank_recipes(*, final_prediction: str, y0: str, db: RecipeDB):
         _render_carousel(
             predicted_recipes,
             y0_recipes,
-            show_k=None,
+            num_items_per_comparison=num_items_per_comparison,
         )
         return
 
@@ -88,9 +89,9 @@ def _render_carousel(
     predicted: List[Dict[str, Any]],
     y0: List[Dict[str, Any]],
     name: str = "recipe",
-    md_fn: callable = lambda d: _recipe_details(d["recipe"]),
+    md_fn: callable = None,
     filter_fn: Callable[[Dict[str, Any]], bool] = None,
-    show_k: int = None,
+    num_items_per_comparison: int = 5,
 ):
     """
     Args:
@@ -99,23 +100,24 @@ def _render_carousel(
         name: name of the thing being ranked. Used for saving to session state.
         md_fn: function to render the option
         filter_fn: function to filter the options
-        show_k: number of options to show
+        num_items_per_comparison: number of options to show
 
     Adds to session state:
         - ranking: a dict mapping a rank (0-indexed) to a name
         - y0_ranks: a dict mapping name to a rank
         - predicted_ranks: a list of ranks for the predicted options
     """
+    if md_fn is None:
+
+        def md_fn(d):
+            return _recipe_details(d["recipe"])
+
     predicted = [
-        p
-        for p in predicted
-        if p is not None and (filter_fn is None or filter_fn(p))
+        p for p in predicted if p is not None and (filter_fn is None or filter_fn(p))
     ]
     predicted = list({d["recipe"].title: d for d in predicted}.values())
 
-    y0 = [
-        p for p in y0 if p is not None and (filter_fn is None or filter_fn(p))
-    ]
+    y0 = [p for p in y0 if p is not None and (filter_fn is None or filter_fn(p))]
     y0 = list({d["recipe"].title: d for d in y0}.values())
 
     if len(predicted) == 0:
@@ -138,16 +140,16 @@ def _render_carousel(
 
     predicted_options = [p for p in predicted if p["recipe"].title in diff_names]
     y0_options = [p for p in y0 if p["recipe"].title in diff_names]
-    if show_k is not None and len(diff_names) > show_k:
+    if num_items_per_comparison is not None and len(diff_names) > num_items_per_comparison:
         # try to get a roughly balanced set of options
-        if len(predicted_options) < show_k / 2:
-            options = predicted_options + y0_options[: show_k - len(predicted_options)]
-        elif len(y0_options) < show_k / 2:
-            options = predicted_options[: show_k - len(y0_options)] + y0_options
+        if len(predicted_options) < num_items_per_comparison / 2:
+            options = predicted_options + y0_options[: num_items_per_comparison - len(predicted_options)]
+        elif len(y0_options) < num_items_per_comparison / 2:
+            options = predicted_options[: num_items_per_comparison - len(y0_options)] + y0_options
         else:
             options = (
-                predicted_options[: show_k // 2 + show_k % 2]
-                + y0_options[: show_k // 2]
+                predicted_options[: num_items_per_comparison // 2 + num_items_per_comparison % 2]
+                + y0_options[: num_items_per_comparison // 2]
             )
     else:
         options = predicted_options + y0_options
@@ -170,7 +172,11 @@ def _render_carousel(
     from evaluation.app.components import carousel
 
     def display_fn(i):
-        st.markdown(f"### {options[i]['recipe'].title}")
+        recipe = options[i]["recipe"]
+        st.markdown(f"### {recipe.title}")
+        # Display recipe image if available
+        if getattr(recipe, "image_url", None):
+            st.image(recipe.image_url, width=400)
         st.markdown(
             md_fn(
                 options[i],
@@ -180,7 +186,7 @@ def _render_carousel(
 
     st.markdown("### Review the assistant's recommendations")
     st.markdown(f"The assistant has recommended {len(options)} {name}s for you.")
-    carousel([lambda i=i: display_fn(i) for i in range(len(options))], height=300)
+    carousel([lambda i=i: display_fn(i) for i in range(len(options))], height=550)
 
     with st.form(key=f"ranking_form_{name}"):
         rank = st.multiselect(
@@ -211,7 +217,9 @@ def _render_carousel(
 def render_comparison(*, final_prediction: str, y0: str, db: RecipeDB):
     predicted = parse_meal_plan(final_prediction, db)
     y0 = parse_meal_plan(y0, db)
-
+    # if both are invalid, just return True
+    if predicted is None and y0 is None:
+        return True
     with st.container(border=True):
         st.markdown("## Compare these meal plans")
 
@@ -266,7 +274,8 @@ def render_comparison(*, final_prediction: str, y0: str, db: RecipeDB):
                     "nutritional_preference": nutritional_preference,
                 }
             )
-    return True
+            return True
+    return False
 
 
 def render_meal_plan_streamlit(meal_plan: Dict[str, Dict[str, Any]]) -> None:
@@ -357,9 +366,7 @@ def _render_meal_plan_streamlit(
             st.markdown(_render_cooking_calendar(meal_plan), unsafe_allow_html=True)
 
         with st.expander("🧾 How much food will I waste?", expanded=False):
-            st.markdown(
-                _render_recipe_summary(meal_plan), unsafe_allow_html=True
-            )
+            st.markdown(_render_recipe_summary(meal_plan), unsafe_allow_html=True)
 
     _render_recipe_details_streamlit(meal_plan, unique_id)
 
@@ -489,6 +496,9 @@ def _render_recipe_details_streamlit(meal_plan: Dict[str, Any], unique_id: str) 
 
                 @st.dialog(f"{recipe.title}", width="large")
                 def _show_recipe_dialog(recipe: Recipe) -> None:
+                    # Display recipe image if available
+                    if getattr(recipe, "image_url", None):
+                        st.image(recipe.image_url, width=400)
                     st.markdown(
                         _recipe_details(recipe),
                         unsafe_allow_html=True,
@@ -506,7 +516,9 @@ def _render_recipe_details_streamlit(meal_plan: Dict[str, Any], unique_id: str) 
 def _render_calendar_table(meal_plan: Dict[str, Any]) -> str:
     lines: List[str] = []
     lines.append("### 🗓️ Meal Plan at a Glance")
-    lines.append(f"This is a summary of the meals you will be eating over the {len(DAYS_OF_THE_WEEK)}-day period.")
+    lines.append(
+        f"This is a summary of the meals you will be eating over the {len(DAYS_OF_THE_WEEK)}-day period."
+    )
     lines.append("* :material/nest_eco_leaf: recipe cooked fresh at that time")
     lines.append("* :material/microwave: recipe reheated from leftovers")
     lines.append("* :material/error: invalid recipe not found in database")
@@ -599,7 +611,9 @@ def _render_recipe_summary(meal_plan: Dict[str, Any]) -> str:
     )
 
     lines: List[str] = []
-    lines.append(f"This summary shows how much food was wasted across the {len(DAYS_OF_THE_WEEK)}-day period.")
+    lines.append(
+        f"This summary shows how much food was wasted across the {len(DAYS_OF_THE_WEEK)}-day period."
+    )
     lines.append("")
     lines.append(
         "| Recipe | Cooked (servings) | Consumed (servings) | Wasted (servings) |"
@@ -890,6 +904,9 @@ def render_recipe_mentions(recipe_names: List[str], db: RecipeDB) -> None:
                     # Create dialog for valid recipe
                     @st.dialog(f"{recipe_name}", width="large")
                     def _show_recipe_dialog(recipe: Recipe) -> None:
+                        # Display recipe image if available
+                        if getattr(recipe, "image_url", None):
+                            st.image(recipe.image_url, width=400)
                         st.markdown(
                             _recipe_details(recipe),
                             unsafe_allow_html=True,

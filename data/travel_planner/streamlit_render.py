@@ -25,6 +25,8 @@ def render_eval(
     db,
     people_number: int,
     dest: str,
+    num_items_per_comparison: int = 5,
+    **kwargs,
 ):
     """
     Render evaluation UI for shopping custom specs and return (completed, feedback).
@@ -35,6 +37,7 @@ def render_eval(
         db=db,
         people_number=people_number,
         dest=dest,
+        num_items_per_comparison=num_items_per_comparison,
     )
     if not ranking_done:
         return False, None
@@ -49,6 +52,7 @@ def render_eval_first_page(
     db,
     people_number: int,
     dest: str,
+    num_items_per_comparison: int = 5,
 ):
     """
     For each kind of thing, display the carousel with some decoys, and ask user to rank options among valid options in the actual dest
@@ -75,6 +79,7 @@ def render_eval_first_page(
             _transportation_to_dialog_content,
             db,
             filter_fn=lambda d: dest == d["city2"],
+            num_items_per_comparison=num_items_per_comparison,
         )
         return
 
@@ -93,6 +98,7 @@ def render_eval_first_page(
             _transportation_to_dialog_content,
             db,
             filter_fn=lambda d: dest == d["city1"],
+            num_items_per_comparison=num_items_per_comparison,
         )
         return
 
@@ -116,6 +122,7 @@ def render_eval_first_page(
             _restaurant_to_dialog_content,
             db,
             filter_fn=lambda d: dest == d["city"],
+            num_items_per_comparison=num_items_per_comparison,
         )
         return
 
@@ -133,6 +140,7 @@ def render_eval_first_page(
             _attraction_to_dialog_content,
             db,
             filter_fn=lambda d: dest == d["city"],
+            num_items_per_comparison=num_items_per_comparison,
         )
         return
 
@@ -148,6 +156,7 @@ def render_eval_first_page(
             _accommodation_to_dialog_content,
             db,
             filter_fn=lambda d: dest == d["city"],
+            num_items_per_comparison=num_items_per_comparison,
         )
         return
 
@@ -242,7 +251,7 @@ def _render_carousel(
     md_fn,
     db,
     filter_fn: Callable[[Dict[str, Any]], bool] = None,
-    show_k: int = None,
+    num_items_per_comparison: int = 5,
 ):
     """
     Args:
@@ -252,7 +261,7 @@ def _render_carousel(
         md_fn: function to render the option
         db: database
         filter_fn: function to filter the options
-        show_k: number of options to show
+        num_items_per_comparison: number of options to show
 
     Adds to session state:
         - ranking: a dict mapping a rank (0-indexed) to a name
@@ -287,16 +296,16 @@ def _render_carousel(
 
     predicted_options = [p for p in predicted if p["name"] in diff_names]
     y0_options = [p for p in y0 if p["name"] in diff_names]
-    if show_k is not None and len(diff_names) > show_k:
+    if num_items_per_comparison is not None and len(diff_names) > num_items_per_comparison:
         # try to get a roughly balanced set of options
-        if len(predicted_options) < show_k / 2:
-            options = predicted_options + y0_options[: show_k - len(predicted_options)]
-        elif len(y0_options) < show_k / 2:
-            options = predicted_options[: show_k - len(y0_options)] + y0_options
+        if len(predicted_options) < num_items_per_comparison / 2:
+            options = predicted_options + y0_options[: num_items_per_comparison - len(predicted_options)]
+        elif len(y0_options) < num_items_per_comparison / 2:
+            options = predicted_options[: num_items_per_comparison - len(y0_options)] + y0_options
         else:
             options = (
-                predicted_options[: show_k // 2 + show_k % 2]
-                + y0_options[: show_k // 2]
+                predicted_options[: num_items_per_comparison // 2 + num_items_per_comparison % 2]
+                + y0_options[: num_items_per_comparison // 2]
             )
     else:
         options = predicted_options + y0_options

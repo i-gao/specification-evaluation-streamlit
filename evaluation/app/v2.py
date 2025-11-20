@@ -423,32 +423,17 @@ def presurvey_screen():
         def validate(form_values):
             return not any(
                 v == "-" for v in form_values["expertise"].values()
-            ) and not any(v == "-" for v in form_values["specification"].values())
+            )
 
         def on_completion(form_values):
-            if (
-                isinstance(st.session_state.spec, CustomSpecification)
-                and st.session_state.spec.user_specification_callback is not None
-            ):
-                st.session_state.spec.user_specification_callback(
-                    form_values["specification"]
-                )
             st.session_state.form_results["presurvey"] = form_values
             st.session_state.current_screen = "chat_screen"
             start_interaction()
-
-        if isinstance(st.session_state.spec, CustomSpecification):
-            user_specification_form_initial = (
-                st.session_state.spec.user_specification_form_initial
-            )
-        else:
-            user_specification_form_initial = None
 
         forms.presurvey(
             should_show=lambda: not st.session_state.presurvey_completed,
             on_completion=on_completion,
             user_expertise_form=st.session_state.spec.user_expertise_form,
-            user_specification_form_initial=user_specification_form_initial,
             validate=validate,
         )
 
@@ -544,8 +529,9 @@ def evaluation_screen():
             save_session_data(skip_grading=True)
 
     evaluation_flow(
-        chat_evaluation_form=forms.assistant_instruments_survey,
+        chat_evaluation_form=forms.nasa_tlx_survey,
         custom_final_specification_form=forms.custom_final_specification,
+        post_specification_survey_form=forms.post_specification_survey,
     )
 
 

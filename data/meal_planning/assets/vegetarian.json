@@ -1,0 +1,209 @@
+{
+    "sunday": {
+        "breakfast": [
+            {
+                "action": "cook",
+                "recipe_title": "Spicy Egg And Cheese Muffin Melts"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Spicy Egg And Cheese Muffin Melts"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "cook",
+                "recipe_title": "Vietnamese Caramel Chicken"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Vietnamese Caramel Chicken"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "cook",
+                "recipe_title": "Russian Chicken Stew With Potatoes And Vegetables"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Russian Chicken Stew With Potatoes And Vegetables"
+            },
+            {
+                "action": "cook",
+                "recipe_title": "Garlic Rice"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Garlic Rice"
+            }
+        ]
+    },
+    "monday": {
+        "breakfast": [
+            {
+                "action": "eat",
+                "recipe_title": "Spicy Egg And Cheese Muffin Melts"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Vietnamese Caramel Chicken"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "eat",
+                "recipe_title": "Russian Chicken Stew With Potatoes And Vegetables"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Garlic Rice"
+            }
+        ]
+    },
+    "tuesday": {
+        "breakfast": [
+            {
+                "action": "eat",
+                "recipe_title": "Spicy Egg And Cheese Muffin Melts"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Vietnamese Caramel Chicken"
+            }
+        ],
+        "snack": [],
+        "dinner": [
+            {
+                "action": "eat",
+                "recipe_title": "Russian Chicken Stew With Potatoes And Vegetables"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Garlic Rice"
+            }
+        ]
+    },
+    "wednesday": {
+        "breakfast": [
+            {
+                "action": "eat",
+                "recipe_title": "Spicy Egg And Cheese Muffin Melts"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Vietnamese Caramel Chicken"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "eat",
+                "recipe_title": "Russian Chicken Stew With Potatoes And Vegetables"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Garlic Rice"
+            }
+        ]
+    },
+    "thursday": {
+        "breakfast": [
+            {
+                "action": "eat",
+                "recipe_title": "Spicy Egg And Cheese Muffin Melts"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Vietnamese Caramel Chicken"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "cook",
+                "recipe_title": "Tex Mex Beef Bowl With Avocado Cilantro Dressing"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Tex Mex Beef Bowl With Avocado Cilantro Dressing"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Tex Mex Beef Bowl With Avocado Cilantro Dressing"
+            }
+
+        ]
+    },
+    "friday": {
+        "breakfast": [
+            {
+                "action": "eat",
+                "recipe_title": "Spicy Egg And Cheese Muffin Melts"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Vietnamese Caramel Chicken"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "cook",
+                "recipe_title": "Italian Steak Pizzaiola"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Italian Steak Pizzaiola"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Italian Steak Pizzaiola"
+            }
+        ]
+    },
+    "saturday": {
+        "breakfast": [
+            {
+                "action": "cook",
+                "recipe_title": "Eggs In Purgatory"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Eggs In Purgatory"
+            }
+
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Italian Steak Pizzaiola"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Italian Steak Pizzaiola"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "cook",
+                "recipe_title": "Chef John’S Chicken Saltimbocca"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Chef John’S Chicken Saltimbocca"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Chef John’S Chicken Saltimbocca"
+            }
+        ]
+    }
+}

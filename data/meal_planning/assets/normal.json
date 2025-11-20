@@ -1,0 +1,227 @@
+{
+    "sunday": {
+        "breakfast": [
+            {
+                "action": "cook",
+                "recipe_title": "Crescent Sausage Egg Roll Ups"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Crescent Sausage Egg Roll Ups"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Crescent Sausage Egg Roll Ups"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "cook",
+                "recipe_title": "Hawaiian Pizza"
+            },
+            {
+                "action": "cook",
+                "recipe_title": "Hawaiian Pizza"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Hawaiian Pizza"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Hawaiian Pizza"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "cook",
+                "recipe_title": "Italian Wedding Pasta Bake"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Italian Wedding Pasta Bake"
+            }
+        ]
+    },
+    "monday": {
+        "breakfast": [
+            {
+                "action": "eat",
+                "recipe_title": "Crescent Sausage Egg Roll Ups"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Crescent Sausage Egg Roll Ups"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Hawaiian Pizza"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Hawaiian Pizza"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "eat",
+                "recipe_title": "Italian Wedding Pasta Bake"
+            }
+        ]
+    },
+    "tuesday": {
+        "breakfast": [
+            {
+                "action": "eat",
+                "recipe_title": "Crescent Sausage Egg Roll Ups"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Crescent Sausage Egg Roll Ups"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Hawaiian Pizza"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Hawaiian Pizza"
+            }
+        ],
+        "snack": [],
+        "dinner": [
+            {
+                "action": "eat",
+                "recipe_title": "Italian Wedding Pasta Bake"
+            }
+        ]
+    },
+    "wednesday": {
+        "breakfast": [
+            {
+                "action": "eat",
+                "recipe_title": "Crescent Sausage Egg Roll Ups"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Crescent Sausage Egg Roll Ups"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Hawaiian Pizza"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Hawaiian Pizza"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "eat",
+                "recipe_title": "Italian Wedding Pasta Bake"
+            }
+        ]
+    },
+    "thursday": {
+        "breakfast": [
+            {
+                "action": "eat",
+                "recipe_title": "Crescent Sausage Egg Roll Ups"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Crescent Sausage Egg Roll Ups"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Hawaiian Pizza"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Hawaiian Pizza"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "eat",
+                "recipe_title": "Italian Wedding Pasta Bake"
+            }
+        ]
+    },
+    "friday": {
+        "breakfast": [
+            {
+                "action": "eat",
+                "recipe_title": "Crescent Sausage Egg Roll Ups"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Crescent Sausage Egg Roll Ups"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Hawaiian Pizza"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "cook",
+                "recipe_title": "Japanese Style Triple Seared Steak"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Japanese Style Triple Seared Steak"
+            }
+        ]
+    },
+    "saturday": {
+        "breakfast": [
+            {
+                "action": "cook",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Hawaiian Pizza"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Hawaiian Pizza"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "cook",
+                "recipe_title": "Instant Pot Salsa Chicken"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Instant Pot Salsa Chicken"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Instant Pot Salsa Chicken"
+            }
+        ]
+    }
+}

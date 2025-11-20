@@ -353,10 +353,6 @@ def render_eval(
                 [i for i in range(len(options))],
                 format_func=lambda x: f"Cart {x + 1}",
             )
-            must_haves_nice_to_haves = st.text_area(
-                "What are your **must haves** vs. **nice to haves**? How do the carts compare?",
-                height=120,
-            )
             rank = st.multiselect(
                 "Rank the carts above from MOST to LEAST preferred, taking in consideration all of the factors above.",
                 [i for i in range(len(options))],

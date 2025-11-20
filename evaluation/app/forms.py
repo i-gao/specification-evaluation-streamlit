@@ -6,6 +6,12 @@ from evaluation.qualitative_eval import (
     COMPARISON_LIKERT,
     ASSISTANT_INSTRUMENTS,
     INSTRUMENT_LIKERT,
+    NASA_TLX_SCALES,
+    NASA_TLX_MIN_VALUE,
+    NASA_TLX_MAX_VALUE,
+    NASA_TLX_STEP,
+    MUST_HAVES_QUESTION,
+    NICE_TO_HAVES_QUESTION,
 )
 from data import get_spec
 import evaluation.app.components as components
@@ -29,19 +35,17 @@ def presurvey(
     validate: Callable = None,
     on_completion: Callable = None,
     user_expertise_form: List[FormElement] = None,
-    user_specification_form_initial: List[FormElement] = None,
     include_trust_question: bool = False,
 ):
     """
     Form that appears at the beginning of the experiment.
-    Elicits the user's expertise level and initial specification (in the custom case).
+    Elicits the user's expertise level.
     """
     if should_show is not None and not should_show():
         return
 
     form_values = {
         "expertise": {},
-        "specification": {},
     }
     with st.form(key="presurvey_form"):
         for form_element in user_expertise_form:
@@ -50,13 +54,6 @@ def presurvey(
             if form_element["input_type"] != "text":
                 form_values["expertise"][form_element["label"]] = o
 
-        if user_specification_form_initial is not None:
-            for form_element in user_specification_form_initial:
-                st_fn, st_kwargs, req = form_element_to_streamlit(form_element)
-                o = st_fn(**st_kwargs)
-                if form_element["input_type"] != "text":
-                    form_values["specification"][form_element["label"]] = o
-
         if include_trust_question:
             form_values["trust"] = st.radio(
                 "How much do you agree with this statement? 'I think working with the assistant will be more efficient than using a web browser to solve the task myself.'",
@@ -64,7 +61,20 @@ def presurvey(
             )
 
         if st.form_submit_button("Submit", type="primary"):
-            valid = validate is None or validate(form_values)
+            # Default validation: check that all fields are filled
+            if validate is None:
+                valid = True
+                # Check expertise fields
+                for key, value in form_values.get("expertise", {}).items():
+                    if value == "-" or value == "" or value is None:
+                        valid = False
+                        break
+                # Check trust question if included
+                if valid and include_trust_question:
+                    if form_values.get("trust") == "-" or form_values.get("trust") == "":
+                        valid = False
+            else:
+                valid = validate(form_values)
             if not valid:
                 st.error("Please fill in all fields correctly")
                 return
@@ -94,14 +104,20 @@ def brainstorming(
         submitted = st.form_submit_button("Continue to presurvey", type="primary")
         if submitted:
             form_values = {"notes": notes}
-            valid = validate is None or validate(form_values)
+            # Default validation: check that notes are not empty
+            if validate is None:
+                valid = notes is not None and notes.strip() != ""
+            else:
+                valid = validate(form_values)
             if not valid:
+                st.error("Please write your thoughts before continuing")
                 return
             if on_completion is not None:
                 on_completion(form_values)
 
 
 def message_feedback(
+    message_index: int,
     should_show: Callable = None,
     validate: Callable = None,
     on_completion: Callable = None,
@@ -109,11 +125,17 @@ def message_feedback(
     """
     Form that appears beneath a message from the assistant,
     asking the user to evaluate the message.
+
+    Args:
+        message_index: The index of the message in st.session_state.messages to evaluate
+        should_show: Function that returns True if the form should be shown
+        validate: Validation callback called with form results
+        on_completion: Callback called with form results once validated
     """
     if should_show is not None and not should_show():
         return
 
-    with st.form(key=f"feedback_form_{len(st.session_state.messages) - 1}"):
+    with st.form(key=f"feedback_form_{message_index}"):
         st.write(
             "**Please evaluate the most recent policy message.** Check all that apply:"
         )
@@ -140,7 +162,7 @@ def message_feedback(
             "filler": filler,
             "solution": solution,
             "explanation": explanation,
-            "message_index": len(st.session_state.messages) - 2,
+            "message_index": message_index,
         }
 
         if st.form_submit_button("Submit Feedback", type="primary"):
@@ -150,6 +172,66 @@ def message_feedback(
                 return
             if on_completion is not None:
                 on_completion(feedback)
+
+
+def message_thumbs_feedback(
+    message_index: int,
+    should_show: Callable = None,
+    validate: Callable = None,
+    on_completion: Callable = None,
+):
+    """
+    Form that appears beneath a message from the assistant,
+    asking the user to rate the message with thumbs up/down.
+
+    Uses Streamlit's st.feedback widget with "thumbs" option.
+    Returns 0 for thumbs-down, 1 for thumbs-up, or None if not selected.
+
+    Args:
+        message_index: The index of the message in st.session_state.messages to evaluate
+        should_show: Function that returns True if the form should be shown
+        validate: Validation callback called with form results
+        on_completion: Callback called with form results once validated
+
+    Reference: https://docs.streamlit.io/develop/api-reference/widgets/st.feedback
+    """
+    if should_show is not None and not should_show():
+        return
+
+    feedback_key = f"thumbs_feedback_{message_index}"
+
+    st.write("**Rate the most recent assistant message:**")
+
+    # Define callback to handle feedback submission
+    def handle_feedback():
+        """Process feedback when user clicks thumbs up/down"""
+        feedback_value = st.session_state.get(feedback_key)
+        if feedback_value is None:
+            return
+
+        feedback = {
+            "thumbs_rating": feedback_value,  # 0 = thumbs down, 1 = thumbs up
+            "message_index": message_index,
+        }
+
+        # Validate if callback provided
+        if validate is not None:
+            valid = validate(feedback)
+            if not valid:
+                return
+
+        # Call completion callback if provided
+        if on_completion is not None:
+            on_completion(feedback)
+
+    # Use st.feedback with thumbs option
+    # Returns 0 for thumbs-down, 1 for thumbs-up, or None if not selected
+    # The on_change callback handles processing when user clicks
+    st.feedback(
+        options="thumbs",
+        key=feedback_key,
+        on_change=handle_feedback,
+    )
 
 
 def custom_final_specification(
@@ -175,9 +257,20 @@ def custom_final_specification(
                 form_values[form_element["label"]] = o
 
         if st.form_submit_button("Submit", type="primary"):
-            valid = validate is None or validate(form_values)
+            # Default validation: check that all form elements are filled
+            if validate is None:
+                valid = True
+                for form_element in st.session_state.spec.user_specification_form_final:
+                    label = form_element.get("label")
+                    value = form_values.get(label)
+                    if form_element.get("required", True):  # Default to required if not specified
+                        if value is None or value == "" or value == "-":
+                            valid = False
+                            break
+            else:
+                valid = validate(form_values)
             if not valid:
-                st.error("Please fill in all fields correctly")
+                st.error("Please fill in all required fields correctly")
                 return
 
             if on_completion is not None:
@@ -230,7 +323,29 @@ def comparison_scoring(
         )
 
         if st.form_submit_button("Submit", type="primary"):
-            valid = validate is None or validate(score_answers)
+            # Default validation: check that all fields are filled
+            if validate is None:
+                valid = True
+                # Check free_write
+                if not score_answers.get("free_write") or score_answers.get("free_write", "").strip() == "":
+                    valid = False
+                # Check relative_score
+                if valid and (score_answers.get("relative_score") == "" or score_answers.get("relative_score") is None):
+                    valid = False
+                # Check confidence
+                if valid and (score_answers.get("confidence") == "" or score_answers.get("confidence") is None):
+                    valid = False
+                # Check dataset-specific questions
+                if valid and st.session_state.spec.user_evaluation_form:
+                    for form_element in st.session_state.spec.user_evaluation_form:
+                        label = form_element.get("label")
+                        value = score_answers.get(label)
+                        if form_element.get("required", True):
+                            if value is None or value == "" or value == "-":
+                                valid = False
+                                break
+            else:
+                valid = validate(score_answers)
             if not valid:
                 st.error(
                     f"Please make sure to fill in all fields and spend at least {st.session_state.evaluation_minimum / 60:.1f} minutes on the evaluation."
@@ -238,6 +353,45 @@ def comparison_scoring(
                 return
             if on_completion is not None:
                 on_completion(score_answers)
+
+
+def post_specification_survey(
+    should_show: Callable = None,
+    validate: Callable = None,
+    on_completion: Callable = None,
+):
+    """
+    Post-interaction specification survey form.
+    Asks about must-haves and nice-to-haves for a good recommendation.
+    """
+    if should_show is not None and not should_show():
+        return
+
+    form_results = {}
+    with st.form(key="post_specification_survey_form"):
+        form_results["must_haves"] = st.text_area(
+            MUST_HAVES_QUESTION,
+            height=120,
+        )
+        form_results["nice_to_haves"] = st.text_area(
+            NICE_TO_HAVES_QUESTION,
+            height=120,
+        )
+
+        if st.form_submit_button("Submit", type="primary"):
+            # Default validation: check that both text areas are filled
+            if validate is None:
+                valid = (
+                    form_results.get("must_haves", "").strip() != ""
+                    and form_results.get("nice_to_haves", "").strip() != ""
+                )
+            else:
+                valid = validate(form_results)
+            if not valid:
+                st.error("Please fill in both the must-haves and nice-to-haves fields")
+                return
+            if on_completion is not None:
+                on_completion(form_results)
 
 
 def assistant_instruments_survey(
@@ -253,16 +407,6 @@ def assistant_instruments_survey(
 
     form_results = {}
     with st.form(key="interaction_evaluation_form"):
-        # post-interaction specification
-        form_results["must_haves"] = st.text_area(
-            "Think about the task. What are your **must-haves** or **must-not-haves** for a good recommendation?",
-            height=120,
-        )
-        form_results["nice_to_haves"] = st.text_area(
-            "Think about the task. What are your **nice-to-haves** or **nice-to-not-haves** for a good recommendation?",
-            height=120,
-        )
-
         st.write("Answer the following questions about the assistant.")
 
         # assistant instruments
@@ -278,9 +422,16 @@ def assistant_instruments_survey(
             )
 
         if st.form_submit_button("Submit", type="primary"):
-            valid = validate is None or validate(form_results)
+            # Default validation: check that all instruments are answered (not "-")
+            if validate is None:
+                valid = all(
+                    value != "-" and value != "" and value is not None
+                    for value in form_results.values()
+                )
+            else:
+                valid = validate(form_results)
             if not valid:
-                st.error("Please fill in all fields correctly")
+                st.error("Please answer all questions about the assistant")
                 return
             if on_completion is not None:
                 on_completion(form_results)
@@ -306,12 +457,12 @@ def final_prediction_evaluation(
     form_elements = [
         FormElement(
             input_type="text_area",
-            label="Think about the task. What are your **must-haves** or **must-not-haves** for a good recommendation?",
+            label=MUST_HAVES_QUESTION,
             height=120,
         ),
         FormElement(
             input_type="text_area",
-            label="Think about the task. What are your **nice-to-haves** or **nice-to-not-haves** for a good recommendation?",
+            label=NICE_TO_HAVES_QUESTION,
             height=120,
         ),
         FormElement(
@@ -335,13 +486,21 @@ def final_prediction_evaluation(
             feedback[label] = value
         submit = st.form_submit_button("Submit", type="primary")
         if submit:
+            # Check all required fields and text areas
             for element in form_elements:
-                if element.get("required", False):
-                    label = element.get("label")
+                label = element.get("label")
+                value = feedback.get(label)
+                # Text areas should not be empty
+                if element.get("input_type") == "text_area":
+                    if not value or value.strip() == "":
+                        st.error(f"Please fill in the '{label}' field.")
+                        return False, None
+                # Required fields (radio buttons) should not be "-" or empty
+                elif element.get("required", False):
                     if (
-                        not feedback.get(label)
-                        or feedback.get(label) == ""
-                        or feedback.get(label) == "-"
+                        not value
+                        or value == ""
+                        or value == "-"
                     ):
                         st.error("Please fill in all required fields.")
                         return False, None
@@ -483,3 +642,131 @@ def assistant_ranking_exit_survey(
                 return
             if on_completion is not None:
                 on_completion(form_values)
+
+
+def nasa_tlx_survey(
+    should_show: Callable = None,
+    validate: Callable = None,
+    on_completion: Callable = None,
+    include_pairwise_comparisons: bool = False,
+):
+    """
+    NASA Task Load Index (NASA-TLX) survey form.
+
+    The NASA-TLX is a subjective workload assessment tool that rates perceived workload
+    across six dimensions: Mental Demand, Physical Demand, Temporal Demand, Performance,
+    Effort, and Frustration Level.
+
+    Each dimension is rated on a 0-100 scale with 5-point increments.
+
+    Args:
+        should_show: Function that returns True if the form should be shown
+        validate: Validation callback called with form results
+        on_completion: Callback called with form results once validated
+        include_pairwise_comparisons: If True, includes pairwise comparison questions
+            to weight the subscales (full NASA-TLX). If False, uses Raw TLX (no weighting).
+    """
+    if should_show is not None and not should_show():
+        return
+
+    form_results = {}
+    with st.container(key="narrow_body"):
+        with st.form(key="nasa_tlx_form", border=False):
+            # Collect ratings for each of the 6 scales
+            for scale_name, scale_info in NASA_TLX_SCALES.items():
+                # Create slider with anchors
+                st.write(f"**{scale_name}**: {scale_info['description']}")
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.caption(f"0: {scale_info['low_anchor']}")
+                with col2:
+                    st.caption(f"100: {scale_info['high_anchor']}")
+                slider_value = st.slider(
+                    scale_name,
+                    min_value=NASA_TLX_MIN_VALUE,
+                    max_value=NASA_TLX_MAX_VALUE,
+                    value=50,  # Default to middle
+                    step=NASA_TLX_STEP,
+                    label_visibility="collapsed",
+                    help=f"0: {scale_info['low_anchor']}, 100: {scale_info['high_anchor']}",
+                    key=f"nasa_tlx_{scale_name}",
+                )
+                form_results[scale_name] = slider_value
+
+
+            # Optional pairwise comparisons for weighting (full NASA-TLX)
+            if include_pairwise_comparisons:
+                st.markdown("### Pairwise Comparisons")
+                st.markdown(
+                    "For each pair below, select which dimension contributed more to your "
+                    "workload during the task."
+                )
+
+                scale_names = list(NASA_TLX_SCALES.keys())
+                
+                # Generate all pairwise comparisons (15 total: C(6,2) = 15)
+                all_comparisons = []
+                for i in range(len(scale_names)):
+                    for j in range(i + 1, len(scale_names)):
+                        scale_a = scale_names[i]
+                        scale_b = scale_names[j]
+                        all_comparisons.append((scale_a, scale_b, f"{scale_a} vs {scale_b}"))
+                
+                # Randomize order but keep it stable across page reloads
+                pairwise_order_key = "nasa_tlx_pairwise_order"
+                if pairwise_order_key not in st.session_state:
+                    # Create a shuffled copy to avoid modifying the original
+                    shuffled_comparisons = all_comparisons.copy()
+                    random.shuffle(shuffled_comparisons)
+                    st.session_state[pairwise_order_key] = shuffled_comparisons
+                else:
+                    # Use the stored order
+                    shuffled_comparisons = st.session_state[pairwise_order_key]
+                
+                pairwise_results = {}
+                for comparison_idx, (scale_a, scale_b, comparison_key) in enumerate(shuffled_comparisons):
+                    choice = st.segmented_control(
+                        "Which contributed more to your workload?",
+                        options=["-", scale_a, scale_b],
+                        selection_mode="single",
+                        default=None,
+                        key=f"pairwise_{comparison_idx}",
+                    )
+                    # Convert None to empty string for consistency with validation
+                    pairwise_results[comparison_key] = choice if choice is not None else ""
+
+                form_results["pairwise_comparisons"] = pairwise_results
+
+            if st.form_submit_button("Submit", type="primary"):
+                # Default validation: ensure all scales are rated
+                if validate is None:
+                    valid = all(
+                        scale_name in form_results
+                        and isinstance(form_results[scale_name], int)
+                        and NASA_TLX_MIN_VALUE
+                        <= form_results[scale_name]
+                        <= NASA_TLX_MAX_VALUE
+                        for scale_name in NASA_TLX_SCALES.keys()
+                    )
+                    if include_pairwise_comparisons:
+                        valid = valid and all(
+                            value != ""
+                            for value in form_results.get(
+                                "pairwise_comparisons", {}
+                            ).values()
+                        )
+                else:
+                    valid = validate(form_results)
+
+                if not valid:
+                    st.error(
+                        "Please rate all dimensions correctly"
+                        + (
+                            " and complete all pairwise comparisons"
+                            if include_pairwise_comparisons
+                            else ""
+                        )
+                    )
+                    return
+                if on_completion is not None:
+                    on_completion(form_results)

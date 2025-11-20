@@ -116,10 +116,10 @@ def render_fixed_task_explanation():
     st.markdown(COMMONSENSE_DESCRIPTION)
 
 
-def render_custom_task_explanation():
+def render_custom_task_explanation(files_data: List[Dict] = None):
     """Render the custom task explanation for file organization."""
-    st.markdown(FIXED_INSTRUCTIONS)
-    st.markdown(COMMONSENSE_DESCRIPTION)
+    from data.file_organization.streamlit_render import render_custom_task_explanation as render_custom_explanation
+    render_custom_explanation(files_data=files_data)
 
 
 def check_file_policy_validity(yhat: str, raise_errors: bool = False) -> Tuple[bool, dict]:
@@ -225,9 +225,13 @@ class FileOrganizationDataset(SpecificationCollection):
         self,
         dev: bool = False,
         fixed_indexes: Optional[List[int]] = None,
+        eval_num_comparisons: int = 5,
+        eval_num_items_per_comparison: int = 5,
         **kwargs,
     ) -> None:
         super().__init__(dev=dev, **kwargs)
+        self.eval_num_comparisons = eval_num_comparisons
+        self.eval_num_items_per_comparison = eval_num_items_per_comparison
 
         # Find all UUIDs in the assets directory for the fixed specs
         policy_dir = os.path.join(DATASET_ROOT, "assets", "dataset_policy")
@@ -642,7 +646,11 @@ class FileOrganizationDataset(SpecificationCollection):
                 ],
                 files_data=files_data,
                 render_evaluation_fn=render_file_eval,
-                render_evaluation_kwargs={"files_data": files_data},
+                render_evaluation_kwargs={
+                    "files_data": files_data,
+                    "num_comparisons": self.eval_num_comparisons,
+                    "num_items_per_comparison": self.eval_num_items_per_comparison,
+                },
                 render_search_interface_fn=render_file_search_interface,
                 render_search_interface_kwargs={"files_data": files_data},
             )

@@ -1,0 +1,231 @@
+{
+    "sunday": {
+        "breakfast": [
+            {
+                "action": "cook",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "cook",
+                "recipe_title": "Gochujang Fried Rice"
+            },
+            {
+                "action": "cook",
+                "recipe_title": "Gochujang Fried Rice"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Gochujang Fried Rice"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "cook",
+                "recipe_title": "Mild Coconut Tofu Curry"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Mild Coconut Tofu Curry"
+            }
+        ]
+    },
+    "monday": {
+        "breakfast": [
+            {
+                "action": "cook",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Gochujang Fried Rice"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "eat",
+                "recipe_title": "Mild Coconut Tofu Curry"
+            }
+        ]
+    },
+    "tuesday": {
+        "breakfast": [
+            {
+                "action": "cook",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Gochujang Fried Rice"
+            }
+        ],
+        "snack": [],
+        "dinner": [
+            {
+                "action": "eat",
+                "recipe_title": "Mild Coconut Tofu Curry"
+            }
+        ]
+    },
+    "wednesday": {
+        "breakfast": [
+            {
+                "action": "cook",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Gochujang Fried Rice"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "eat",
+                "recipe_title": "Mild Coconut Tofu Curry"
+            }
+        ]
+    },
+    "thursday": {
+        "breakfast": [
+            {
+                "action": "cook",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Gochujang Fried Rice"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "eat",
+                "recipe_title": "Mild Coconut Tofu Curry"
+            }
+        ]
+    },
+    "friday": {
+        "breakfast": [
+            {
+                "action": "cook",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Gochujang Fried Rice"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "cook",
+                "recipe_title": "Japanese Pan Noodles"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Japanese Pan Noodles"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Japanese Pan Noodles"
+            }
+        ]
+    },
+    "saturday": {
+        "breakfast": [
+            {
+                "action": "cook",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Swedish Pancakes (Vegan)"
+            }
+        ],
+        "lunch": [
+            {
+                "action": "eat",
+                "recipe_title": "Japanese Pan Noodles"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Japanese Pan Noodles"
+            }
+        ],
+        "dinner": [
+            {
+                "action": "cook",
+                "recipe_title": "Chana Masala (Indian Chickpea Curry)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Chana Masala (Indian Chickpea Curry)"
+            },
+            {
+                "action": "eat",
+                "recipe_title": "Chana Masala (Indian Chickpea Curry)"
+            }
+        ]
+    }
+}

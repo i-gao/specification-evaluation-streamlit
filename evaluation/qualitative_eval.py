@@ -72,3 +72,42 @@ COMPARISON_LIKERT = [
     "B much more",
 ]
 COMPARISON_LIKERT_NUMERIC = [-2, -1, 0, 1, 2]
+
+# NASA-TLX (NASA Task Load Index) instrument
+# Reference: https://en.wikipedia.org/wiki/NASA-TLX
+NASA_TLX_SCALES = {
+    "Mental Demand": {
+        "description": "How much mental and perceptual activity was required? Was the task easy or demanding, simple or complex?",
+        "low_anchor": "Very Low",
+        "high_anchor": "Very High",
+    },
+    "Temporal Demand": {
+        "description": "How much time pressure did you feel due to the pace at which the tasks or task elements occurred? Was the pace slow or rapid?",
+        "low_anchor": "Very Low",
+        "high_anchor": "Very High",
+    },
+    "Performance": {
+        "description": "How successful were you in performing the task? How satisfied were you with your performance?",
+        "low_anchor": "Perfect",
+        "high_anchor": "Failure",
+    },
+    "Effort": {
+        "description": "How hard did you have to work (mentally and physically) to accomplish your level of performance?",
+        "low_anchor": "Very Low",
+        "high_anchor": "Very High",
+    },
+    "Frustration Level": {
+        "description": "How irritated, stressed, and annoyed versus content, relaxed, and complacent did you feel during the task?",
+        "low_anchor": "Very Low",
+        "high_anchor": "Very High",
+    },
+}
+
+# NASA-TLX uses a 0-100 scale with 5-point increments
+# For Streamlit sliders, we'll use 0-100 with step=5
+NASA_TLX_MIN_VALUE = 0
+NASA_TLX_MAX_VALUE = 100
+NASA_TLX_STEP = 5
+
+MUST_HAVES_QUESTION = "Think about the task. What are your **must-haves** or **must-not-haves**?"
+NICE_TO_HAVES_QUESTION = "Think about the task. What are your **nice-to-haves** or **nice-to-not-haves**?"
