@@ -340,11 +340,7 @@ class FileOrganizationDataset(SpecificationCollection):
         """
         sample_file = files_data[0] if files_data else {}
         file_fields = self._build_file_fields(sample_file)
-        
-        if uuid_or_custom == "custom":
-            files_json_path = os.path.join("dataset_files_gold", "custom_files.json")
-        else:
-            files_json_path = os.path.join("dataset_files", f"{uuid_or_custom}_files.json")
+        files_json_path = os.path.join("dataset_files", f"{uuid_or_custom}_files.json")
         
         return [
             {
