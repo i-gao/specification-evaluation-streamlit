@@ -457,6 +457,7 @@ def _custom_chat_screen():
         autovalidate=False,
         show_response_time=True,
         show_end_conversation_button=True,
+        show_frustration_button=True,
     )
 
 
@@ -488,6 +489,7 @@ def _fixed_chat_screen():
             autovalidate=False,
             show_response_time=True,
             show_end_conversation_button=True,
+            show_frustration_button=True,
         )
     with tabs[1]:
         components.render_specification()

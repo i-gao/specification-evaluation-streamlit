@@ -853,7 +853,7 @@ def search_exploration_countdown():
     Countdown for search exploration stage, displayed in the header.
     Duration is loaded from st.session_state.search_exploration_time (in seconds).
     """
-    if "search_exploration_start_time" not in st.session_state:
+    if st.session_state.get("search_exploration_start_time") is None:
         return
     
     # Get search duration from config - return early if not set
@@ -876,6 +876,7 @@ def chat_flow(
     autoscore: bool = False,
     show_response_time: bool = False,
     show_end_conversation_button: bool = False,
+    show_frustration_button: bool = False,
 ):
     """
     Chat flow. Handles the conversation between the user and the assistant.
@@ -914,6 +915,7 @@ def chat_flow(
                 _log_user_message(
                     user_msg, collect_feedback=(message_feedback_form is not None)
                 )
+            # Show end button if it should be shown (takes priority)
             if show_end_button:
                 btn_txt = "End conversation"
                 if st.session_state.get("budget_exhausted", False):
@@ -923,6 +925,24 @@ def chat_flow(
                         end_interaction("budget_exhausted")
                     else:
                         end_interaction("user_end")
+            # Show frustration button if enabled and end button is not shown
+            elif show_frustration_button:
+                if st.button("End Conversation", type="primary", key="frustration_button"):
+                    # Get the last assistant message
+                    last_assistant_msg = _get_last_msg_by_role("assistant")
+                    click_time = time.time()
+                    
+                    # Log to form results
+                    if "frustration_feedback" not in st.session_state.form_results:
+                        st.session_state.form_results["frustration_feedback"] = []
+                    st.session_state.form_results["frustration_feedback"].append({
+                        "last_assistant_message": last_assistant_msg,
+                        "click_time": click_time,
+                        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(click_time)),
+                    })
+                    
+                    # Show popup message
+                    st.toast("Please work with the assistant to complete the task. If you are satisfied, tell the assistant to end the conversation.", icon=":material/progress_activity:")
 
     # Display message feedback form if appropriate
     # Note: the feedback time currently DOES count towards the interaction budget
@@ -1149,7 +1169,7 @@ def _run_search_exploration():
         return
     
     # Get search duration from config - skip if not set
-    search_exploration_time = getattr(st.session_state, "search_exploration_time", None)
+    search_exploration_time = st.session_state.get("search_exploration_time", None)
     if search_exploration_time is None:
         # Skip search exploration if not configured
         st.session_state.search_exploration_completed = True
