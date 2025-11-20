@@ -1,7 +1,7 @@
-from datasets import load_from_disk
 from typing import List, Tuple, Dict, Any, Optional
 import os
 import json
+from datasets import load_dataset
 from langchain_core.tools import tool
 import random
 
@@ -406,7 +406,9 @@ class TravelPlannerDataset(SpecificationCollection):
 
         # Load all the problems
         split = "train" if dev else "validation"
-        self._rows = load_from_disk(f"{DATASET_ROOT}/assets/personalized_{split}")
+        json_path = f"{DATASET_ROOT}/assets/personalized_{split}.json"
+        # Load JSON file using HuggingFace Datasets
+        self._rows = load_dataset("json", data_files=json_path, split="train")
         self._rows = self._rows.select(
             range(1, len(self._rows))
         )  # first row is used as a demo in render_task_explanation
