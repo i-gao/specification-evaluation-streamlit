@@ -27,8 +27,9 @@ from data.workout_planning.db import (
     DAYS_OF_THE_WEEK,
     TIMES_OF_DAY,
 )
-from data.workout_planning import (
-    streamlit_search_interface as search_interface,
+from data.workout_planning.streamlit_search_interface import (
+    render_search_interface,
+    render_liked_items,
 )
 from data.reward import linear_reward, Constraint
 from data.workout_planning.parser import parse_workout_plan
@@ -489,9 +490,9 @@ class WorkoutPlanningDataset(SpecificationCollection):
                     "num_items_per_comparison": self.eval_num_items_per_comparison,
                     "db": self._exercise_db,
                 },
-                render_search_interface_fn=search_interface.render_search_interface,
+                render_search_interface_fn=render_search_interface,
                 render_search_interface_kwargs={"exercise_db": self._exercise_db},
-                render_liked_items_fn=search_interface.render_liked_items,
+                render_liked_items_fn=render_liked_items,
                 render_liked_items_kwargs={"exercise_db": self._exercise_db},
             )
             specs[ix] = spec
