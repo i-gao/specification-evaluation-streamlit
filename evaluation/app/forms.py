@@ -637,8 +637,6 @@ def assistant_ranking_exit_survey(
     # Restore original spec
     st.session_state.spec = original_spec
 
-    st.markdown("---")
-
     # Form for ranking and explanation (separate from conversation display)
     with st.form(key="assistant_ranking_exit_survey_form", border=False):
         # Complete ranking question (A > B > C style)
