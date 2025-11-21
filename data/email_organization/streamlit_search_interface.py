@@ -113,84 +113,84 @@ def render_search_interface(emails_data: Optional[List[Dict]] = None, **kwargs):
     # Show all emails at once
     st.markdown(f"### Assign {len(sorted_emails)} Emails to Folders")
         
-        for email in sorted_emails:
-            email_id = str(email.get("email_id", ""))
-            subject = email.get("subject", "")
-            from_addr = email.get("from", "")
-            date = email.get("date", "")
-            message = email.get("message", "")
-            to_addr = email.get("to", "")
-            
-            # Create a short date format for the label
-            date_short = ""
-            if date:
-                if "," in date:
-                    date_short = date.split(",")[0]
-                else:
-                    date_short = date
-            
-            # Create expander label
-            max_label_length = 120
-            date_suffix = f" | {date_short}" if date_short else ""
-            date_suffix_len = len(date_suffix)
-            
-            if subject:
-                main_part = f"{from_addr} | {subject}"
+    for email in sorted_emails:
+        email_id = str(email.get("email_id", ""))
+        subject = email.get("subject", "")
+        from_addr = email.get("from", "")
+        date = email.get("date", "")
+        message = email.get("message", "")
+        to_addr = email.get("to", "")
+        
+        # Create a short date format for the label
+        date_short = ""
+        if date:
+            if "," in date:
+                date_short = date.split(",")[0]
             else:
-                main_part = f"{from_addr} | (No Subject)"
-            
-            available_len = max_label_length - date_suffix_len
-            if len(main_part) > available_len:
-                truncate_len = available_len - 3
-                if subject:
-                    sender_part_len = len(from_addr) + 3
-                    if truncate_len > sender_part_len:
-                        max_subject_len = truncate_len - sender_part_len
-                        truncated_subject = subject[:max_subject_len] + "..."
-                        main_part = f"{from_addr} | {truncated_subject}"
-                    else:
-                        main_part = main_part[:truncate_len] + "..."
+                date_short = date
+        
+        # Create expander label
+        max_label_length = 120
+        date_suffix = f" | {date_short}" if date_short else ""
+        date_suffix_len = len(date_suffix)
+        
+        if subject:
+            main_part = f"{from_addr} | {subject}"
+        else:
+            main_part = f"{from_addr} | (No Subject)"
+        
+        available_len = max_label_length - date_suffix_len
+        if len(main_part) > available_len:
+            truncate_len = available_len - 3
+            if subject:
+                sender_part_len = len(from_addr) + 3
+                if truncate_len > sender_part_len:
+                    max_subject_len = truncate_len - sender_part_len
+                    truncated_subject = subject[:max_subject_len] + "..."
+                    main_part = f"{from_addr} | {truncated_subject}"
                 else:
                     main_part = main_part[:truncate_len] + "..."
+            else:
+                main_part = main_part[:truncate_len] + "..."
+        
+        expander_label = main_part + date_suffix
+        
+        with st.expander(expander_label, expanded=False):
+            # Email details
+            col1a, col1b = st.columns([3, 1])
+            with col1a:
+                st.markdown(f"**From:** {from_addr}")
+                if to_addr:
+                    st.markdown(f"**To:** {to_addr}")
+            with col1b:
+                st.markdown(f"**Email ID:** `{email_id}`")
+                st.markdown(f"**Date:** {date}")
             
-            expander_label = main_part + date_suffix
+            if subject:
+                st.markdown(f"**Subject:** {subject}")
             
-            with st.expander(expander_label, expanded=False):
-                # Email details
-                col1a, col1b = st.columns([3, 1])
-                with col1a:
-                    st.markdown(f"**From:** {from_addr}")
-                    if to_addr:
-                        st.markdown(f"**To:** {to_addr}")
-                with col1b:
-                    st.markdown(f"**Email ID:** `{email_id}`")
-                    st.markdown(f"**Date:** {date}")
-                
-                if subject:
-                    st.markdown(f"**Subject:** {subject}")
-                
-                st.markdown("**Message:**")
-                message_clean = "\n".join(line.rstrip() for line in message.split("\n"))
-                st.markdown(f"<div style='white-space: pre-wrap; margin-top: 0.5rem;'>{message_clean}</div>", unsafe_allow_html=True)
-                
-                # Folder assignment
-                current_folder = assignments.get(email_id, "Unsorted")
-                selected_folder = st.selectbox(
-                    "Assign to folder:",
-                    options=folders,
-                    index=folders.index(current_folder) if current_folder in folders else 0,
-                    key=f"folder_select_{email_id}",
-                    accept_new_options=True,
-                    placeholder="Select or create a folder"
-                )
-                
-                if selected_folder != current_folder:
-                    assignments[email_id] = selected_folder
-                    # Add new folder if it doesn't exist
-                    if selected_folder not in folders:
-                        folders.append(selected_folder)
-                    st.rerun()
-    
+            st.markdown("**Message:**")
+            message_clean = "\n".join(line.rstrip() for line in message.split("\n"))
+            st.markdown(f"<div style='white-space: pre-wrap; margin-top: 0.5rem;'>{message_clean}</div>", unsafe_allow_html=True)
+            
+            # Folder assignment
+            current_folder = assignments.get(email_id, "Unsorted")
+            selected_folder = st.selectbox(
+                "Assign to folder:",
+                options=folders,
+                index=folders.index(current_folder) if current_folder in folders else 0,
+                key=f"folder_select_{email_id}",
+                accept_new_options=True,
+                placeholder="Select or create a folder"
+            )
+            
+            if selected_folder != current_folder:
+                assignments[email_id] = selected_folder
+                # Add new folder if it doesn't exist
+                if selected_folder not in folders:
+                    folders.append(selected_folder)
+                st.rerun()
+
     # Store assignments in a format that can be retrieved
     # The assignments dict maps email_id -> folder_name
     # This can be used to construct y* later
