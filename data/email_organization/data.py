@@ -776,7 +776,7 @@ class EmailOrganizationDataset(SpecificationCollection):
 
             # Add the apply policy tool
             actions.append(self._create_apply_policy_tool(emails_data))
-
+           
             # Create gold policy
             gold_policy = self._create_gold_policy(
                 valid_rules, edge_cases, unique_folders, emails_data

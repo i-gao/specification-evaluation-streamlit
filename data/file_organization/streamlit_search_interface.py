@@ -115,85 +115,85 @@ def render_search_interface(files_data: Optional[List[Dict]] = None, **kwargs):
     # Show all files at once
     st.markdown(f"### Assign {len(sorted_files)} Files to Folders")
 
-        for file in sorted_files:
-            filename = file.get("filename", "")
-            create_date = file.get("create_date", "")
-            edit_date = file.get("edit_date", "")
-            file_preview = file.get("file_contents_preview", "")
+    for file in sorted_files:
+        filename = file.get("filename", "")
+        create_date = file.get("create_date", "")
+        edit_date = file.get("edit_date", "")
+        file_preview = file.get("file_contents_preview", "")
 
-            # Format dates
-            if create_date:
-                create_display = (
-                    create_date[:16] if len(create_date) > 10 else create_date[:10]
+        # Format dates
+        if create_date:
+            create_display = (
+                create_date[:16] if len(create_date) > 10 else create_date[:10]
+            )
+        else:
+            create_display = ""
+        if edit_date:
+            edit_display = edit_date[:16] if len(edit_date) > 10 else edit_date[:10]
+        else:
+            edit_display = ""
+
+        # Determine file icon
+        file_ext = filename.split(".")[-1].lower() if "." in filename else ""
+        file_icon = "📄"
+        if file_ext in ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"]:
+            file_icon = "🖼️"
+        elif file_ext in ["pdf"]:
+            file_icon = "📕"
+        elif file_ext in ["doc", "docx"]:
+            file_icon = "📘"
+        elif file_ext in ["xls", "xlsx", "csv"]:
+            file_icon = "📊"
+        elif file_ext in ["txt", "md", "rtf"]:
+            file_icon = "📝"
+        elif file_ext in ["py", "js", "java", "cpp", "c", "ts", "html", "css"]:
+            file_icon = "💻"
+        elif file_ext in ["zip", "rar", "7z", "tar", "gz"]:
+            file_icon = "📦"
+        elif file_ext in ["mp3", "mp4", "avi", "wav", "flac"]:
+            file_icon = "🎵"
+
+        with st.expander(f"{file_icon} {filename}", expanded=False):
+            # File details
+            col1a, col1b = st.columns([2, 1])
+            with col1a:
+                st.markdown(f"**Filename:** {filename}")
+                if create_display:
+                    st.markdown(f"**Date Created:** {create_display}")
+                if edit_display:
+                    st.markdown(f"**Date Modified:** {edit_display}")
+            with col1b:
+                if file_ext:
+                    st.markdown(f"**Type:** {file_ext.upper()}")
+
+            if file_preview:
+                st.markdown("**Preview:**")
+                preview_display = (
+                    file_preview[:500] + "..."
+                    if len(file_preview) > 500
+                    else file_preview
                 )
-            else:
-                create_display = ""
-            if edit_date:
-                edit_display = edit_date[:16] if len(edit_date) > 10 else edit_date[:10]
-            else:
-                edit_display = ""
+                st.code(preview_display, language=None)
 
-            # Determine file icon
-            file_ext = filename.split(".")[-1].lower() if "." in filename else ""
-            file_icon = "📄"
-            if file_ext in ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"]:
-                file_icon = "🖼️"
-            elif file_ext in ["pdf"]:
-                file_icon = "📕"
-            elif file_ext in ["doc", "docx"]:
-                file_icon = "📘"
-            elif file_ext in ["xls", "xlsx", "csv"]:
-                file_icon = "📊"
-            elif file_ext in ["txt", "md", "rtf"]:
-                file_icon = "📝"
-            elif file_ext in ["py", "js", "java", "cpp", "c", "ts", "html", "css"]:
-                file_icon = "💻"
-            elif file_ext in ["zip", "rar", "7z", "tar", "gz"]:
-                file_icon = "📦"
-            elif file_ext in ["mp3", "mp4", "avi", "wav", "flac"]:
-                file_icon = "🎵"
+            # Folder assignment
+            current_folder = assignments.get(filename, "Uncategorized")
+            selected_folder = st.selectbox(
+                "Assign to folder:",
+                options=folders,
+                index=folders.index(current_folder)
+                if current_folder in folders
+                else 0,
+                key=f"folder_select_{filename}",
+                accept_new_options=True,
+                placeholder="Select or create a folder",
+            )
 
-            with st.expander(f"{file_icon} {filename}", expanded=False):
-                # File details
-                col1a, col1b = st.columns([2, 1])
-                with col1a:
-                    st.markdown(f"**Filename:** {filename}")
-                    if create_display:
-                        st.markdown(f"**Date Created:** {create_display}")
-                    if edit_display:
-                        st.markdown(f"**Date Modified:** {edit_display}")
-                with col1b:
-                    if file_ext:
-                        st.markdown(f"**Type:** {file_ext.upper()}")
-
-                if file_preview:
-                    st.markdown("**Preview:**")
-                    preview_display = (
-                        file_preview[:500] + "..."
-                        if len(file_preview) > 500
-                        else file_preview
-                    )
-                    st.code(preview_display, language=None)
-
-                # Folder assignment
-                current_folder = assignments.get(filename, "Uncategorized")
-                selected_folder = st.selectbox(
-                    "Assign to folder:",
-                    options=folders,
-                    index=folders.index(current_folder)
-                    if current_folder in folders
-                    else 0,
-                    key=f"folder_select_{filename}",
-                    accept_new_options=True,
-                    placeholder="Select or create a folder",
-                )
-
-                if selected_folder != current_folder:
-                    assignments[filename] = selected_folder
-                    # Add new folder if it doesn't exist
-                    if selected_folder not in folders:
-                        folders.append(selected_folder)
-                    st.rerun()
+            if selected_folder != current_folder:
+                assignments[filename] = selected_folder
+                # Add new folder if it doesn't exist
+                if selected_folder not in folders:
+                    folders.append(selected_folder)
+                st.rerun()
 
     # Store assignments in a format that can be retrieved
     # The assignments dict maps filename -> folder_name
