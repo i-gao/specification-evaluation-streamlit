@@ -32,6 +32,7 @@ def render_eval(
     people_number: int,
     dest: str,
     num_items_per_comparison: int = 5,
+    driving_info=None,
     **kwargs,
 ):
     """
@@ -44,6 +45,7 @@ def render_eval(
         people_number=people_number,
         dest=dest,
         num_items_per_comparison=num_items_per_comparison,
+        driving_info=driving_info,
     )
     if not ranking_done:
         return False, None
@@ -59,15 +61,16 @@ def render_eval_first_page(
     people_number: int,
     dest: str,
     num_items_per_comparison: int = 5,
+    driving_info=None,
 ):
     """
     For each kind of thing, display the carousel with some decoys, and ask user to rank options among valid options in the actual dest
     """
     parsed_prediction = parse_travel_plan(
-        final_prediction, include_info=True, db=db, people_number=people_number
+        final_prediction, include_info=True, db=db, people_number=people_number, driving_info=driving_info
     )
     parsed_y0 = parse_travel_plan(
-        y0, include_info=True, db=db, people_number=people_number
+        y0, include_info=True, db=db, people_number=people_number, driving_info=driving_info
     )
 
     # 1. Transportation (to)
@@ -254,6 +257,7 @@ PRETTY_NAMES = {
     "transportation_from": "transportation options back to your origin city",
 }
 
+
 @st.fragment
 def _render_carousel(
     predicted: List[Dict[str, Any]],
@@ -301,7 +305,7 @@ def _render_carousel(
     predicted_names = set([p["name"] for p in predicted])
     y0_names = set([p["name"] for p in y0])
     diff_names = (predicted_names - y0_names).union(y0_names - predicted_names)
-    if not diff_names:
+    if not diff_names or len(diff_names) == 1:
         # No difference - mark as done with empty rankings
         st.session_state.form_results["final_evaluation"][name] = {
             "ranking": {},
@@ -313,15 +317,26 @@ def _render_carousel(
 
     predicted_options = [p for p in predicted if p["name"] in diff_names]
     y0_options = [p for p in y0 if p["name"] in diff_names]
-    if num_items_per_comparison is not None and len(diff_names) > num_items_per_comparison:
+    if (
+        num_items_per_comparison is not None
+        and len(diff_names) > num_items_per_comparison
+    ):
         # try to get a roughly balanced set of options
         if len(predicted_options) < num_items_per_comparison / 2:
-            options = predicted_options + y0_options[: num_items_per_comparison - len(predicted_options)]
+            options = (
+                predicted_options
+                + y0_options[: num_items_per_comparison - len(predicted_options)]
+            )
         elif len(y0_options) < num_items_per_comparison / 2:
-            options = predicted_options[: num_items_per_comparison - len(y0_options)] + y0_options
+            options = (
+                predicted_options[: num_items_per_comparison - len(y0_options)]
+                + y0_options
+            )
         else:
             options = (
-                predicted_options[: num_items_per_comparison // 2 + num_items_per_comparison % 2]
+                predicted_options[
+                    : num_items_per_comparison // 2 + num_items_per_comparison % 2
+                ]
                 + y0_options[: num_items_per_comparison // 2]
             )
     else:
@@ -352,7 +367,9 @@ def _render_carousel(
         )
 
     st.markdown("### Review the assistant's recommendations")
-    st.markdown(f"The assistant has recommended {len(options)} {PRETTY_NAMES.get(name, name)}s for you.")
+    st.markdown(
+        f"The assistant has recommended {len(options)} {PRETTY_NAMES.get(name, name)}s for you."
+    )
     carousel([lambda i=i: display_fn(i) for i in range(len(options))], height=400)
     with st.form(key=f"ranking_form_{name}"):
         rank = st.multiselect(
@@ -386,6 +403,7 @@ def render_comparison(
     valid2: bool,
     metadata1: Dict[str, Any],
     metadata2: Dict[str, Any],
+    driving_info=None,
 ) -> None:
     # Randomize which plan goes on which side (stable across reruns)
     side_key = "travel_comparison_side_assignment"
@@ -401,7 +419,7 @@ def render_comparison(
     valid_b = valid2 if y1_on_left else valid1
     metadata_a = metadata1 if y1_on_left else metadata2
     metadata_b = metadata2 if y1_on_left else metadata1
-    
+
     # Render in two tabs
     tab1, tab2 = st.tabs(["Plan A", "Plan B"])
     with tab1:
@@ -421,7 +439,7 @@ def render_comparison(
                 )
                 if constraints_md:
                     st.markdown(constraints_md)
-        render_travel_plan_streamlit(plan_a, db, people_number)
+        render_travel_plan_streamlit(plan_a, db, people_number, driving_info=driving_info)
 
     with tab2:
         if valid_b is not None:
@@ -440,14 +458,14 @@ def render_comparison(
                 )
                 if constraints_md:
                     st.markdown(constraints_md)
-        render_travel_plan_streamlit(plan_b, db, people_number)
+        render_travel_plan_streamlit(plan_b, db, people_number, driving_info=driving_info)
 
 
 def render_travel_plan_streamlit(
-    travel_plan: str, travel_db: TravelDB, people_number: int
+    travel_plan: str, travel_db: TravelDB, people_number: int, driving_info=None
 ) -> None:
     travel_plan = parse_travel_plan(
-        travel_plan, include_info=True, db=travel_db, people_number=people_number
+        travel_plan, include_info=True, db=travel_db, people_number=people_number, driving_info=driving_info
     )
 
     if not travel_plan:

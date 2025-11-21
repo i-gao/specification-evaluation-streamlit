@@ -1,4 +1,4 @@
-from typing import List, Tuple, Dict, Any, Optional
+from typing import List, Tuple, Dict, Any, Optional, Union
 import os
 import json
 from datasets import load_dataset
@@ -18,7 +18,7 @@ from utils.misc import parse_json, replace_tags_with_link
 from utils.streamlit_types import FormElement, form_element_to_streamlit
 import streamlit as st
 import data.travel_planner.streamlit_render as renderer
-from data.travel_planner.parser import parse_travel_plan
+from data.travel_planner.parser import parse_travel_plan, _remove_duration_from_transportation
 
 from data.travel_planner.reward_utils.tp_utils.func import get_valid_name_city
 from data.travel_planner.reward import (
@@ -464,11 +464,15 @@ class TravelPlannerDataset(SpecificationCollection):
 
             task["local_constraint"] = json.loads(task["local_constraint"])
             task["driving_info"] = json.loads(task["driving_info"])
+            # Remove duration from all Content fields in driving_info
+            task["driving_info"] = _process_driving_info(task["driving_info"])
             task["annotated_plan"] = (
                 [d for d in json.loads(task["annotated_plan"]) if len(d) > 0]
                 if task["annotated_plan"] is not None
                 else None
             )
+            # Remove duration from transportation fields in annotated_plan
+            task["annotated_plan"] = _process_annotated_plan(task["annotated_plan"])
             task["preferences"] = json.loads(task["preferences"])
             task["preference_weights"] = json.loads(task["preference_weights"])
             task["date"] = eval(task["date"])
@@ -521,7 +525,7 @@ class TravelPlannerDataset(SpecificationCollection):
                 yhat: str, raise_errors: bool = False
             ) -> Optional[Any]:
                 """Parse travel plan from string."""
-                out = parse_travel_plan(yhat)
+                out = parse_travel_plan(yhat, driving_info=task["driving_info"])
                 if out is None:
                     if raise_errors:
                         raise ValueError(
@@ -547,17 +551,27 @@ class TravelPlannerDataset(SpecificationCollection):
                 reward_fn_tool_description="Score the travel plan based on preference constraints",
                 ystar=ystar,
                 parse_solutions_fn=lambda msg: parse_travel_plan_solutions(
-                    msg, self._travel_db, task["dest"]
+                    msg,
+                    self._travel_db,
+                    task["dest"],
+                    driving_info=task["driving_info"],
                 ),
                 parse_solutions_and_options_fn=lambda msg: parse_travel_plan_solutions_and_options(
-                    msg, self._travel_db, task["dest"]
+                    msg,
+                    self._travel_db,
+                    task["dest"],
+                    driving_info=task["driving_info"],
                 ),
                 # metric_name=None,  # Not provided
                 # baseline_scores=None,  # Not provided
                 render_task_explanation=render_fixed_task_explanation,
                 actions=actions
                 + get_driving_actions(task["driving_info"])
-                + get_compute_cost_action(task.get("people_number", 1), task["days"]),
+                + get_compute_cost_action(
+                    task.get("people_number", 1),
+                    task["days"],
+                    driving_info=task["driving_info"],
+                ),
                 msg_fmt_instructions=MSG_FMT_INSTRUCTIONS,
                 prediction_fmt_instructions=PREDICTION_FMT_INSTRUCTIONS,
                 render_msg_fn=output_to_streamlit,
@@ -614,6 +628,14 @@ class TravelPlannerDataset(SpecificationCollection):
         for ix in indexes:
             # Parse task data
             fixed_task = self._custom_rows[ix]
+            
+            # Process annotated_plan to remove duration from transportation fields
+            annotated_plan = fixed_task.get("annotated_plan")
+            if annotated_plan is not None:
+                if isinstance(annotated_plan, str):
+                    annotated_plan = json.loads(annotated_plan)
+                annotated_plan = _process_annotated_plan(annotated_plan)
+            
             task = {
                 "org": fixed_task["org"],
                 "dest": fixed_task["dest"],
@@ -623,7 +645,7 @@ class TravelPlannerDataset(SpecificationCollection):
                 "people_number": fixed_task["people_number"],
                 "cities": fixed_task["cities"],
                 "local_constraint": {},  # drop local constraints from the fixed task
-                "driving_info": json.loads(fixed_task["driving_info"]),
+                "driving_info": _process_driving_info(json.loads(fixed_task["driving_info"])),
                 "budget": 999999,  # give a bit of leeway
                 # drop preferences and preference weights from the fixed task
             }
@@ -682,7 +704,7 @@ class TravelPlannerDataset(SpecificationCollection):
                 people_number=1,
                 validity_fn_tool_name="check_travel_plan_validity",
                 validity_fn_tool_description="Check if the travel plan is valid",
-                y0=f"<travel_plan>{json.dumps(fixed_task['annotated_plan']) if isinstance(fixed_task['annotated_plan'], dict) else fixed_task['annotated_plan']}</travel_plan>",
+                y0=f"<travel_plan>{json.dumps(annotated_plan) if annotated_plan is not None else ''}</travel_plan>",
                 render_task_explanation=self._render_custom_task_explanation,
                 actions=actions
                 + get_driving_actions(task["driving_info"])
@@ -701,16 +723,16 @@ class TravelPlannerDataset(SpecificationCollection):
                     dest=task["dest"], state=dest_state
                 ),
                 db=self._travel_db,
-                render_evaluation_fn=lambda **kwargs: renderer.render_eval(
-                    **kwargs, db=self._travel_db
-                ),
+                render_evaluation_fn=renderer.render_eval,
                 render_evaluation_kwargs={
                     "people_number": 1,
-                    "y0": f"<travel_plan>{json.dumps(fixed_task['annotated_plan']) if isinstance(fixed_task['annotated_plan'], dict) else fixed_task['annotated_plan']}</travel_plan>",
+                    "y0": f"<travel_plan>{json.dumps(annotated_plan) if annotated_plan is not None else ''}</travel_plan>",
                     "dest": task["dest"],
                     "num_items_per_comparison": getattr(
                         self, "eval_num_items_per_comparison", 5
                     ),
+                    "driving_info": task["driving_info"],
+                    "db": self._travel_db,
                 },
                 dataset_name=self.dataset_name,
                 driving_options=task["driving_info"],
@@ -776,7 +798,10 @@ class TravelPlannerDataset(SpecificationCollection):
             st.markdown(
                 renderer._render_travel_summary_table(
                     parse_travel_plan(
-                        json.dumps(plan), include_info=True, db=self._travel_db
+                        json.dumps(plan),
+                        include_info=True,
+                        db=self._travel_db,
+                        driving_info=None,
                     ),
                     self._travel_db,
                     1,
@@ -840,7 +865,10 @@ class TravelPlannerDataset(SpecificationCollection):
             st.markdown(
                 renderer._render_travel_summary_table(
                     parse_travel_plan(
-                        json.dumps(modified_plan), include_info=True, db=self._travel_db
+                        json.dumps(modified_plan),
+                        include_info=True,
+                        db=self._travel_db,
+                        driving_info=None,
                     ),
                     self._travel_db,
                     1,
@@ -895,7 +923,10 @@ class TravelPlannerDataset(SpecificationCollection):
             st.markdown(
                 renderer._render_travel_summary_table(
                     parse_travel_plan(
-                        json.dumps(modified_plan), include_info=True, db=self._travel_db
+                        json.dumps(modified_plan),
+                        include_info=True,
+                        db=self._travel_db,
+                        driving_info=None,
                     ),
                     self._travel_db,
                     1,
@@ -954,7 +985,10 @@ class TravelPlannerDataset(SpecificationCollection):
             st.markdown(
                 renderer._render_travel_summary_table(
                     parse_travel_plan(
-                        json.dumps(modified_plan), include_info=True, db=self._travel_db
+                        json.dumps(modified_plan),
+                        include_info=True,
+                        db=self._travel_db,
+                        driving_info=None,
                     ),
                     self._travel_db,
                     1,
@@ -970,6 +1004,71 @@ class TravelPlannerDataset(SpecificationCollection):
         st.markdown(
             "* Accommodations have rules: you must follow those rules when booking."
         )
+
+
+def _process_driving_info(driving_info: Union[Dict[str, str], List[Dict[str, str]], None]) -> Union[Dict[str, str], List[Dict[str, str]], None]:
+    """
+    Process driving_info to remove duration from all Content fields.
+    
+    Args:
+        driving_info: Either a dict, list of dicts with "Content" fields, or None
+        
+    Returns:
+        Processed driving_info with duration removed from Content fields, or None if input is None
+    """
+    if driving_info is None:
+        return None
+    
+    if isinstance(driving_info, dict):
+        # Dict format: {key: content}
+        processed = {}
+        for key, content in driving_info.items():
+            processed[key] = _remove_duration_from_transportation(content)
+        return processed
+    elif isinstance(driving_info, list):
+        # List format: [{"Description": "...", "Content": "..."}, ...]
+        processed = []
+        for item in driving_info:
+            if isinstance(item, dict):
+                processed_item = item.copy()
+                if "Content" in processed_item:
+                    processed_item["Content"] = _remove_duration_from_transportation(processed_item["Content"])
+                processed.append(processed_item)
+            else:
+                processed.append(item)
+        return processed
+    else:
+        return driving_info
+
+
+def _process_annotated_plan(annotated_plan: Optional[List[Dict[str, Any]]]) -> Optional[List[Dict[str, Any]]]:
+    """
+    Process annotated_plan to remove duration from transportation fields.
+    
+    Args:
+        annotated_plan: List of day dictionaries, each with a "transportation" field, or None
+        
+    Returns:
+        Processed annotated_plan with duration removed from transportation fields, or None if input is None
+    """
+    if annotated_plan is None:
+        return None
+    
+    if not isinstance(annotated_plan, list):
+        return annotated_plan
+    
+    processed = []
+    for day in annotated_plan:
+        if isinstance(day, dict):
+            processed_day = day.copy()
+            # Remove duration from transportation field if it exists and is not "-"
+            if "transportation" in processed_day and processed_day["transportation"] != "-":
+                processed_day["transportation"] = _remove_duration_from_transportation(processed_day["transportation"])
+            processed.append(processed_day)
+        else:
+            processed.append(day)
+    
+    return processed
 
 
 def get_driving_actions(refs: Dict[str, str]) -> List[Action]:
@@ -995,7 +1094,11 @@ def get_driving_actions(refs: Dict[str, str]) -> List[Action]:
     ]
 
 
-def get_compute_cost_action(people_number: int, days: int) -> List[Action]:
+def get_compute_cost_action(
+    people_number: int,
+    days: int,
+    driving_info: Union[Dict[str, str], List[Dict[str, str]]] = None,
+) -> List[Action]:
     """
     Get action for computing the total cost of a travel plan.
 
@@ -1056,7 +1159,7 @@ def get_compute_cost_action(people_number: int, days: int) -> List[Action]:
         """
         try:
             # Parse the travel plan
-            parsed_plan = parse_travel_plan(travel_plan)
+            parsed_plan = parse_travel_plan(travel_plan, driving_info=driving_info)
             if parsed_plan is None:
                 return "Error: Could not parse the travel plan. Please provide a valid travel plan in JSON format."
 
@@ -1125,7 +1228,7 @@ def validity_fn(
     """
     Check if the travel plan is valid by checking commonsense constraints and budget.
     """
-    yhat_parsed = parse_travel_plan(yhat)
+    yhat_parsed = parse_travel_plan(yhat, driving_info=query_data.get("driving_info"))
     if yhat_parsed is None:
         if raise_errors:
             raise Exception("Could not parse a travel plan from the message.")
@@ -1194,7 +1297,7 @@ def reward_fn(
     Returns:
         Tuple of (score, metadata) where score is the preference score
     """
-    yhat_parsed = parse_travel_plan(yhat)
+    yhat_parsed = parse_travel_plan(yhat, driving_info=query_data.get("driving_info"))
     if yhat_parsed is None:
         if raise_errors:
             raise Exception("Could not parse a travel plan from the message.")
@@ -1318,7 +1421,12 @@ def output_to_streamlit(
 from utils.misc import parse_for_answer_tags
 
 
-def parse_travel_plan_solutions(msg: str, db: TravelDB, dest: str) -> List[str]:
+def parse_travel_plan_solutions(
+    msg: str,
+    db: TravelDB,
+    dest: str,
+    driving_info: Union[Dict[str, str], List[Dict[str, str]]] = None,
+) -> List[str]:
     """Parse complete travel plan solutions from string (does not include individual travel item mentions)."""
     to_return = []
     # First try to parse from <travel_plan> tags
@@ -1326,19 +1434,22 @@ def parse_travel_plan_solutions(msg: str, db: TravelDB, dest: str) -> List[str]:
         msg, keyword="travel_plan", return_none_if_not_found=True
     )
     if travel_plan_content:
-        out = parse_travel_plan(travel_plan_content)
+        out = parse_travel_plan(travel_plan_content, driving_info=driving_info)
         if out is not None:
             to_return.append(json.dumps(out))
     else:
         # Fall back to parsing JSON directly (for backward compatibility)
-        out = parse_travel_plan(msg)
+        out = parse_travel_plan(msg, driving_info=driving_info)
         if out is not None:
             to_return.append(json.dumps(out))
     return to_return
 
 
 def parse_travel_plan_solutions_and_options(
-    msg: str, db: TravelDB, dest: str
+    msg: str,
+    db: TravelDB,
+    dest: str,
+    driving_info: Union[Dict[str, str], List[Dict[str, str]]] = None,
 ) -> List[str]:
     """Parse both complete travel plan solutions and individual travel item mentions from string."""
     to_return = []
@@ -1347,7 +1458,7 @@ def parse_travel_plan_solutions_and_options(
         msg, keyword="travel_plan", return_none_if_not_found=True
     )
     if travel_plan_content:
-        out = parse_travel_plan(msg)
+        out = parse_travel_plan(msg, driving_info=driving_info)
         if out is not None:
             to_return.append(json.dumps(out))
 
