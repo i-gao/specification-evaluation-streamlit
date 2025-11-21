@@ -644,6 +644,13 @@ class FileOrganizationDataset(SpecificationCollection):
 
             # Create the y0 (gold policy as JSON string)
             y0 = "<policy>" + json.dumps(gold_policy) + "</policy>"
+            
+            # Create wrapper functions for custom specs that don't show correct_folder
+            def render_custom_file_policy_results(msg: str, files_data: List[Dict]) -> None:
+                return render_file_policy_results(msg, files_data, show_correct_folder=False)
+            
+            def render_custom_file_policy_results_txt(msg: str, files_data: List[Dict]) -> str:
+                return render_file_policy_results_txt(msg, files_data, show_correct_folder=False)
 
             spec = CustomSpecification(
                 dataset_name=self.dataset_name,
@@ -660,8 +667,8 @@ class FileOrganizationDataset(SpecificationCollection):
                 actions=actions,
                 msg_fmt_instructions=PREDICTION_FMT_INSTRUCTIONS,
                 prediction_fmt_instructions=PREDICTION_FMT_INSTRUCTIONS,
-                render_msg_fn=render_file_policy_results,
-                render_msg_fn_txt=render_file_policy_results_txt,
+                render_msg_fn=render_custom_file_policy_results,
+                render_msg_fn_txt=render_custom_file_policy_results_txt,
                 render_msg_kwargs=["files_data"],
                 name="file_organization_custom",
                 state_files=[filename] if filename else [],

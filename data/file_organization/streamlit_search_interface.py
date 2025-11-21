@@ -244,4 +244,4 @@ def render_user_policy(assignments: Dict[str, str], files_data: List[Dict]):
     # This will show the files organized by folder
     from data.file_organization.streamlit_render import render_file_policy_results
 
-    render_file_policy_results(user_policy_str, files_data)
+    render_file_policy_results(user_policy_str, files_data, show_correct_folder=False)

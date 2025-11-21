@@ -1,9 +1,10 @@
 from typing import List, Dict, Tuple, Optional
 import streamlit as st
+import pandas as pd
 import json
 import random
 from datetime import datetime
-from utils.misc import parse_for_answer_tags
+from utils.misc import parse_for_answer_tags, replace_tags_with_link
 from data.file_organization.reward import apply_policy
 from data.file_organization.parser import parse_policy
 
@@ -186,7 +187,7 @@ def render_file_grid_header() -> None:
     )
 
 
-def render_file_policy_results(msg: str, files_data: List[Dict]) -> None:
+def render_file_policy_results(msg: str, files_data: List[Dict], show_correct_folder: bool = True) -> None:
     """
     Render the file policy results grouped by folder, showing files within each folder.
     Displays in a Windows Explorer-like interface.
@@ -194,23 +195,83 @@ def render_file_policy_results(msg: str, files_data: List[Dict]) -> None:
     Args:
         msg: The message containing the policy
         files_data: List of file dictionaries
+        show_correct_folder: Whether to show the correct folder column (for fixed specs). 
+                            Set to False for custom specs where there's no "correct" folder.
     """
+    # Build mapping from filename to full file data and correct folder
+    filename_to_data = {}
+    filename_to_folder = {}
+    for file in files_data:
+        filename = file.get("filename", "")
+        if filename:
+            filename_to_data[filename] = file
+            # Get correct folder from theme (theme is converted to folder name by replacing _ with space)
+            theme = file.get("theme") or file.get("_theme")
+            if theme:
+                # Convert theme to folder name (same logic as in reward.py)
+                folder = theme.replace("_", " ")
+                filename_to_folder[filename] = folder
+
+    # Parse file tags from the message
+    mentioned_files = parse_for_answer_tags(
+        msg, keyword="file", return_all=True, return_none_if_not_found=True
+    )
+
     # Extract policy and find its position in the message
     policy_str, start_end = parse_for_answer_tags(
         msg, keyword="policy", return_start_end=True, return_none_if_not_found=True
     )
 
-    # Display message without the policy section
+    # Generate unique ID for this message to avoid conflicts when multiple messages are rendered
+    message_hash = str(hash(msg))[:8]
+    unique_id = f"mentioned-files-{message_hash}"
+
+    # Display message with file tags replaced by links
     if start_end is not None:
         # Message has policy tags - display everything except the policy
         before_policy = msg[: start_end[0]]
         after_policy = msg[start_end[1] :]
         message_without_policy = before_policy + after_policy
         if message_without_policy.strip():
-            st.markdown(message_without_policy)
+            display_msg = replace_tags_with_link(
+                message_without_policy, tag="file", href=f"#{unique_id}"
+            )
+            st.markdown(display_msg, unsafe_allow_html=True)
     else:
         # No policy tags found - display the full message
-        st.markdown(msg)
+        display_msg = replace_tags_with_link(msg, tag="file", href=f"#{unique_id}")
+        st.markdown(display_msg, unsafe_allow_html=True)
+
+    # Display mentioned files with their full information
+    if mentioned_files:
+        file_info_list = []
+        for file_group in mentioned_files:
+            # Handle comma-separated filenames
+            filenames = [fname.strip() for fname in file_group.split(",") if fname.strip()]
+            for filename in filenames:
+                if filename in filename_to_data:
+                    file_data = filename_to_data[filename]
+                    file_info = {
+                        "filename": filename,
+                        "create_date": file_data.get("create_date", ""),
+                        "edit_date": file_data.get("edit_date", ""),
+                        "file_contents_preview": (file_data.get("file_contents_preview", "")[:500]
+                        + (
+                            "..."
+                            if len(file_data.get("file_contents_preview", "")) > 500
+                            else ""
+                        )),
+                    }
+                    # Only add correct_folder for fixed specs
+                    if show_correct_folder:
+                        file_info["correct_folder"] = filename_to_folder.get(filename, "Unknown")
+                    file_info_list.append(file_info)
+
+        if file_info_list:
+            with st.expander("File Information", expanded=True):
+                st.markdown(f'<div id="{unique_id}"></div>', unsafe_allow_html=True)
+                df = pd.DataFrame(file_info_list)
+                st.dataframe(df, hide_index=True)
 
     # Parse the policy from the message
     policy = parse_policy(msg, raise_errors=False)
@@ -387,22 +448,77 @@ def render_file_policy_results(msg: str, files_data: List[Dict]) -> None:
                     st.markdown("</div>", unsafe_allow_html=True)
 
 
-def render_file_policy_results_txt(msg: str, files_data: List[Dict]) -> str:
+def render_file_policy_results_txt(msg: str, files_data: List[Dict], show_correct_folder: bool = True) -> str:
     """
     Render the file policy results as JSON organized by folder, with files listed under each folder.
 
     Args:
         msg: The message containing the policy
         files_data: List of file dictionaries
+        show_correct_folder: Whether to show the correct folder column (for fixed specs). 
+                            Set to False for custom specs where there's no "correct" folder.
 
     Returns:
         JSON string with folders as keys and arrays of file objects as values
     """
+    # Build mapping from filename to full file data and correct folder
+    filename_to_data = {}
+    filename_to_folder = {}
+    for file in files_data:
+        filename = file.get("filename", "")
+        if filename:
+            filename_to_data[filename] = file
+            # Get correct folder from theme (theme is converted to folder name by replacing _ with space)
+            theme = file.get("theme") or file.get("_theme")
+            if theme:
+                # Convert theme to folder name (same logic as in reward.py)
+                folder = theme.replace("_", " ")
+                filename_to_folder[filename] = folder
+
+    # Parse file tags from the message
+    mentioned_files = parse_for_answer_tags(
+        msg, keyword="file", return_all=True, return_none_if_not_found=True
+    )
+
+    # Helper function to build file info list
+    def build_file_info_list():
+        file_info_list = []
+        for file_group in mentioned_files:
+            # Handle comma-separated filenames
+            filenames = [fname.strip() for fname in file_group.split(",") if fname.strip()]
+            for filename in filenames:
+                if filename in filename_to_data:
+                    file_data = filename_to_data[filename]
+                    file_info = {
+                        "filename": filename,
+                        "create_date": file_data.get("create_date", ""),
+                        "edit_date": file_data.get("edit_date", ""),
+                        "file_contents_preview": (file_data.get("file_contents_preview", "")[:500]
+                        + (
+                            "..."
+                            if len(file_data.get("file_contents_preview", "")) > 500
+                            else ""
+                        )),
+                    }
+                    # Only add correct_folder for fixed specs
+                    if show_correct_folder:
+                        file_info["correct_folder"] = filename_to_folder.get(filename, "Unknown")
+                    file_info_list.append(file_info)
+        return file_info_list
+
     # Parse the policy from the message
     policy = parse_policy(msg, raise_errors=False)
 
     if policy is None:
-        # If we can't parse the policy, return the raw message
+        # If we can't parse the policy, return the raw message with file info if available
+        if mentioned_files:
+            file_info_list = build_file_info_list()
+            if file_info_list:
+                return (
+                    msg
+                    + "\n\n------- Information about mentioned files ----------\n\n"
+                    + json.dumps(file_info_list, indent=2)
+                )
         return msg
 
     # Apply the policy to all files
@@ -410,11 +526,20 @@ def render_file_policy_results_txt(msg: str, files_data: List[Dict]) -> str:
         organized = apply_policy(files_data, policy)
     except Exception as e:
         # Return error message as JSON
-        return (
+        error_msg = (
             msg
             + "\n\n-----------Working directory state after running the policy:-----------\n\n"
             + json.dumps({"error": f"Error applying policy: {str(e)}"})
         )
+        # Add file info if available
+        if mentioned_files:
+            file_info_list = build_file_info_list()
+            if file_info_list:
+                error_msg += (
+                    "\n\n------- Information about mentioned files ----------\n\n"
+                    + json.dumps(file_info_list, indent=2)
+                )
+        return error_msg
 
     # Truncate each file_contents_preview to 500 characters
     for folder, files in organized.items():
@@ -424,11 +549,22 @@ def render_file_policy_results_txt(msg: str, files_data: List[Dict]) -> str:
                 file["file_contents_preview"] = preview[:500] + "..."
             file["new_filename"] = file.pop("filename")
 
-    return (
+    result = (
         msg
         + "\n\n-----------Working directory state after running the policy:-----------\n\n"
         + json.dumps(organized)
     )
+
+    # Add file info if available
+    if mentioned_files:
+        file_info_list = build_file_info_list()
+        if file_info_list:
+            result += (
+                "\n\n------- Information about mentioned files ----------\n\n"
+                + json.dumps(file_info_list, indent=2)
+            )
+
+    return result
 
 
 def render_eval(
@@ -960,7 +1096,7 @@ def render_custom_task_explanation(files_data: List[Dict] = None):
         st.info(
             "*Example:* A file organization policy that groups files into folders and renames them"
         )
-        render_file_policy_results(example_msg, example_files)
+        render_file_policy_results(example_msg, example_files, show_correct_folder=False)
 
     st.markdown(
         "Think about how you want to organize your files. The assistant should create a policy that groups related files together "
