@@ -28,7 +28,6 @@ def render_eval(
         db=db,
         num_items_per_comparison=num_items_per_comparison,
     )
-    print("Ranking done:", ranking_done)
     if not ranking_done:
         return False, None
 

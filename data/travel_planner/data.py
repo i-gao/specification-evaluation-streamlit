@@ -647,6 +647,8 @@ class TravelPlannerDataset(SpecificationCollection):
             )
 
             # Get state for destination city
+            org_state = self._travel_db.get_city_state(task["org"])
+            org_with_state = f"{task['org']}, {org_state}" if org_state else task["org"]
             dest_state = self._travel_db.get_city_state(task["dest"])
             dest_with_state = (
                 f"{task['dest']}, {dest_state}" if dest_state else task["dest"]
@@ -659,7 +661,7 @@ class TravelPlannerDataset(SpecificationCollection):
             )
 
             # Create custom specification
-            initial_specification = f"Plan a trip from {task['org']} to {dest_with_state} over {task['days']} days from {task['date'][0]} to {task['date'][-1]}"
+            initial_specification = f"Plan a trip from {org_with_state} to {dest_with_state} over {task['days']} days from {task['date'][0]} to {task['date'][-1]}"
             spec = CustomSpecification(
                 initial_specification=initial_specification,
                 current_specification=initial_specification,

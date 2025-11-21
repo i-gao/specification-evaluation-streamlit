@@ -249,6 +249,11 @@ def render_eval_second_page(
     return False, None
 
 
+PRETTY_NAMES = {
+    "transportation_to": "transportation options to your destination",
+    "transportation_from": "transportation options back to your origin city",
+}
+
 @st.fragment
 def _render_carousel(
     predicted: List[Dict[str, Any]],
@@ -297,7 +302,13 @@ def _render_carousel(
     y0_names = set([p["name"] for p in y0])
     diff_names = (predicted_names - y0_names).union(y0_names - predicted_names)
     if not diff_names:
-        # don't render anything
+        # No difference - mark as done with empty rankings
+        st.session_state.form_results["final_evaluation"][name] = {
+            "ranking": {},
+            "y0_ranks": {},
+            "predicted_ranks": {},
+        }
+        st.rerun()
         return
 
     predicted_options = [p for p in predicted if p["name"] in diff_names]
@@ -341,8 +352,8 @@ def _render_carousel(
         )
 
     st.markdown("### Review the assistant's recommendations")
-    st.markdown(f"The assistant has recommended {len(options)} {name}s for you.")
-    carousel([lambda i=i: display_fn(i) for i in range(len(options))], height=300)
+    st.markdown(f"The assistant has recommended {len(options)} {PRETTY_NAMES.get(name, name)}s for you.")
+    carousel([lambda i=i: display_fn(i) for i in range(len(options))], height=400)
     with st.form(key=f"ranking_form_{name}"):
         rank = st.multiselect(
             f"Rank the {name} above from MOST to LEAST preferred.",
