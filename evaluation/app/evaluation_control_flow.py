@@ -483,11 +483,32 @@ def step_final_evaluation_second(
             st.session_state.form_results["final_evaluation"] = {}
         st.session_state.form_results["final_evaluation"].update(feedback)
 
-        # Try to compute a Grade
+        # Try to compute a Grade and display validity results
         try:
             is_valid, validity_metadata = st.session_state.spec.validity_fn(
                 st.session_state.final_prediction
             )
+            
+            # Display validity results
+            violated_constraints = validity_metadata.get("violated_constraints", [])
+            if is_valid and len(violated_constraints) == 0:
+                # Show check mark if valid
+                with st.container(horizontal=True, horizontal_alignment="right"):
+                    text = ":green[:material/check:] This output is valid and passes all constraints."
+                    st.markdown(
+                        f'<div class="validation-container">\n\n{text}</div>',
+                        unsafe_allow_html=True,
+                    )
+            elif len(violated_constraints) > 0:
+                # Show violated constraints
+                with st.container(horizontal=True, horizontal_alignment="right"):
+                    constraints_text = "<br>".join([f"• {constraint}" for constraint in violated_constraints])
+                    text = f":red[:material/close:] The following constraints were violated:<br>{constraints_text}"
+                    st.markdown(
+                        f'<div class="validation-container">\n\n{text}</div>',
+                        unsafe_allow_html=True,
+                    )
+            
             score = st.session_state.form_results["final_evaluation"].get("score", None)
             st.session_state.final_grade = Grade(
                 prediction=st.session_state.final_prediction,
@@ -495,7 +516,14 @@ def step_final_evaluation_second(
                 correct=is_valid,
                 eval_metadata=validity_metadata,
             )
-        except Exception:
+        except Exception as e:
+            # Show error if validity check failed
+            with st.container(horizontal=True, horizontal_alignment="right"):
+                text = f":red[:material/close:] Error checking validity: {str(e)}"
+                st.markdown(
+                    f'<div class="validation-container">\n\n{text}</div>',
+                    unsafe_allow_html=True,
+                )
             st.session_state.final_grade = None
 
         return True

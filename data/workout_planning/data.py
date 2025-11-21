@@ -27,6 +27,9 @@ from data.workout_planning.db import (
     DAYS_OF_THE_WEEK,
     TIMES_OF_DAY,
 )
+from data.workout_planning import (
+    streamlit_search_interface as search_interface,
+)
 from data.reward import linear_reward, Constraint
 from data.workout_planning.parser import parse_workout_plan
 
@@ -445,11 +448,6 @@ class WorkoutPlanningDataset(SpecificationCollection):
                 Constraint.from_dict(c, extractor_lookup=self._extractor_lookup)
                 for c in initial_constraints
             ]
-
-            # Import search interface before creating spec
-            from data.workout_planning import (
-                streamlit_search_interface as search_interface,
-            )
 
             spec = CustomSpecification(
                 dataset_name=self.dataset_name,
