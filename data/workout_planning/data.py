@@ -454,6 +454,7 @@ class WorkoutPlanningDataset(SpecificationCollection):
                 dataset_name=self.dataset_name,
                 index=f"custom_{ix}",
                 initial_specification="Design a workout plan for your next week.",
+                current_specification="Design a workout plan for your next week.",
                 commonsense_description=COMMONSENSE_INSTRUCTIONS,
                 user_specification_form_final=self._create_user_specification_form_final(),
                 user_specification_callback=user_specification_callback,
