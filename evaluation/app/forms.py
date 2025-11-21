@@ -425,6 +425,7 @@ def final_prediction_evaluation(
     slider_label: str = None,
     text_area_label: str = None,
     submit_key: str = "custom_eval_second_page_form",
+    show_validity_check: bool = False,
 ):
     """
     Generic second-page evaluation: render the final prediction, then ask 3 questions.
@@ -437,6 +438,33 @@ def final_prediction_evaluation(
     st.markdown("Below is the assistant's final artifact for the task.")
     with st.container(border=True):
         st.session_state.spec.render_msg_fn(st.session_state.final_prediction)
+
+    if show_validity_check:
+        is_valid, validity_metadata = st.session_state.spec.validity_fn(
+            st.session_state.final_prediction
+        )
+        # Display validity results
+        violated_constraints = validity_metadata.get("violated_constraints", [])
+        if is_valid and len(violated_constraints) == 0:
+            # Show check mark if valid
+            with st.container(horizontal=True, horizontal_alignment="right"):
+                text = ":green[:material/check:] This output is valid and passes all constraints."
+                st.markdown(
+                    f'<div class="validation-container">\n\n{text}</div>',
+                    unsafe_allow_html=True,
+                )
+        elif len(violated_constraints) > 0:
+            # Show violated constraints
+            with st.container(horizontal=True, horizontal_alignment="right"):
+                constraints_text = "<br>".join(
+                    [f":red[• {constraint}]" for constraint in violated_constraints]
+                )
+                text = f":red[:material/close:] The following constraints were violated:<br>{constraints_text}"
+                st.markdown(
+                    f'<div class="validation-container">\n\n{text}</div>',
+                    unsafe_allow_html=True,
+                )
+
     st.divider()
 
     form_elements = [

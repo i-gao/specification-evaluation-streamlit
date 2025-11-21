@@ -463,6 +463,7 @@ def step_final_evaluation_second(
         slider_label="Rate the overall quality of this artifact from 0 (unusable) to 100 (perfect).",
         text_area_label="What would you change about the assistant's artifact?",
         submit_key="final_eval_second_form",
+        show_validity_check=True,
     )
 
     # If custom_final_evaluation_form is provided, display it
@@ -488,26 +489,6 @@ def step_final_evaluation_second(
             is_valid, validity_metadata = st.session_state.spec.validity_fn(
                 st.session_state.final_prediction
             )
-            
-            # Display validity results
-            violated_constraints = validity_metadata.get("violated_constraints", [])
-            if is_valid and len(violated_constraints) == 0:
-                # Show check mark if valid
-                with st.container(horizontal=True, horizontal_alignment="right"):
-                    text = ":green[:material/check:] This output is valid and passes all constraints."
-                    st.markdown(
-                        f'<div class="validation-container">\n\n{text}</div>',
-                        unsafe_allow_html=True,
-                    )
-            elif len(violated_constraints) > 0:
-                # Show violated constraints
-                with st.container(horizontal=True, horizontal_alignment="right"):
-                    constraints_text = "<br>".join([f"• {constraint}" for constraint in violated_constraints])
-                    text = f":red[:material/close:] The following constraints were violated:<br>{constraints_text}"
-                    st.markdown(
-                        f'<div class="validation-container">\n\n{text}</div>',
-                        unsafe_allow_html=True,
-                    )
             
             score = st.session_state.form_results["final_evaluation"].get("score", None)
             st.session_state.final_grade = Grade(
