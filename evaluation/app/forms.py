@@ -580,7 +580,7 @@ def assistant_ranking_exit_survey(
 
     # Create tabs for each conversation
     tab_labels = [
-        f"Assistant {round_idx + 1} ({config_dict.get('dataset_name', 'unknown')})"
+        f"Assistant {round_idx + 1}"
         for round_idx, (config_dict, _) in enumerate(message_history)
     ]
     tabs = st.tabs(tab_labels)
