@@ -465,7 +465,7 @@ class MealPlanningDataset(SpecificationCollection):
                 render_search_interface,
                 render_liked_items,
             )
-            
+
             spec = CustomSpecification(
                 dataset_name=self.dataset_name,
                 index=f"custom_{ix}",
@@ -511,7 +511,9 @@ class MealPlanningDataset(SpecificationCollection):
                     db=self._recipe_db,
                 ),
                 render_evaluation_kwargs={
-                    "num_items_per_comparison": getattr(self, "eval_num_items_per_comparison", 5),
+                    "num_items_per_comparison": getattr(
+                        self, "eval_num_items_per_comparison", 5
+                    ),
                 },
                 render_search_interface_fn=render_search_interface,
                 render_search_interface_kwargs={"recipe_db": self._recipe_db},
@@ -1150,7 +1152,12 @@ def parse_meal_plan_solutions_and_options(msg: str) -> List[str]:
 def output_to_streamlit(
     msg: str, db: RecipeDB, auto_patch_eat_before_cook: bool = False
 ) -> None:
-    msg = msg.replace("$", "\$").replace("~", "\~")
+    msg = (
+        msg.replace("$", "\$")
+        .replace("~", "\~")
+        .replace("<meal_plan>", "")
+        .replace("</meal_plan>", "")
+    )
     # Parse meal plan JSON
     js, start_end = parse_json(msg, return_start_end=True)
 

@@ -35,22 +35,23 @@ def render_eval(
     if not comparison_done:
         return False, None
 
-    # Compute the final score
-    prediction_rankings = [
-        list(
-            st.session_state.form_results["final_evaluation"]["recipe"][
-                "predicted_ranks"
-            ].values()
-        )
-    ]
-    y0_rankings = [
-        list(
-            st.session_state.form_results["final_evaluation"]["recipe"][
-                "y0_ranks"
-            ].values()
-        )
-    ]
-    p_recipe_wins = pairwise_win_rate(prediction_rankings, y0_rankings)
+    # Compute the final score - aggregate across all meal types
+    prediction_rankings = []
+    y0_rankings = []
+    for meal in MEALS_OF_THE_DAY:
+        meal_key = f"recipe_{meal}"
+        if meal_key in st.session_state.form_results["final_evaluation"]:
+            meal_data = st.session_state.form_results["final_evaluation"][meal_key]
+            if meal_data.get("predicted_ranks"):
+                prediction_rankings.append(list(meal_data["predicted_ranks"].values()))
+            if meal_data.get("y0_ranks"):
+                y0_rankings.append(list(meal_data["y0_ranks"].values()))
+
+    if prediction_rankings and y0_rankings:
+        p_recipe_wins = pairwise_win_rate(prediction_rankings, y0_rankings)
+    else:
+        # If no rankings, default to 0.5 (tie)
+        p_recipe_wins = 0.5
     other_wins, total = likert_to_win_rate(
         [
             st.session_state.form_results["final_evaluation"][
@@ -75,30 +76,102 @@ def rank_recipes(
     *, final_prediction: str, y0: str, db: RecipeDB, num_items_per_comparison: int = 5
 ):
     predicted = parse_meal_plan(final_prediction, db)
-    y0 = parse_meal_plan(y0, db)
+    y0_parsed = parse_meal_plan(y0, db)
 
-    done = "recipe" in st.session_state.form_results["final_evaluation"]
-    if not done:
-        predicted_recipes = [
-            recipe
-            for day in DAYS_OF_THE_WEEK
-            for meal in MEALS_OF_THE_DAY
-            for recipe in (
-                predicted[day][meal] if predicted[day][meal] is not None else []
+    # Process each meal type sequentially
+    for meal in MEALS_OF_THE_DAY:
+        meal_key = f"recipe_{meal}"
+        done = meal_key in st.session_state.form_results["final_evaluation"]
+        if not done:
+            # Collect recipes for this meal type from both plans
+            predicted_recipes = []
+            for day in DAYS_OF_THE_WEEK:
+                if (
+                    day in predicted
+                    and meal in predicted[day]
+                    and predicted[day][meal] is not None
+                ):
+                    predicted_recipes.extend(predicted[day][meal])
+
+            y0_recipes = []
+            for day in DAYS_OF_THE_WEEK:
+                if (
+                    day in y0_parsed
+                    and meal in y0_parsed[day]
+                    and y0_parsed[day][meal] is not None
+                ):
+                    y0_recipes.extend(y0_parsed[day][meal])
+
+            # Check if one plan has the meal and the other doesn't
+            has_predicted = len(predicted_recipes) > 0
+            has_y0 = len(y0_recipes) > 0
+
+            # Create a "Skip [meal]" dummy option if needed
+            skip_option = None
+            if has_predicted and not has_y0:
+                # y0 doesn't have this meal, add skip option to y0
+                skip_option = {
+                    "recipe": type(
+                        "Recipe",
+                        (),
+                        {
+                            "title": f"Skip {meal.capitalize()}",
+                            "ingredients": None,
+                            "instructions": None,
+                            "cuisine": None,
+                        },
+                    )()
+                }
+                y0_recipes.append(skip_option)
+            elif has_y0 and not has_predicted:
+                # predicted doesn't have this meal, add skip option to predicted
+                skip_option = {
+                    "recipe": type(
+                        "Recipe",
+                        (),
+                        {
+                            "title": f"Skip {meal.capitalize()}",
+                            "ingredients": None,
+                            "instructions": None,
+                            "cuisine": None,
+                        },
+                    )()
+                }
+                predicted_recipes.append(skip_option)
+
+            # If neither plan has this meal, skip it
+            if not has_predicted and not has_y0:
+                # Mark as done with empty rankings
+                st.session_state.form_results["final_evaluation"][meal_key] = {
+                    "ranking": {},
+                    "y0_ranks": {},
+                    "predicted_ranks": {},
+                }
+                continue
+
+            # Check if both plans have the same recipes (no differences)
+            # Note: We check this after potentially adding skip options
+            predicted_names = set([r["recipe"].title for r in predicted_recipes])
+            y0_names = set([r["recipe"].title for r in y0_recipes])
+            diff_names = (predicted_names - y0_names).union(y0_names - predicted_names)
+
+            if not diff_names:
+                # Both plans have the same recipes, mark as done with empty rankings
+                st.session_state.form_results["final_evaluation"][meal_key] = {
+                    "ranking": {},
+                    "y0_ranks": {},
+                    "predicted_ranks": {},
+                }
+                continue
+
+            # Render carousel for this meal type
+            _render_carousel(
+                predicted_recipes,
+                y0_recipes,
+                name=meal_key,
+                num_items_per_comparison=num_items_per_comparison,
             )
-        ]
-        y0_recipes = [
-            recipe
-            for day in DAYS_OF_THE_WEEK
-            for meal in MEALS_OF_THE_DAY
-            for recipe in (y0[day][meal] if y0[day][meal] is not None else [])
-        ]
-        _render_carousel(
-            predicted_recipes,
-            y0_recipes,
-            num_items_per_comparison=num_items_per_comparison,
-        )
-        return
+            return
 
     return True
 
@@ -204,6 +277,14 @@ def _render_carousel(
     def display_fn(i):
         recipe = options[i]["recipe"]
         st.markdown(f"**{recipe.title}**")
+
+        # Handle "Skip [meal]" option specially
+        if recipe.title.startswith("Skip "):
+            st.markdown(
+                "*This option represents skipping this meal type in the meal plan.*"
+            )
+            return
+
         # Display recipe image if available
         if getattr(recipe, "image_url", None):
             st.image(recipe.image_url, width=400)
@@ -214,13 +295,28 @@ def _render_carousel(
             unsafe_allow_html=True,
         )
 
-    st.markdown("### Review the assistant's recommendations")
-    st.markdown(f"The assistant has recommended {len(options)} {name}s for you.")
+    # Extract meal type from name if it's in format "recipe_{meal}"
+    if name.startswith("recipe_"):
+        meal_type = name.replace("recipe_", "").capitalize()
+        st.markdown(f"### Review {meal_type} recommendations")
+        st.markdown(
+            f"The assistant has recommended {len(options)} {meal_type.lower()} options for you."
+        )
+    else:
+        st.markdown("### Review the assistant's recommendations")
+        st.markdown(f"The assistant has recommended {len(options)} {name}s for you.")
     carousel([lambda i=i: display_fn(i) for i in range(len(options))], height=550)
 
     with st.form(key=f"ranking_form_{name}"):
+        # Create a more specific prompt based on meal type
+        if name.startswith("recipe_"):
+            meal_type = name.replace("recipe_", "").capitalize()
+            prompt = f"Rank the {meal_type.lower()} options above from MOST to LEAST preferred."
+        else:
+            prompt = f"Rank the {name} above from MOST to LEAST preferred."
+
         rank = st.multiselect(
-            f"Rank the {name} above from MOST to LEAST preferred.",
+            prompt,
             [i for i in range(len(options))],
             default=[],
             format_func=lambda x: f"Option {x + 1}: {options[x]['recipe'].title}",
@@ -228,8 +324,6 @@ def _render_carousel(
         )
         submit = st.form_submit_button("Submit", type="primary")
         if submit:
-            print(rank)
-            print(len(rank), len(options))
             if len(rank) != len(options):
                 st.error("Please rank all options")
                 return
@@ -343,57 +437,62 @@ def output_to_streamlit_comparison(
 
     tab1, tab2 = st.tabs(["Plan A", "Plan B"])
 
-    with st.container(border=True, height=700):
-        with tab1:
-            if a_valid is not None:
-                if a_valid:
-                    st.markdown(":small[:green[:material/check: Plan A is valid]]")
-                else:
-                    st.markdown(":small[:red[:material/close: Plan A invalid]]\n\n")
-                    constraints_md = "\n\n".join(
-                        [
-                            f":small[:red[- {constraint}]]"
-                            for constraint in (a_metadata or {}).get(
-                                "violated_constraints", []
-                            )
-                            if constraint is not None
-                        ]
-                    )
-                    if constraints_md:
-                        st.markdown(constraints_md)
-            if parsed1:
-                _render_meal_plan_streamlit(parsed1, f"{unique_id}_a")
+    with tab1:
+        if a_valid is not None:
+            if a_valid:
+                st.markdown(":small[:green[:material/check: Plan A is valid]]")
             else:
-                st.markdown("*Invalid meal plan*")
+                st.markdown(":small[:red[:material/close: Plan A invalid]]\n\n")
+                constraints_md = "\n\n".join(
+                    [
+                        f":small[:red[- {constraint}]]"
+                        for constraint in (a_metadata or {}).get(
+                            "violated_constraints", []
+                        )
+                        if constraint is not None
+                    ]
+                )
+                if constraints_md:
+                    st.markdown(constraints_md)
+        if parsed1:
+            _render_meal_plan_streamlit(
+                parsed1, f"{unique_id}_a", show_recipe_details=False
+            )
+        else:
+            st.markdown("*Invalid meal plan*")
 
-        with tab2:
-            if b_valid is not None:
-                if b_valid:
-                    st.markdown(":small[:green[:material/check: Plan B is valid]]")
-                else:
-                    st.markdown(":small[:red[:material/close: Plan B invalid]]\n\n")
-                    constraints_md = "\n\n".join(
-                        [
-                            f":small[:red[- {constraint}]]"
-                            for constraint in (b_metadata or {}).get(
-                                "violated_constraints", []
-                            )
-                            if constraint is not None
-                        ]
-                    )
-                    if constraints_md:
-                        st.markdown(constraints_md)
-            if parsed2:
-                _render_meal_plan_streamlit(parsed2, f"{unique_id}_b")
+    with tab2:
+        if b_valid is not None:
+            if b_valid:
+                st.markdown(":small[:green[:material/check: Plan B is valid]]")
             else:
-                st.markdown("*Invalid meal plan*")
+                st.markdown(":small[:red[:material/close: Plan B invalid]]\n\n")
+                constraints_md = "\n\n".join(
+                    [
+                        f":small[:red[- {constraint}]]"
+                        for constraint in (b_metadata or {}).get(
+                            "violated_constraints", []
+                        )
+                        if constraint is not None
+                    ]
+                )
+                if constraints_md:
+                    st.markdown(constraints_md)
+        if parsed2:
+            _render_meal_plan_streamlit(
+                parsed2, f"{unique_id}_b", show_recipe_details=False
+            )
+        else:
+            st.markdown("*Invalid meal plan*")
 
 
 # -------------------- Helpers used by Streamlit renders --------------------
 
 
 def _render_meal_plan_streamlit(
-    meal_plan: Dict[str, Dict[str, Any]], unique_id: str
+    meal_plan: Dict[str, Dict[str, Any]],
+    unique_id: str,
+    show_recipe_details: bool = True,
 ) -> None:
     if not meal_plan:
         st.markdown("*No meal plan data available*")
@@ -401,17 +500,16 @@ def _render_meal_plan_streamlit(
 
     st.markdown(_render_calendar_table(meal_plan), unsafe_allow_html=True)
 
-    with st.container(horizontal=False, gap="small"):
+    with st.expander("🍳 Which days will I have to cook?", expanded=True):
+        st.markdown(_render_cooking_calendar(meal_plan), unsafe_allow_html=True)
+
+    with st.expander("🧾 How much food will I waste?", expanded=False):
+        st.markdown(_render_recipe_summary(meal_plan), unsafe_allow_html=True)
+
+    if show_recipe_details:
         with st.expander("🍽️ Day-by-day breakdown", expanded=False):
             _render_detailed_sections_streamlit(meal_plan, unique_id)
-
-        with st.expander("🍳 Which days will I have to cook?", expanded=False):
-            st.markdown(_render_cooking_calendar(meal_plan), unsafe_allow_html=True)
-
-        with st.expander("🧾 How much food will I waste?", expanded=False):
-            st.markdown(_render_recipe_summary(meal_plan), unsafe_allow_html=True)
-
-    _render_recipe_details_streamlit(meal_plan, unique_id)
+        _render_recipe_details_streamlit(meal_plan, unique_id)
 
 
 MEAL_EMOJIS = {"breakfast": "🌅", "lunch": "🌞", "snack": "🍎", "dinner": "🌙"}

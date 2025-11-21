@@ -90,6 +90,18 @@ STYLESHEET = """
         font-size: 0.9em !important;
     }
 
+    /* Final validation container */
+    .final-validation-container {
+        padding: 0.5rem;
+        text-align: left;
+    }
+    .final-validation-container ul {
+      padding-inline-start: 1em;
+    }
+    .final-validation-container li {
+        font-size: 0.9em !important;
+    }
+
     /* Floating header */
     .st-key-floating_header {
         padding: 0.8em;

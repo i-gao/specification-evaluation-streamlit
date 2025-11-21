@@ -7,6 +7,9 @@ from data.workout_planning.db import DAYS_OF_THE_WEEK, TIMES_OF_DAY
 from data.workout_planning.parser import parse_workout_plan
 from evaluation.qualitative_eval import COMPARISON_LIKERT
 from data.reward import likert_to_win_rate, pairwise_win_rate
+import inflect
+import math
+import pandas as pd
 
 # Session state key prefixes used by this render module that should be cleared between rounds
 RENDER_SESSION_STATE_KEY_PREFIXES = [
@@ -15,12 +18,24 @@ RENDER_SESSION_STATE_KEY_PREFIXES = [
 ]
 
 
-def render_eval(*, final_prediction: str, y0: Optional[str], db, num_items_per_comparison: int = 5, **kwargs):
+def render_eval(
+    *,
+    final_prediction: str,
+    y0: Optional[str],
+    db,
+    num_items_per_comparison: int = 5,
+    **kwargs,
+):
     """
-    Render evaluation UI: first rank exercises, then show A vs B comparison and collect Likert-scale preferences.
+    Render evaluation UI: first rank workouts, then show A vs B comparison and collect Likert-scale preferences.
     Returns (completed, feedback_dict_or_none).
     """
-    ranking_done = rank_exercises(final_prediction=final_prediction, y0=y0, db=db, num_items_per_comparison=num_items_per_comparison)
+    ranking_done = rank_workouts(
+        final_prediction=final_prediction,
+        y0=y0,
+        db=db,
+        num_items_per_comparison=num_items_per_comparison,
+    )
     if not ranking_done:
         return False, None
 
@@ -31,38 +46,38 @@ def render_eval(*, final_prediction: str, y0: Optional[str], db, num_items_per_c
     # Compute the final score
     prediction_rankings = [
         list(
-            st.session_state.form_results["final_evaluation"]["exercise"][
+            st.session_state.form_results["final_evaluation"]["workout"][
                 "predicted_ranks"
             ].values()
         )
     ]
     y0_rankings = [
         list(
-            st.session_state.form_results["final_evaluation"]["exercise"][
+            st.session_state.form_results["final_evaluation"]["workout"][
                 "y0_ranks"
             ].values()
         )
     ]
-    p_exercise_wins = pairwise_win_rate(prediction_rankings, y0_rankings)
+    p_workout_wins = pairwise_win_rate(prediction_rankings, y0_rankings)
     other_wins, total = likert_to_win_rate(
         [
             st.session_state.form_results["final_evaluation"]["goals_preference"],
             st.session_state.form_results["final_evaluation"]["schedule_preference"],
             st.session_state.form_results["final_evaluation"]["equipment_preference"],
-            st.session_state.form_results["final_evaluation"]["injury_preference"],
-            st.session_state.form_results["final_evaluation"]["difficulty_preference"],
         ],
         return_total=True,
     )
-    p_wins = (p_exercise_wins + other_wins) / (total + 1)
+    p_wins = (p_workout_wins + other_wins) / (total + 1)
     st.session_state.form_results["final_evaluation"]["score"] = p_wins
 
     return True, None
 
 
-def rank_exercises(*, final_prediction: str, y0: Optional[str], db, num_items_per_comparison: int = 5):
+def rank_workouts(
+    *, final_prediction: str, y0: Optional[str], db, num_items_per_comparison: int = 5
+):
     """
-    Rank exercises from both plans using a carousel.
+    Rank workouts from both plans using a carousel.
     Returns True when ranking is complete.
     """
     predicted = parse_workout_plan(final_prediction, db, leave_invalid=True)
@@ -70,35 +85,57 @@ def rank_exercises(*, final_prediction: str, y0: Optional[str], db, num_items_pe
         parse_workout_plan(y0, db, leave_invalid=True) if y0 is not None else None
     )
 
-    done = "exercise" in st.session_state.form_results["final_evaluation"]
+    done = "workout" in st.session_state.form_results["final_evaluation"]
     if not done:
-        # Extract all exercises from both plans
-        predicted_exercises = []
+        # Extract all workouts from both plans
+        # A workout is a (day, time_of_day, exercises) tuple
+        predicted_workouts = []
         for day in DAYS_OF_THE_WEEK:
             if day not in predicted:
                 continue
             for time_of_day in TIMES_OF_DAY:
-                if time_of_day not in predicted[day] or predicted[day][time_of_day] is None:
+                if (
+                    time_of_day not in predicted[day]
+                    or predicted[day][time_of_day] is None
+                ):
                     continue
-                for exercise in predicted[day][time_of_day]:
-                    if not exercise.get("invalid", False):
-                        predicted_exercises.append(exercise)
+                exercises = predicted[day][time_of_day]
+                if exercises:  # Only include non-empty workouts
+                    predicted_workouts.append(
+                        {
+                            "day": day,
+                            "time_of_day": time_of_day,
+                            "exercises": exercises,
+                            "plan": "predicted",
+                        }
+                    )
 
-        y0_exercises = []
+        y0_workouts = []
         if parsed_y0 is not None:
             for day in DAYS_OF_THE_WEEK:
                 if day not in parsed_y0:
                     continue
                 for time_of_day in TIMES_OF_DAY:
-                    if time_of_day not in parsed_y0[day] or parsed_y0[day][time_of_day] is None:
+                    if (
+                        time_of_day not in parsed_y0[day]
+                        or parsed_y0[day][time_of_day] is None
+                    ):
                         continue
-                    for exercise in parsed_y0[day][time_of_day]:
-                        if not exercise.get("invalid", False):
-                            y0_exercises.append(exercise)
+                    exercises = parsed_y0[day][time_of_day]
+                    if exercises:  # Only include non-empty workouts
+                        y0_workouts.append(
+                            {
+                                "day": day,
+                                "time_of_day": time_of_day,
+                                "exercises": exercises,
+                                "plan": "y0",
+                            }
+                        )
 
         _render_carousel(
-            predicted_exercises,
-            y0_exercises,
+            predicted_workouts,
+            y0_workouts,
+            name="workout",
             num_items_per_comparison=num_items_per_comparison,
         )
         return False
@@ -110,47 +147,47 @@ def rank_exercises(*, final_prediction: str, y0: Optional[str], db, num_items_pe
 def _render_carousel(
     predicted: List[Dict[str, Any]],
     y0: List[Dict[str, Any]],
-    name: str = "exercise",
+    name: str = "workout",
     md_fn: Callable = None,
     filter_fn: Callable[[Dict[str, Any]], bool] = None,
     num_items_per_comparison: int = 5,
 ):
     """
     Args:
-        predicted: list of predicted exercises
-        y0: list of y0 exercises
+        predicted: list of predicted workouts (dicts with day, time_of_day, exercises, plan)
+        y0: list of y0 workouts (dicts with day, time_of_day, exercises, plan)
         name: name of the thing being ranked. Used for saving to session state.
-        md_fn: function to render the exercise
-        filter_fn: function to filter the exercises
-        num_items_per_comparison: number of exercises to show
+        md_fn: function to render the workout (optional, defaults to workout rendering)
+        filter_fn: function to filter the workouts
+        num_items_per_comparison: number of workouts to show
 
     Adds to session state:
-        - ranking: a dict mapping a rank (0-indexed) to an exercise identifier
-        - y0_ranks: a dict mapping exercise identifier to a rank
-        - predicted_ranks: a dict mapping exercise identifier to a rank
+        - ranking: a dict mapping a rank (0-indexed) to a workout identifier
+        - y0_ranks: a dict mapping workout identifier to a rank
+        - predicted_ranks: a dict mapping workout identifier to a rank
     """
-    if md_fn is None:
-        def md_fn(exercise):
-            return _exercise_details(exercise)
+
+    # Helper function to create workout identifier
+    def get_workout_id(workout):
+        # Create identifier based on workout content (exercises)
+        exercise_ids = []
+        for ex in workout["exercises"]:
+            if not ex.get("invalid", False):
+                exercise_ids.append(
+                    f"{ex['exercise_name']} - {ex.get('variation_name', 'default')}"
+                )
+        # Sort to make identifier stable regardless of exercise order
+        exercise_ids.sort()
+        return f"{workout['day']} {workout['time_of_day']}: {', '.join(exercise_ids)}"
 
     predicted = [
         p for p in predicted if p is not None and (filter_fn is None or filter_fn(p))
     ]
-    # Create unique identifiers for exercises (exercise_name + variation_name)
-    predicted = list({
-        f"{d['exercise_name']} - {d.get('variation_name', 'default')}": d 
-        for d in predicted
-    }.values())
-
     y0 = [p for p in y0 if p is not None and (filter_fn is None or filter_fn(p))]
-    y0 = list({
-        f"{d['exercise_name']} - {d.get('variation_name', 'default')}": d 
-        for d in y0
-    }.values())
 
     if len(predicted) == 0:
         # set difference is the entire y0, and y0 auto-wins
-        dummy_rank = {i: f"{y['exercise_name']} - {y.get('variation_name', 'default')}" for i, y in enumerate(y0)}
+        dummy_rank = {i: get_workout_id(y) for i, y in enumerate(y0)}
         st.session_state.form_results["final_evaluation"][name] = {
             "ranking": dummy_rank,
             "y0_ranks": {v: k for k, v in dummy_rank.items()},
@@ -158,25 +195,36 @@ def _render_carousel(
         }
         st.rerun()
 
-    # find the set difference
-    predicted_names = set([f"{p['exercise_name']} - {p.get('variation_name', 'default')}" for p in predicted])
-    y0_names = set([f"{p['exercise_name']} - {p.get('variation_name', 'default')}" for p in y0])
-    diff_names = (predicted_names - y0_names).union(y0_names - predicted_names)
-    if not diff_names:
+    # find the set difference based on workout content
+    predicted_ids = set([get_workout_id(p) for p in predicted])
+    y0_ids = set([get_workout_id(y) for y in y0])
+    diff_ids = (predicted_ids - y0_ids).union(y0_ids - predicted_ids)
+    if not diff_ids:
         # don't render anything
         return
 
-    predicted_options = [p for p in predicted if f"{p['exercise_name']} - {p.get('variation_name', 'default')}" in diff_names]
-    y0_options = [p for p in y0 if f"{p['exercise_name']} - {p.get('variation_name', 'default')}" in diff_names]
-    if num_items_per_comparison is not None and len(diff_names) > num_items_per_comparison:
+    predicted_options = [p for p in predicted if get_workout_id(p) in diff_ids]
+    y0_options = [p for p in y0 if get_workout_id(p) in diff_ids]
+    if (
+        num_items_per_comparison is not None
+        and len(diff_ids) > num_items_per_comparison
+    ):
         # try to get a roughly balanced set of options
         if len(predicted_options) < num_items_per_comparison / 2:
-            options = predicted_options + y0_options[: num_items_per_comparison - len(predicted_options)]
+            options = (
+                predicted_options
+                + y0_options[: num_items_per_comparison - len(predicted_options)]
+            )
         elif len(y0_options) < num_items_per_comparison / 2:
-            options = predicted_options[: num_items_per_comparison - len(y0_options)] + y0_options
+            options = (
+                predicted_options[: num_items_per_comparison - len(y0_options)]
+                + y0_options
+            )
         else:
             options = (
-                predicted_options[: num_items_per_comparison // 2 + num_items_per_comparison % 2]
+                predicted_options[
+                    : num_items_per_comparison // 2 + num_items_per_comparison % 2
+                ]
                 + y0_options[: num_items_per_comparison // 2]
             )
     else:
@@ -200,52 +248,170 @@ def _render_carousel(
     from evaluation.app.components import carousel
 
     def display_fn(i):
-        exercise = options[i]
-        st.markdown(f"### {exercise['exercise_name']}")
-        if exercise.get('variation_name'):
-            st.markdown(f"**Variation:** {exercise['variation_name']}")
-        # Display exercise image if available (YouTube thumbnail)
-        youtube_url = exercise.get("URL")
-        if youtube_url and youtube_url != "nan":
-            video_id = youtube_url.split("/")[-1]
-            image_url = f"https://img.youtube.com/vi/{video_id}/0.jpg"
-            st.image(image_url, width=400)
-        st.markdown(
-            md_fn(exercise),
-            unsafe_allow_html=True,
-        )
+        workout = options[i]
+
+        # Generate and display workout name
+        workout_name = _generate_workout_name(workout["exercises"])
+        st.markdown(f"### {workout_name}")
+
+        # Render workout summary table
+        _render_workout_summary_table(workout["exercises"])
+        st.markdown("#### Exercises in this workout")
+
+        # Render all exercises in the workout
+        for j, exercise in enumerate(workout["exercises"]):
+            exercise_name = exercise.get("exercise_name", "Unknown")
+            variation_name = exercise.get("variation_name", "default")
+            with st.expander(f"{j + 1}. {exercise_name} - {variation_name}"):
+                st.markdown(
+                    _render_exercise_details(j, exercise), unsafe_allow_html=True
+                )
 
     st.markdown("### Review the assistant's recommendations")
     st.markdown(f"The assistant has recommended {len(options)} {name}s for you.")
-    carousel([lambda i=i: display_fn(i) for i in range(len(options))], height=550)
+    # Increased height for larger workout cards
+    carousel([lambda i=i: display_fn(i) for i in range(len(options))], height=700)
 
     with st.form(key=f"ranking_form_{name}"):
         rank = st.multiselect(
-            f"Rank the {name} above from MOST to LEAST preferred.",
+            f"Rank the {name}s above from MOST to LEAST preferred.",
             [i for i in range(len(options))],
             default=[],
-            format_func=lambda x: f"{name.upper()} {x + 1}: {options[x]['exercise_name']} - {options[x].get('variation_name', 'default')}",
+            format_func=lambda x: f"Workout {x + 1}: {_generate_workout_name(options[x]['exercises'])}",
         )
         submit = st.form_submit_button("Submit", type="primary")
         if submit:
             if len(rank) != len(options):
                 st.error("Please rank all options")
                 return
-            ranking = {i: f"{options[i]['exercise_name']} - {options[i].get('variation_name', 'default')}" for i in rank}
+            ranking = {i: get_workout_id(options[i]) for i in rank}
             st.session_state.form_results["final_evaluation"][name] = {
                 "ranking": ranking,
-                "y0_ranks": {v: k for k, v in ranking.items() if v in y0_names},
+                "y0_ranks": {v: k for k, v in ranking.items() if v in y0_ids},
                 "predicted_ranks": {
-                    v: k for k, v in ranking.items() if v in predicted_names
+                    v: k for k, v in ranking.items() if v in predicted_ids
                 },
             }
             st.rerun()
 
 
+def _generate_workout_name(exercises: List[Dict[str, Any]]) -> str:
+    """Generate a descriptive name for the workout based on duration, target muscle groups, and exercise classification."""
+    duration = _calculate_workout_duration(exercises)
+    valid_exercises = [e for e in exercises if not e.get("invalid", False)]
+
+    ABBREVIATIONS = {
+        "Abdominal": "Ab",
+        "Quadricep": "Quad",
+        "Postural": "Posture-focused",
+        "Unsorted*": "",
+        "Animal Flow": "",
+        "Grinds": "",
+    }
+    p = inflect.engine()
+
+    # Collect unique target muscle groups
+    target_muscles = set()
+    for exercise in valid_exercises:
+        if exercise.get("target_muscle_group"):
+            singular_group = p.singular_noun(exercise["target_muscle_group"])
+            pretty_group = ABBREVIATIONS.get(singular_group, singular_group)
+            target_muscles.add(pretty_group)
+
+    # Collect unique primary exercise classifications
+    classifications = set()
+    for exercise in valid_exercises:
+        if exercise.get("primary_exercise_classification"):
+            classifications.add(
+                ABBREVIATIONS.get(
+                    exercise["primary_exercise_classification"],
+                    exercise["primary_exercise_classification"],
+                )
+            )
+
+    # Format target areas
+    if not target_muscles:
+        target_str = "total body"
+    elif len(target_muscles) == 1:
+        target_str = list(target_muscles)[0]
+    else:
+        # Sort for consistency and join with " & "
+        sorted_muscles = sorted([m.lower() for m in target_muscles])
+        target_str = " & ".join(sorted_muscles)
+
+    # Format classification
+    if classifications:
+        classification_str = " & ".join(sorted(classifications)).lower()
+        return f"{duration} minute {target_str}-focused {classification_str} workout"
+    else:
+        return f"{duration} minute {target_str}-focused workout"
+
+
+def _render_workout_summary_table(exercises: List[Dict[str, Any]]) -> None:
+    """Render a summary table with key facts about the workout."""
+    # Calculate totals
+    total_time = _calculate_workout_duration(exercises)
+    valid_exercises = [e for e in exercises if not e.get("invalid", False)]
+    exercise_count = len(valid_exercises)
+
+    # Collect unique target muscle groups
+    target_muscles = set()
+    for exercise in valid_exercises:
+        if exercise.get("target_muscle_group"):
+            target_muscles.add(exercise["target_muscle_group"])
+
+    # Collect unique equipment
+    equipment = set()
+    for exercise in valid_exercises:
+        if exercise.get("primary_equipment"):
+            equipment.add(exercise["primary_equipment"])
+
+    # Find max difficulty
+    DIFFICULTY_ORDER = [
+        "Novice",
+        "Beginner",
+        "Intermediate",
+        "Advanced",
+        "Expert",
+        "Master",
+        "Grand Master",
+        "Legendary",
+    ]
+    difficulty_levels = []
+    for exercise in valid_exercises:
+        if exercise.get("difficulty_level"):
+            difficulty_levels.append(exercise["difficulty_level"])
+
+    max_difficulty = "N/A"
+    if difficulty_levels:
+        # Find the maximum difficulty by comparing indices in the ordered list
+        max_difficulty = max(
+            difficulty_levels,
+            key=lambda d: DIFFICULTY_ORDER.index(d) if d in DIFFICULTY_ORDER else -1,
+        )
+
+    # Render as markdown table
+    target_muscles_str = ", ".join(sorted(target_muscles)) if target_muscles else "N/A"
+    equipment_str = ", ".join(sorted(equipment)) if equipment else "N/A"
+
+    table_data = pd.DataFrame.from_dict(
+        {
+            "Total Time": total_time,
+            "Number of Exercises": exercise_count,
+            "Max Difficulty": max_difficulty,
+            "Target Muscle Groups": target_muscles_str,
+            "Equipment Needed": equipment_str,
+        },
+        orient="index",
+        columns=["Value"],
+    )
+    st.table(table_data)
+
+
 def _exercise_details(exercise: Dict[str, Any]) -> str:
     """Render exercise details as markdown with better spacing."""
     lines = []
-    
+
     # Basic information - each on its own line
     if exercise.get("difficulty_level"):
         lines.append(f"**Difficulty:** {exercise['difficulty_level']}")
@@ -257,11 +423,15 @@ def _exercise_details(exercise: Dict[str, Any]) -> str:
         lines.append(f"**Type:** {exercise['primary_exercise_classification']}")
     if exercise.get("primary_equipment"):
         lines.append(f"**Equipment:** {exercise['primary_equipment']}")
-    
+
     # Add spacing before exercise details
-    if lines and (exercise.get("num_sets") or exercise.get("time_per_set") or exercise.get("num_reps_per_set")):
+    if lines and (
+        exercise.get("num_sets")
+        or exercise.get("time_per_set")
+        or exercise.get("num_reps_per_set")
+    ):
         lines.append("")
-    
+
     # Exercise details - each on its own line
     if exercise.get("num_sets"):
         lines.append(f"**Sets:** {exercise['num_sets']}")
@@ -269,14 +439,14 @@ def _exercise_details(exercise: Dict[str, Any]) -> str:
         lines.append(f"**Time per set:** {exercise['time_per_set']}s")
     if exercise.get("num_reps_per_set"):
         lines.append(f"**Reps:** {exercise['num_reps_per_set']}")
-    
+
     # YouTube link (if available)
     youtube_url = exercise.get("URL")
     if youtube_url and youtube_url != "nan":
         if lines:
             lines.append("")
         lines.append(f"Youtube video: [[link]]({youtube_url})")
-    
+
     return "\n".join(lines)
 
 
@@ -289,7 +459,7 @@ def render_comparison(*, final_prediction: str, y0: Optional[str], db):
     parsed_y0 = (
         parse_workout_plan(y0, db, leave_invalid=True) if y0 is not None else None
     )
-    
+
     # if both are invalid, just return True
     if parsed_pred is None and parsed_y0 is None:
         return True
@@ -333,14 +503,6 @@ def render_comparison(*, final_prediction: str, y0: Optional[str], db):
             "Compare how well plans A and B match your equipment availability.",
             options=["-"] + COMPARISON_LIKERT,
         )
-        injury_preference = st.radio(
-            "Compare how well plans A and B accommodate your injury/mobility constraints.",
-            options=["-"] + COMPARISON_LIKERT,
-        )
-        difficulty_preference = st.radio(
-            "Compare the difficulty levels of exercises in plans A and B. Which do you prefer?",
-            options=["-"] + COMPARISON_LIKERT,
-        )
 
         submit = st.form_submit_button("Submit", type="primary")
         if submit:
@@ -350,8 +512,6 @@ def render_comparison(*, final_prediction: str, y0: Optional[str], db):
                     goals_preference,
                     schedule_preference,
                     equipment_preference,
-                    injury_preference,
-                    difficulty_preference,
                 ]
             ):
                 st.error("Please fill out all fields")
@@ -362,13 +522,12 @@ def render_comparison(*, final_prediction: str, y0: Optional[str], db):
                     "goals_preference": goals_preference,
                     "schedule_preference": schedule_preference,
                     "equipment_preference": equipment_preference,
-                    "injury_preference": injury_preference,
-                    "difficulty_preference": difficulty_preference,
                 }
             )
             return True
 
     return False
+
 
 def render_workout_plan_streamlit(plan: Any) -> None:
     """
@@ -413,7 +572,7 @@ def output_to_streamlit_comparison(
                 )
                 if constraints_md:
                     st.markdown(constraints_md)
-        _render_workout_plan_streamlit(parsed1, unique_id)
+        _render_workout_plan_streamlit(parsed1, unique_id, show_expanders=False)
 
     with tab2:
         if b_valid is not None:
@@ -432,10 +591,12 @@ def output_to_streamlit_comparison(
                 )
                 if constraints_md:
                     st.markdown(constraints_md)
-        _render_workout_plan_streamlit(parsed2, unique_id)
+        _render_workout_plan_streamlit(parsed2, unique_id, show_expanders=False)
 
 
-def _render_workout_plan_streamlit(plan: Any, unique_id: str) -> None:
+def _render_workout_plan_streamlit(
+    plan: Any, unique_id: str, show_expanders: bool = True
+) -> None:
     if not plan:
         st.markdown("*No workout plan data available*")
         return
@@ -443,19 +604,85 @@ def _render_workout_plan_streamlit(plan: Any, unique_id: str) -> None:
     # Calendar overview
     st.markdown("\n".join(_render_calendar_table(plan)), unsafe_allow_html=True)
 
-    with st.container(horizontal=False, gap="small"):
-        # Detailed workouts: one expander per workout slot
-        slots = _get_workout_slots(plan)
-        if not slots:
-            st.markdown("*No workouts planned*")
-        else:
-            for i, (day, time_of_day) in enumerate(slots):
-                title = f"💪 {day.capitalize()} {time_of_day} workout ({_calculate_workout_duration(plan[day][time_of_day])} min)"
-                with st.expander(title, expanded=False):
-                    st.markdown(
-                        _render_workout_details(i, day, time_of_day, plan),
-                        unsafe_allow_html=True,
-                    )
+    # Show plan summary: equipment, max difficulty, target muscle groups, and classifications
+    all_equipment = set()
+    all_target_muscles = set()
+    all_classifications = set()
+    all_difficulty_levels = []
+    DIFFICULTY_ORDER = [
+        "Novice",
+        "Beginner",
+        "Intermediate",
+        "Advanced",
+        "Expert",
+        "Master",
+        "Grand Master",
+        "Legendary",
+    ]
+
+    for day in DAYS_OF_THE_WEEK:
+        if day not in plan:
+            continue
+        for time_of_day in TIMES_OF_DAY:
+            if time_of_day not in plan[day] or plan[day][time_of_day] is None:
+                continue
+            exercises = plan[day][time_of_day]
+            if not exercises:
+                continue
+            for exercise in exercises:
+                if exercise.get("invalid", False):
+                    continue
+                if exercise.get("primary_equipment"):
+                    all_equipment.add(exercise["primary_equipment"])
+                if exercise.get("target_muscle_group"):
+                    all_target_muscles.add(exercise["target_muscle_group"])
+                if exercise.get("primary_exercise_classification"):
+                    all_classifications.add(exercise["primary_exercise_classification"])
+                if exercise.get("difficulty_level"):
+                    all_difficulty_levels.append(exercise["difficulty_level"])
+
+    # Calculate max difficulty
+    max_difficulty = "N/A"
+    if all_difficulty_levels:
+        max_difficulty = max(
+            all_difficulty_levels,
+            key=lambda d: DIFFICULTY_ORDER.index(d) if d in DIFFICULTY_ORDER else -1,
+        )
+
+    # Display summary information
+    summary_items = []
+    if all_equipment:
+        equipment_str = ", ".join(sorted(all_equipment))
+        summary_items.append(f"**Equipment Required:** {equipment_str}")
+    if max_difficulty != "N/A":
+        summary_items.append(f"**Max Difficulty:** {max_difficulty}")
+    if all_target_muscles:
+        target_muscles_str = ", ".join(sorted(all_target_muscles))
+        summary_items.append(f"**Target Muscle Groups:** {target_muscles_str}")
+    if all_classifications:
+        classifications_str = ", ".join(sorted(all_classifications))
+        summary_items.append(f"**Exercise Classifications:** {classifications_str}")
+
+    if summary_items:
+        st.markdown("\n".join(summary_items))
+
+    if not show_expanders:
+        return
+
+    # Detailed workouts: one expander per workout slot
+    st.markdown("### Workout Details")
+    slots = _get_workout_slots(plan)
+    if not slots:
+        st.markdown("*No workouts planned*")
+    else:
+        for i, (day, time_of_day) in enumerate(slots):
+            title = f"💪 {day.capitalize()} {time_of_day} | {_generate_workout_name(plan[day][time_of_day])}"
+            with st.expander(title, expanded=False):
+                _render_workout_summary_table(plan[day][time_of_day])
+                st.markdown(
+                    _render_workout_details(i, day, time_of_day, plan),
+                    unsafe_allow_html=True,
+                )
 
 
 # ===== Markdown rendering helpers (moved from data.py) =====
@@ -506,17 +733,14 @@ def _render_calendar_table(workout_plan):
             if not exercises:
                 row_cells.append("")
                 continue
-            exercise_count = len(exercises)
             num_invalid_exercises = len(
                 [e for e in exercises if e.get("invalid", False)]
             )
-            total_duration = _calculate_workout_duration(exercises)
+            workout_name = _generate_workout_name(exercises)
             cell_content = (
-                (
-                    f"{total_duration:.0f} min workout (:red-background[:material/error: {exercise_count} exercises, {num_invalid_exercises} invalid])"
-                )
+                f"{workout_name} (:red-background[:material/error: {num_invalid_exercises} invalid exercise{'s' if num_invalid_exercises != 1 else ''}])"
                 if num_invalid_exercises > 0
-                else f"{total_duration:.0f} min workout ({exercise_count} exercises)"
+                else workout_name
             )
             row_cells.append(cell_content)
         row = "| " + " | ".join(row_cells) + " |"
@@ -621,7 +845,7 @@ def _calculate_workout_duration(exercises):
         if exercise.get("invalid", False):
             continue
         total_seconds += exercise.get("total_time_seconds")
-    return total_seconds // 60
+    return math.ceil(total_seconds / 60)
 
 
 def _add_video_link(url, exercise_name, width=150):

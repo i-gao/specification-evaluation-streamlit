@@ -436,9 +436,6 @@ def final_prediction_evaluation(
 
     # Render the final prediction view
     st.markdown("Below is the assistant's final artifact for the task.")
-    with st.container(border=True):
-        st.session_state.spec.render_msg_fn(st.session_state.final_prediction)
-
     if show_validity_check:
         is_valid, validity_metadata = st.session_state.spec.validity_fn(
             st.session_state.final_prediction
@@ -447,23 +444,28 @@ def final_prediction_evaluation(
         violated_constraints = validity_metadata.get("violated_constraints", [])
         if is_valid and len(violated_constraints) == 0:
             # Show check mark if valid
-            with st.container(horizontal=True, horizontal_alignment="right"):
-                text = ":green[:material/check:] This output is valid and passes all constraints."
+            with st.container(horizontal=True, horizontal_alignment="left"):
+                text = ":green[:material/check: This output is valid and passes all constraints:]"
                 st.markdown(
-                    f'<div class="validation-container">\n\n{text}</div>',
+                    f'<div class="final-validation-container">\n\n{text}</div>',
                     unsafe_allow_html=True,
                 )
         elif len(violated_constraints) > 0:
             # Show violated constraints
-            with st.container(horizontal=True, horizontal_alignment="right"):
-                constraints_text = "<br>".join(
-                    [f":red[• {constraint}]" for constraint in violated_constraints]
+            with st.container(horizontal=True, horizontal_alignment="left"):
+                constraints_text = "\n".join(
+                    [f":red[<li>{constraint}</li>]" for constraint in violated_constraints]
                 )
-                text = f":red[:material/close:] The following constraints were violated:<br>{constraints_text}"
+                text = f":red[:material/close: The following constraints were violated:]<br><ul>{constraints_text}</ul>"
                 st.markdown(
-                    f'<div class="validation-container">\n\n{text}</div>',
+                    f'<div class="final-validation-container">\n\n{text}</div>',
                     unsafe_allow_html=True,
                 )
+
+    with st.container(border=True):
+        st.session_state.spec.render_msg_fn(st.session_state.final_prediction)
+
+
 
     st.divider()
 

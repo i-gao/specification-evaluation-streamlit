@@ -18,7 +18,10 @@ from utils.misc import parse_json, replace_tags_with_link
 from utils.streamlit_types import FormElement, form_element_to_streamlit
 import streamlit as st
 import data.travel_planner.streamlit_render as renderer
-from data.travel_planner.parser import parse_travel_plan, _remove_duration_from_transportation
+from data.travel_planner.parser import (
+    parse_travel_plan,
+    _remove_duration_from_transportation,
+)
 
 from data.travel_planner.reward_utils.tp_utils.func import get_valid_name_city
 from data.travel_planner.reward import (
@@ -628,14 +631,14 @@ class TravelPlannerDataset(SpecificationCollection):
         for ix in indexes:
             # Parse task data
             fixed_task = self._custom_rows[ix]
-            
+
             # Process annotated_plan to remove duration from transportation fields
             annotated_plan = fixed_task.get("annotated_plan")
             if annotated_plan is not None:
                 if isinstance(annotated_plan, str):
                     annotated_plan = json.loads(annotated_plan)
                 annotated_plan = _process_annotated_plan(annotated_plan)
-            
+
             task = {
                 "org": fixed_task["org"],
                 "dest": fixed_task["dest"],
@@ -645,7 +648,9 @@ class TravelPlannerDataset(SpecificationCollection):
                 "people_number": fixed_task["people_number"],
                 "cities": fixed_task["cities"],
                 "local_constraint": {},  # drop local constraints from the fixed task
-                "driving_info": _process_driving_info(json.loads(fixed_task["driving_info"])),
+                "driving_info": _process_driving_info(
+                    json.loads(fixed_task["driving_info"])
+                ),
                 "budget": 999999,  # give a bit of leeway
                 # drop preferences and preference weights from the fixed task
             }
@@ -794,7 +799,6 @@ class TravelPlannerDataset(SpecificationCollection):
             )
             st.markdown("### 🗓️ Itinerary at a glance")
             st.markdown("This is a quick overview of your daily schedule.")
-            st.markdown(renderer._render_round_trip_check(plan))
             st.markdown(
                 renderer._render_travel_summary_table(
                     parse_travel_plan(
@@ -861,7 +865,6 @@ class TravelPlannerDataset(SpecificationCollection):
             )
             st.markdown("### 🗓️ Itinerary at a glance")
             st.markdown("This is a quick overview of your daily schedule.")
-            st.markdown(renderer._render_round_trip_check(modified_plan))
             st.markdown(
                 renderer._render_travel_summary_table(
                     parse_travel_plan(
@@ -919,7 +922,6 @@ class TravelPlannerDataset(SpecificationCollection):
 
             st.markdown("### 🗓️ Itinerary at a glance")
             st.markdown("This is a quick overview of your daily schedule.")
-            st.markdown(renderer._render_round_trip_check(modified_plan))
             st.markdown(
                 renderer._render_travel_summary_table(
                     parse_travel_plan(
@@ -981,7 +983,6 @@ class TravelPlannerDataset(SpecificationCollection):
             )
             st.markdown("### 🗓️ Itinerary at a glance")
             st.markdown("This is a quick overview of your daily schedule.")
-            st.markdown(renderer._render_round_trip_check(modified_plan))
             st.markdown(
                 renderer._render_travel_summary_table(
                     parse_travel_plan(
@@ -1006,19 +1007,21 @@ class TravelPlannerDataset(SpecificationCollection):
         )
 
 
-def _process_driving_info(driving_info: Union[Dict[str, str], List[Dict[str, str]], None]) -> Union[Dict[str, str], List[Dict[str, str]], None]:
+def _process_driving_info(
+    driving_info: Union[Dict[str, str], List[Dict[str, str]], None],
+) -> Union[Dict[str, str], List[Dict[str, str]], None]:
     """
     Process driving_info to remove duration from all Content fields.
-    
+
     Args:
         driving_info: Either a dict, list of dicts with "Content" fields, or None
-        
+
     Returns:
         Processed driving_info with duration removed from Content fields, or None if input is None
     """
     if driving_info is None:
         return None
-    
+
     if isinstance(driving_info, dict):
         # Dict format: {key: content}
         processed = {}
@@ -1032,7 +1035,9 @@ def _process_driving_info(driving_info: Union[Dict[str, str], List[Dict[str, str
             if isinstance(item, dict):
                 processed_item = item.copy()
                 if "Content" in processed_item:
-                    processed_item["Content"] = _remove_duration_from_transportation(processed_item["Content"])
+                    processed_item["Content"] = _remove_duration_from_transportation(
+                        processed_item["Content"]
+                    )
                 processed.append(processed_item)
             else:
                 processed.append(item)
@@ -1041,33 +1046,40 @@ def _process_driving_info(driving_info: Union[Dict[str, str], List[Dict[str, str
         return driving_info
 
 
-def _process_annotated_plan(annotated_plan: Optional[List[Dict[str, Any]]]) -> Optional[List[Dict[str, Any]]]:
+def _process_annotated_plan(
+    annotated_plan: Optional[List[Dict[str, Any]]],
+) -> Optional[List[Dict[str, Any]]]:
     """
     Process annotated_plan to remove duration from transportation fields.
-    
+
     Args:
         annotated_plan: List of day dictionaries, each with a "transportation" field, or None
-        
+
     Returns:
         Processed annotated_plan with duration removed from transportation fields, or None if input is None
     """
     if annotated_plan is None:
         return None
-    
+
     if not isinstance(annotated_plan, list):
         return annotated_plan
-    
+
     processed = []
     for day in annotated_plan:
         if isinstance(day, dict):
             processed_day = day.copy()
             # Remove duration from transportation field if it exists and is not "-"
-            if "transportation" in processed_day and processed_day["transportation"] != "-":
-                processed_day["transportation"] = _remove_duration_from_transportation(processed_day["transportation"])
+            if (
+                "transportation" in processed_day
+                and processed_day["transportation"] != "-"
+            ):
+                processed_day["transportation"] = _remove_duration_from_transportation(
+                    processed_day["transportation"]
+                )
             processed.append(processed_day)
         else:
             processed.append(day)
-    
+
     return processed
 
 
@@ -1361,7 +1373,12 @@ def output_to_streamlit(
 ) -> None:
     from utils.misc import parse_for_answer_tags
 
-    msg = msg.replace("$", "\$").replace("~", "\~")
+    msg = (
+        msg.replace("$", "\$")
+        .replace("~", "\~")
+        .replace("<travel_plan>", "")
+        .replace("</travel_plan>", "")
+    )
 
     # Parse travel plan JSON
     js, start_end = parse_json(msg, return_start_end=True)

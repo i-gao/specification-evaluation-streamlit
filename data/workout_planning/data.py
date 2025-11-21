@@ -892,7 +892,12 @@ def output_to_streamlit(msg: str, db: ExerciseDB) -> str:
     """
     from utils.misc import parse_for_answer_tags
 
-    msg = msg.replace("$", "\$").replace("~", "\~")
+    msg = (
+        msg.replace("$", "\$")
+        .replace("~", "\~")
+        .replace("<workout_plan>", "")
+        .replace("</workout_plan>", "")
+    )
     # Parse workout plan JSON
     js, start_end = parse_json(msg, return_start_end=True)
 

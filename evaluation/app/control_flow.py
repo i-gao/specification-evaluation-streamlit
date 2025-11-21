@@ -1047,22 +1047,26 @@ def get_countdown_params() -> tuple:
     """
     Return (start_time, time_to_remove) suitable for components.countdown(start_time, time_to_remove).
 
-    The countdown displays: start_time - time.time() - time_to_remove,
-    which equals budget - elapsed_costing_time when start_time is end_of_budget_time
-    and time_to_remove removes non-costing elapsed time.
+    The countdown function calculates: remaining = target_time - (now - start_time - time_to_remove).
+    When interaction hasn't started: returns (now, 0.0) so remaining = budget.
+    When interaction has started: returns (interaction_start_time, time_to_remove) where
+    time_to_remove = wall_elapsed - spent, so remaining = budget - spent.
     """
     now = time.time()
     start_time_sec = st.session_state.get("interaction_start_time", None)
-    budget = float(st.session_state.get("interaction_budget", 0.0))
+    budget = float(st.session_state.get("interaction_budget", 0.0))  # Used conceptually, passed as target_time
     if start_time_sec is None:
         # Not started yet; show full budget
-        return now + budget, 0.0
+        # Return (now, 0.0) so that countdown calculates: budget - (now - now - 0) = budget
+        return now, 0.0
 
     wall_elapsed = max(0.0, now - start_time_sec)
     spent = _get_spent_seconds(st.session_state.get("cost_type", "user"))
     time_to_remove = max(0.0, wall_elapsed - float(spent))
-    end_time = start_time_sec + budget
-    return end_time, time_to_remove
+    # Return start_time_sec (not end_time) so that countdown calculates:
+    # elapsed = now - start_time_sec - time_to_remove = spent
+    # remaining = budget - spent
+    return start_time_sec, time_to_remove
 
 
 def _log_user_message(message: str, collect_feedback: bool = False):
@@ -1533,8 +1537,6 @@ def evaluation_flow(
         run_fixed_evaluation_flow(
             fixed_final_evaluation_form=fixed_final_evaluation_form,
         )
-
-    print("Final evaluation completed:", st.session_state.final_evaluation_completed)
 
     if st.session_state.final_evaluation_completed:
         save_session_data(skip_grading=True)  # just in case

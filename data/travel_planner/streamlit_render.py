@@ -9,7 +9,7 @@ from utils.misc import parse_json
 from data.travel_planner.parser import parse_travel_plan
 import random
 from utils.streamlit_types import FormElement, form_element_to_streamlit
-from data.reward import pairwise_win_rate
+from data.reward import pairwise_win_rate, likert_to_win_rate
 
 # Session state key prefixes used by this render module that should be cleared between rounds
 RENDER_SESSION_STATE_KEY_PREFIXES = [
@@ -49,6 +49,68 @@ def render_eval(
     )
     if not ranking_done:
         return False, None
+
+    comparison_done = render_eval_second_page_comparison(
+        final_prediction=final_prediction,
+        y0=y0,
+        db=db,
+        people_number=people_number,
+        driving_info=driving_info,
+    )
+    if not comparison_done:
+        return False, None
+
+    # Compute the final score
+    prediction_rankings = [
+        list(
+            st.session_state.form_results["final_evaluation"][name][
+                "predicted_ranks"
+            ].values()
+        )
+        for name in [
+            "transportation_to",
+            "transportation_from",
+            "restaurant",
+            "attraction",
+            "accommodation",
+        ]
+    ]
+    y0_rankings = [
+        list(
+            st.session_state.form_results["final_evaluation"][name]["y0_ranks"].values()
+        )
+        for name in [
+            "transportation_to",
+            "transportation_from",
+            "restaurant",
+            "attraction",
+            "accommodation",
+        ]
+    ]
+    p_ranking_wins = pairwise_win_rate(prediction_rankings, y0_rankings)
+    
+    # Incorporate schedule and cost preferences from comparison page
+    comparison_preferences = []
+    if "schedule_preference" in st.session_state.form_results["final_evaluation"]:
+        comparison_preferences.append(
+            st.session_state.form_results["final_evaluation"]["schedule_preference"]
+        )
+    if "cost_preference" in st.session_state.form_results["final_evaluation"]:
+        comparison_preferences.append(
+            st.session_state.form_results["final_evaluation"]["cost_preference"]
+        )
+    
+    if comparison_preferences:
+        other_wins, total = likert_to_win_rate(
+            comparison_preferences,
+            return_total=True,
+        )
+        p_wins = (p_ranking_wins + other_wins) / (total + 1)
+    else:
+        # If no comparison preferences (e.g., y0 is None), just use ranking wins
+        p_wins = p_ranking_wins
+    
+    st.session_state.form_results["final_evaluation"]["score"] = p_wins
 
     return True, None
 
@@ -169,38 +231,77 @@ def render_eval_first_page(
         )
         return
 
-    # Compute the final score
-    prediction_rankings = [
-        list(
-            st.session_state.form_results["final_evaluation"][name][
-                "predicted_ranks"
-            ].values()
-        )
-        for name in [
-            "transportation_to",
-            "transportation_from",
-            "restaurant",
-            "attraction",
-            "accommodation",
-        ]
-    ]
-    y0_rankings = [
-        list(
-            st.session_state.form_results["final_evaluation"][name]["y0_ranks"].values()
-        )
-        for name in [
-            "transportation_to",
-            "transportation_from",
-            "restaurant",
-            "attraction",
-            "accommodation",
-        ]
-    ]
-    st.session_state.form_results["final_evaluation"]["score"] = pairwise_win_rate(
-        prediction_rankings, y0_rankings
-    )
-
     return True
+
+
+def render_eval_second_page_comparison(
+    *,
+    final_prediction: str,
+    y0: Optional[str],
+    db,
+    people_number: int,
+    driving_info=None,
+):
+    """
+    Render comparison page showing two itineraries side-by-side and ask questions
+    about preferred schedule and preferred cost.
+    """
+    if y0 is None:
+        # If there's no y0, skip the comparison
+        return True
+
+    # Check if comparison is already done
+    done = "schedule_preference" in st.session_state.form_results["final_evaluation"]
+    if done:
+        return True
+
+    with st.container(border=True):
+        st.markdown("## Compare these travel itineraries")
+
+        # render_comparison handles randomization internally
+        render_comparison(
+            y1=final_prediction,
+            y2=y0,
+            db=db,
+            people_number=people_number,
+            valid1=None,
+            valid2=None,
+            metadata1=None,
+            metadata2=None,
+            driving_info=driving_info,
+        )
+
+    st.divider()
+
+    # Render form
+    with st.form(key="travel_planner_comparison_form"):
+        schedule_preference = st.radio(
+            "Compare how well itineraries A and B **fit into your preferred schedule** (e.g., timing of activities, pace of travel). Which one do you prefer?",
+            options=["-"] + COMPARISON_LIKERT,
+        )
+        cost_preference = st.radio(
+            "Compare the **overall cost** of itineraries A and B. Which one do you prefer?",
+            options=["-"] + COMPARISON_LIKERT,
+        )
+        submit = st.form_submit_button("Submit", type="primary")
+        if submit:
+            if any(
+                v is None or v == "-"
+                for v in [
+                    schedule_preference,
+                    cost_preference,
+                ]
+            ):
+                st.error("Please fill out all fields")
+                return False
+            st.session_state.form_results["final_evaluation"].update(
+                {
+                    "schedule_preference": schedule_preference,
+                    "cost_preference": cost_preference,
+                }
+            )
+            return True
+    return False
 
 
 def render_eval_second_page(
@@ -439,7 +540,7 @@ def render_comparison(
                 )
                 if constraints_md:
                     st.markdown(constraints_md)
-        render_travel_plan_streamlit(plan_a, db, people_number, driving_info=driving_info)
+        render_travel_plan_streamlit(plan_a, db, people_number, driving_info=driving_info, show_expanders=False)
 
     with tab2:
         if valid_b is not None:
@@ -458,11 +559,11 @@ def render_comparison(
                 )
                 if constraints_md:
                     st.markdown(constraints_md)
-        render_travel_plan_streamlit(plan_b, db, people_number, driving_info=driving_info)
+        render_travel_plan_streamlit(plan_b, db, people_number, driving_info=driving_info, show_expanders=False)
 
 
 def render_travel_plan_streamlit(
-    travel_plan: str, travel_db: TravelDB, people_number: int, driving_info=None
+    travel_plan: str, travel_db: TravelDB, people_number: int, driving_info=None, show_expanders: bool = True
 ) -> None:
     travel_plan = parse_travel_plan(
         travel_plan, include_info=True, db=travel_db, people_number=people_number, driving_info=driving_info
@@ -474,7 +575,6 @@ def render_travel_plan_streamlit(
 
     st.markdown("### 🗓️ Itinerary at a glance")
     st.markdown("This is a quick overview of your daily schedule.")
-    st.markdown(_render_round_trip_check(travel_plan))
 
     # Calendar/summary table
     st.markdown(
@@ -485,19 +585,20 @@ def render_travel_plan_streamlit(
     )
 
     # One expander per day with detailed breakdown
-    for day_data in travel_plan:
-        day_num = day_data.get("days", "?")
-        current_city = day_data.get("current_city", "")
-        title = f"Day {day_num} — {current_city}"
-        with st.expander(title, expanded=False):
-            st.markdown(
-                _render_travel_summary_table(
-                    [day_data], travel_db, people_number, header=False, footer=False
-                ),
-                unsafe_allow_html=True,
-            )
-            # Render detailed sections for this single day by reusing multi-day renderer
-            _render_detailed_travel_sections([day_data], travel_db, people_number)
+    if show_expanders:
+        for day_data in travel_plan:
+            day_num = day_data.get("days", "?")
+            current_city = day_data.get("current_city", "")
+            title = f"Day {day_num} — {current_city}"
+            with st.expander(title, expanded=False):
+                st.markdown(
+                    _render_travel_summary_table(
+                        [day_data], travel_db, people_number, header=False, footer=False
+                    ),
+                    unsafe_allow_html=True,
+                )
+                # Render detailed sections for this single day by reusing multi-day renderer
+                _render_detailed_travel_sections([day_data], travel_db, people_number)
 
 
 def _render_travel_summary_table(
