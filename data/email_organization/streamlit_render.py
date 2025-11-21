@@ -14,13 +14,15 @@ RENDER_SESSION_STATE_KEY_PREFIXES = [
 ]
 
 
-def render_email_policy_results(msg: str, emails_data: List[Dict]) -> None:
+def render_email_policy_results(msg: str, emails_data: List[Dict], show_correct_folder: bool = True) -> None:
     """
     Render the email policy results grouped by folder, showing emails within each folder.
 
     Args:
         msg: The message containing the policy
         emails_data: List of email dictionaries
+        show_correct_folder: Whether to show the correct folder column (for fixed specs). 
+                            Set to False for custom specs where there's no "correct" folder.
     """
     # Build mapping from email_id to full email data and folder
     email_to_data = {}  
@@ -72,21 +74,22 @@ def render_email_policy_results(msg: str, emails_data: List[Dict]) -> None:
             for email_id in email_ids:
                 if email_id in email_to_data:
                     email_data = email_to_data[email_id]
-                    email_info_list.append(
-                        {
-                            "email_id": email_id,
-                            "to": email_data.get("to", ""),
-                            "from": email_data.get("from", ""),
-                            "subject": email_data.get("subject", ""),
-                            "message": email_data.get("message", "")[:500]
-                            + (
-                                "..."
-                                if len(email_data.get("message", "")) > 500
-                                else ""
-                            ),
-                            "correct_folder": email_to_folder.get(email_id, "Unknown"),
-                        }
-                    )
+                    email_info = {
+                        "email_id": email_id,
+                        "to": email_data.get("to", ""),
+                        "from": email_data.get("from", ""),
+                        "subject": email_data.get("subject", ""),
+                        "message": email_data.get("message", "")[:500]
+                        + (
+                            "..."
+                            if len(email_data.get("message", "")) > 500
+                            else ""
+                        ),
+                    }
+                    # Only add correct_folder for fixed specs
+                    if show_correct_folder:
+                        email_info["correct_folder"] = email_to_folder.get(email_id, "Unknown")
+                    email_info_list.append(email_info)
 
         if email_info_list:
             with st.expander("Email Information", expanded=True):
@@ -126,93 +129,94 @@ def render_email_policy_results(msg: str, emails_data: List[Dict]) -> None:
 
     # Display organized emails grouped by folder
     if organized:
-        with st.container(border=True, height=600):
-            st.markdown("### 📁 Organized Emails")
+        st.markdown("### 📁 Organized Emails")
 
-            # Create tabs for each folder
-            folder_names = sorted(organized.keys())
-            if len(folder_names) > 0:
-                tabs = st.tabs(folder_names)
+        # Create tabs for each folder
+        folder_names = sorted(organized.keys())
+        if len(folder_names) > 0:
+            tabs = st.tabs(folder_names)
 
-                for tab, folder_name in zip(tabs, folder_names):
-                    with tab:
-                        emails_in_folder = organized[folder_name]
+            for tab, folder_name in zip(tabs, folder_names):
+                with tab:
+                    emails_in_folder = organized[folder_name]
 
-                        if not emails_in_folder:
-                            st.info(f"No emails in {folder_name}")
-                            continue
+                    if not emails_in_folder:
+                        st.info(f"No emails in {folder_name}")
+                        continue
 
-                        # Sort emails by date if available
-                        try:
-                            emails_in_folder = sorted(
-                                emails_in_folder,
-                                key=lambda x: x.get("date", ""),
-                                reverse=True,
+                    # Sort emails by date if available
+                    try:
+                        emails_in_folder = sorted(
+                            emails_in_folder,
+                            key=lambda x: x.get("date", ""),
+                            reverse=True,
+                        )
+                    except Exception:
+                        pass
+
+                    for email in emails_in_folder:
+                        email_id = str(email.get("email_id", ""))
+                        from_addr = email.get("from", "")
+                        to_addr = email.get("to", "")
+                        subject = email.get("subject", "")
+                        date = email.get("date", "")
+                        message = email.get("message", "")
+
+                        # Build the main part of the expander label
+                        main_part = (
+                            f"{subject}"
+                            if subject
+                            else f"Email {email_id}"
+                        )
+
+                        # Add date suffix if available
+                        date_suffix = ""
+                        if date:
+                            try:
+                                # Try to parse and format the date
+                                date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+                                date_suffix = f" ({date_obj.strftime('%b %d, %Y')})"
+                            except Exception:
+                                date_suffix = f" ({date})"
+
+                        expander_label = main_part + date_suffix
+
+                        with st.expander(expander_label, expanded=False):
+                            # Email header information
+                            col1, col2 = st.columns([3, 1])
+                            with col1:
+                                st.markdown(f"**From:** {from_addr}")
+                                if to_addr:
+                                    st.markdown(f"**To:** {to_addr}")
+                            with col2:
+                                st.markdown(f"**Email ID:** `{email_id}`")
+                                st.markdown(f"**Date:** {date}")
+
+                            # Email subject
+                            if subject:
+                                st.markdown(f"**Subject:** {subject}")
+
+                            # Email body - use markdown with reduced whitespace
+                            st.markdown("**Message:**")
+                            # Remove excessive whitespace from message
+                            message_clean = "\n".join(
+                                line.rstrip() for line in message.split("\n")
                             )
-                        except Exception:
-                            pass
-
-                        for email in emails_in_folder:
-                            email_id = str(email.get("email_id", ""))
-                            from_addr = email.get("from", "")
-                            to_addr = email.get("to", "")
-                            subject = email.get("subject", "")
-                            date = email.get("date", "")
-                            message = email.get("message", "")
-
-                            # Build the main part of the expander label
-                            main_part = (
-                                f"{subject}"
-                                if subject
-                                else f"Email {email_id}"
+                            st.markdown(
+                                f"<div style='white-space: pre-wrap; margin-top: 0.5rem;'>{message_clean}</div>",
+                                unsafe_allow_html=True,
                             )
 
-                            # Add date suffix if available
-                            date_suffix = ""
-                            if date:
-                                try:
-                                    # Try to parse and format the date
-                                    date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
-                                    date_suffix = f" ({date_obj.strftime('%b %d, %Y')})"
-                                except Exception:
-                                    date_suffix = f" ({date})"
 
-                            expander_label = main_part + date_suffix
-
-                            with st.expander(expander_label, expanded=False):
-                                # Email header information
-                                col1, col2 = st.columns([3, 1])
-                                with col1:
-                                    st.markdown(f"**From:** {from_addr}")
-                                    if to_addr:
-                                        st.markdown(f"**To:** {to_addr}")
-                                with col2:
-                                    st.markdown(f"**Email ID:** `{email_id}`")
-                                    st.markdown(f"**Date:** {date}")
-
-                                # Email subject
-                                if subject:
-                                    st.markdown(f"**Subject:** {subject}")
-
-                                # Email body - use markdown with reduced whitespace
-                                st.markdown("**Message:**")
-                                # Remove excessive whitespace from message
-                                message_clean = "\n".join(
-                                    line.rstrip() for line in message.split("\n")
-                                )
-                                st.markdown(
-                                    f"<div style='white-space: pre-wrap; margin-top: 0.5rem;'>{message_clean}</div>",
-                                    unsafe_allow_html=True,
-                                )
-
-
-def render_email_policy_results_txt(msg: str, emails_data: List[Dict]) -> str:
+def render_email_policy_results_txt(msg: str, emails_data: List[Dict], show_correct_folder: bool = True) -> str:
     """
     Render the email policy results as JSON organized by folder, with emails listed under each folder.
 
     Args:
         msg: The message containing the policy
         emails_data: List of email dictionaries
+        show_correct_folder: Whether to show the correct folder column (for fixed specs). 
+                            Set to False for custom specs where there's no "correct" folder.
 
     Returns:
         JSON string with folders as keys and arrays of email objects as values
@@ -242,21 +246,22 @@ def render_email_policy_results_txt(msg: str, emails_data: List[Dict]) -> str:
             for email_id in email_ids:
                 if email_id in email_to_data:
                     email_data = email_to_data[email_id]
-                    email_info_list.append(
-                        {
-                            "email_id": email_id,
-                            "to": email_data.get("to", ""),
-                            "from": email_data.get("from", ""),
-                            "subject": email_data.get("subject", ""),
-                            "message": email_data.get("message", "")[:500]
-                            + (
-                                "..."
-                                if len(email_data.get("message", "")) > 500
-                                else ""
-                            ),
-                            "correct_folder": email_to_folder.get(email_id, "Unknown"),
-                        }
-                    )
+                    email_info = {
+                        "email_id": email_id,
+                        "to": email_data.get("to", ""),
+                        "from": email_data.get("from", ""),
+                        "subject": email_data.get("subject", ""),
+                        "message": email_data.get("message", "")[:500]
+                        + (
+                            "..."
+                            if len(email_data.get("message", "")) > 500
+                            else ""
+                        ),
+                    }
+                    # Only add correct_folder for fixed specs
+                    if show_correct_folder:
+                        email_info["correct_folder"] = email_to_folder.get(email_id, "Unknown")
+                    email_info_list.append(email_info)
         return email_info_list
 
     # Parse the policy from the message
@@ -739,7 +744,7 @@ def render_custom_task_explanation(emails_data: List[Dict] = None):
         st.info(
             "*Example:* An email organization policy that sorts emails into folders"
         )
-        render_email_policy_results(example_msg, example_emails)
+        render_email_policy_results(example_msg, example_emails, show_correct_folder=False)
 
     st.markdown(
         "Think about how you want to organize your emails. The assistant should create a policy that sorts "

@@ -664,7 +664,7 @@ def _render_workout_plan_streamlit(
         summary_items.append(f"**Exercise Classifications:** {classifications_str}")
 
     if summary_items:
-        st.markdown("\n".join(summary_items))
+        st.markdown("\n\n".join(summary_items))
 
     if not show_expanders:
         return
@@ -787,7 +787,7 @@ def _render_exercise_details(i, exercise):
             [
                 f"<b>{i + 1}. {exercise['exercise_name']}</b>",
                 "",
-                ":red-background[:material/error: This is an invalid exercise that is not in the database.]",
+                ":red-background[:material/error: The assistant listed an invalid variation that is not in the database.]",
             ]
         )
     lines = [

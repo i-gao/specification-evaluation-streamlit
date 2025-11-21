@@ -458,6 +458,8 @@ def step_final_evaluation_second(
                 else:
                     st.markdown("*No search interface available for this dataset.*")
 
+    st.markdown("### Evaluate the assistant's artifact")
+
     # Final evaluation form (second time)
     completed, feedback = final_prediction_evaluation(
         slider_label="Rate the overall quality of this artifact from 0 (unusable) to 100 (perfect).",

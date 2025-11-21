@@ -16,8 +16,6 @@ from datetime import datetime
 SEARCH_INTERFACE_SESSION_STATE_KEYS = [
     "email_organization_folders",
     "email_organization_assignments",
-    "email_organization_current_index",
-    "email_organization_show_all",
 ]
 
 def parse_email_date(date_str):
@@ -66,12 +64,6 @@ def render_search_interface(emails_data: Optional[List[Dict]] = None, **kwargs):
     if "email_organization_assignments" not in st.session_state:
         st.session_state.email_organization_assignments = {}
     
-    if "email_organization_current_index" not in st.session_state:
-        st.session_state.email_organization_current_index = 0
-    
-    if "email_organization_show_all" not in st.session_state:
-        st.session_state.email_organization_show_all = False
-    
     folders = st.session_state.email_organization_folders
     assignments = st.session_state.email_organization_assignments
     
@@ -115,20 +107,11 @@ def render_search_interface(emails_data: Optional[List[Dict]] = None, **kwargs):
                 folders.append(new_folder.strip())
                 st.rerun()
     
-    # Display mode toggle
-    col1, col2 = st.columns([1, 4])
-    with col1:
-        show_all = st.checkbox("Show all emails at once", value=st.session_state.email_organization_show_all)
-        if show_all != st.session_state.email_organization_show_all:
-            st.session_state.email_organization_show_all = show_all
-            st.rerun()
-    
     # Sort emails by date (newest first)
     sorted_emails = sorted(emails_data, key=lambda e: parse_email_date(e.get("date", "")), reverse=True)
     
-    if st.session_state.email_organization_show_all:
-        # Show all emails at once
-        st.markdown(f"### Assign {len(sorted_emails)} Emails to Folders")
+    # Show all emails at once
+    st.markdown(f"### Assign {len(sorted_emails)} Emails to Folders")
         
         for email in sorted_emails:
             email_id = str(email.get("email_id", ""))
@@ -207,90 +190,6 @@ def render_search_interface(emails_data: Optional[List[Dict]] = None, **kwargs):
                     if selected_folder not in folders:
                         folders.append(selected_folder)
                     st.rerun()
-    else:
-        # Show one email at a time
-        current_index = st.session_state.email_organization_current_index
-        
-        if current_index >= len(sorted_emails):
-            st.success("✅ You've organized all emails!")
-            st.markdown("### Summary")
-            folder_counts = {}
-            for email_id, folder in assignments.items():
-                folder_counts[folder] = folder_counts.get(folder, 0) + 1
-            
-            for folder in sorted(folders):
-                count = folder_counts.get(folder, 0)
-                st.markdown(f"- **{folder}**: {count} emails")
-            
-            if st.button("Start Over", key="restart_organization"):
-                st.session_state.email_organization_current_index = 0
-                st.session_state.email_organization_assignments = {}
-                st.rerun()
-            return
-        
-        email = sorted_emails[current_index]
-        email_id = str(email.get("email_id", ""))
-        subject = email.get("subject", "")
-        from_addr = email.get("from", "")
-        date = email.get("date", "")
-        message = email.get("message", "")
-        to_addr = email.get("to", "")
-        
-        st.markdown(f"### Email {current_index + 1} of {len(sorted_emails)}")
-        
-        # Email details
-        with st.container(border=True):
-            col1a, col1b = st.columns([3, 1])
-            with col1a:
-                st.markdown(f"**From:** {from_addr}")
-                if to_addr:
-                    st.markdown(f"**To:** {to_addr}")
-            with col1b:
-                st.markdown(f"**Email ID:** `{email_id}`")
-                st.markdown(f"**Date:** {date}")
-            
-            if subject:
-                st.markdown(f"**Subject:** {subject}")
-            
-            st.markdown("**Message:**")
-            message_clean = "\n".join(line.rstrip() for line in message.split("\n"))
-            st.markdown(f"<div style='white-space: pre-wrap; margin-top: 0.5rem;'>{message_clean}</div>", unsafe_allow_html=True)
-        
-        # Folder assignment
-        current_folder = assignments.get(email_id, "Unsorted")
-        selected_folder = st.selectbox(
-            "Assign to folder:",
-            options=folders,
-            index=folders.index(current_folder) if current_folder in folders else 0,
-            key="current_email_folder_select",
-            accept_new_options=True,
-            placeholder="Select or create a folder"
-        )
-        
-        # Update assignment
-        if selected_folder != current_folder:
-            assignments[email_id] = selected_folder
-            # Add new folder if it doesn't exist
-            if selected_folder not in folders:
-                folders.append(selected_folder)
-        
-        # Navigation buttons
-        col1, col2, col3 = st.columns([1, 1, 2])
-        with col1:
-            if st.button("← Previous", disabled=(current_index == 0)):
-                st.session_state.email_organization_current_index = current_index - 1
-                st.rerun()
-        with col2:
-            if st.button("Next →", type="primary"):
-                # Save current assignment
-                assignments[email_id] = selected_folder
-                if selected_folder not in folders:
-                    folders.append(selected_folder)
-                st.session_state.email_organization_current_index = current_index + 1
-                st.rerun()
-        with col3:
-            progress = (current_index + 1) / len(sorted_emails)
-            st.progress(progress, text=f"{current_index + 1} / {len(sorted_emails)} emails organized")
     
     # Store assignments in a format that can be retrieved
     # The assignments dict maps email_id -> folder_name

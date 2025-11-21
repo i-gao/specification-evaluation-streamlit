@@ -783,6 +783,14 @@ class EmailOrganizationDataset(SpecificationCollection):
             )
 
             y0 = "<policy>" + json.dumps(gold_policy) + "</policy>"
+            
+            # Create wrapper functions for custom specs that don't show correct_folder
+            def render_custom_email_policy_results(msg: str, emails_data: List[Dict]) -> None:
+                return render_email_policy_results(msg, emails_data, show_correct_folder=False)
+            
+            def render_custom_email_policy_results_txt(msg: str, emails_data: List[Dict]) -> str:
+                return render_email_policy_results_txt(msg, emails_data, show_correct_folder=False)
+            
             spec = CustomSpecification(
                 dataset_name=self.dataset_name,
                 index=f"custom_{ix}",
@@ -798,8 +806,8 @@ class EmailOrganizationDataset(SpecificationCollection):
                 actions=actions,
                 msg_fmt_instructions=MSG_FMT_INSTRUCTIONS,
                 prediction_fmt_instructions=PREDICTION_FMT_INSTRUCTIONS,
-                render_msg_fn=render_email_policy_results,
-                render_msg_fn_txt=render_email_policy_results_txt,
+                render_msg_fn=render_custom_email_policy_results,
+                render_msg_fn_txt=render_custom_email_policy_results_txt,
                 render_msg_kwargs=["emails_data"],
                 name="email_organization_custom",
                 state_files=[filename] if filename else [],

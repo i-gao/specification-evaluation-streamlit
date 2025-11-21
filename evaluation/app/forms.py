@@ -445,7 +445,7 @@ def final_prediction_evaluation(
         if is_valid and len(violated_constraints) == 0:
             # Show check mark if valid
             with st.container(horizontal=True, horizontal_alignment="left"):
-                text = ":green[:material/check: This output is valid and passes all constraints:]"
+                text = ":green[:material/check: This output passes basic checks.]"
                 st.markdown(
                     f'<div class="final-validation-container">\n\n{text}</div>',
                     unsafe_allow_html=True,
@@ -456,7 +456,7 @@ def final_prediction_evaluation(
                 constraints_text = "\n".join(
                     [f":red[<li>{constraint}</li>]" for constraint in violated_constraints]
                 )
-                text = f":red[:material/close: The following constraints were violated:]<br><ul>{constraints_text}</ul>"
+                text = f":red[:material/close: The following basic checks failed:]<br><ul>{constraints_text}</ul>"
                 st.markdown(
                     f'<div class="final-validation-container">\n\n{text}</div>',
                     unsafe_allow_html=True,
@@ -569,77 +569,78 @@ def assistant_ranking_exit_survey(
 
     num_rounds = len(message_history)
 
+    st.markdown("## Assistant Ranking Survey")
+    st.markdown(
+        f"You interacted with {num_rounds} assistant(s) across {num_rounds} round(s). "
+        "Please review each conversation below and then rank which assistant you preferred."
+    )
+
+    # Store the original spec to restore later
+    original_spec = st.session_state.get("spec", None)
+
+    # Create tabs for each conversation
+    tab_labels = [
+        f"Assistant {round_idx + 1} ({config_dict.get('dataset_name', 'unknown')})"
+        for round_idx, (config_dict, _) in enumerate(message_history)
+    ]
+    tabs = st.tabs(tab_labels)
+
+    # Display each conversation in its tab (outside of form to allow normal buttons)
+    for round_idx, (config_dict, messages) in enumerate(message_history):
+        assistant_num = round_idx + 1
+        dataset_name = config_dict.get("dataset_name", "unknown")
+        spec_index = config_dict.get("spec_index", 0)
+        dataset_kwargs = config_dict.get("dataset_kwargs", {})
+
+        with tabs[round_idx]:
+            # Temporarily load and set the spec for this conversation
+            temp_spec = None
+            try:
+                temp_spec = get_spec(
+                    dataset_name,
+                    spec_index,
+                    **dataset_kwargs,
+                    allow_multimodal_actions=True,
+                )
+                st.session_state.spec = temp_spec
+            except Exception as e:
+                st.error(
+                    f"Error loading spec for Assistant {assistant_num}: {str(e)}"
+                )
+                # Restore original spec before continuing
+                st.session_state.spec = original_spec
+                # Still try to display messages even if spec loading failed
+                st.markdown(
+                    "*Note: Messages may not render correctly due to spec loading error.*"
+                )
+
+            # Display the conversation
+            if temp_spec is not None:
+                with st.container(border=True, height=700):
+                    components.chat_conversation(
+                        messages,
+                        show_quick_actions=False,
+                        show_raw_message=False,
+                        autovalidate=False,
+                        autoscore=False,
+                        show_response_time=True,
+                        empty_message_text=f"No messages recorded for Assistant {assistant_num}.",
+                    )
+            else:
+                # Fallback: display raw messages if spec couldn't be loaded
+                with st.container(border=True, height=700):
+                    for msg in messages:
+                        if msg.get("content") is not None:
+                            with st.chat_message(msg.get("role", "user")):
+                                st.markdown(msg.get("content", ""))
+
+    # Restore original spec
+    st.session_state.spec = original_spec
+
+    st.markdown("---")
+
+    # Form for ranking and explanation (separate from conversation display)
     with st.form(key="assistant_ranking_exit_survey_form", border=False):
-        st.markdown("## Assistant Ranking Survey")
-        st.markdown(
-            f"You interacted with {num_rounds} assistant(s) across {num_rounds} round(s). "
-            "Please review each conversation below and then rank which assistant you preferred."
-        )
-
-        # Store the original spec to restore later
-        original_spec = st.session_state.get("spec", None)
-
-        # Create tabs for each conversation
-        tab_labels = [
-            f"Assistant {round_idx + 1} - Round {round_idx + 1} ({config_dict.get('dataset_name', 'unknown')})"
-            for round_idx, (config_dict, _) in enumerate(message_history)
-        ]
-        tabs = st.tabs(tab_labels)
-
-        # Display each conversation in its tab
-        for round_idx, (config_dict, messages) in enumerate(message_history):
-            assistant_num = round_idx + 1
-            dataset_name = config_dict.get("dataset_name", "unknown")
-            spec_index = config_dict.get("spec_index", 0)
-            dataset_kwargs = config_dict.get("dataset_kwargs", {})
-
-            with tabs[round_idx]:
-                # Temporarily load and set the spec for this conversation
-                temp_spec = None
-                try:
-                    temp_spec = get_spec(
-                        dataset_name,
-                        spec_index,
-                        **dataset_kwargs,
-                        allow_multimodal_actions=True,
-                    )
-                    st.session_state.spec = temp_spec
-                except Exception as e:
-                    st.error(
-                        f"Error loading spec for Assistant {assistant_num}: {str(e)}"
-                    )
-                    # Restore original spec before continuing
-                    st.session_state.spec = original_spec
-                    # Still try to display messages even if spec loading failed
-                    st.markdown(
-                        "*Note: Messages may not render correctly due to spec loading error.*"
-                    )
-
-                # Display the conversation
-                if temp_spec is not None:
-                    with st.container(border=True, height=700):
-                        components.chat_conversation(
-                            messages,
-                            show_quick_actions=False,
-                            show_raw_message=False,
-                            autovalidate=False,
-                            autoscore=False,
-                            show_response_time=True,
-                            empty_message_text=f"No messages recorded for Assistant {assistant_num}.",
-                        )
-                else:
-                    # Fallback: display raw messages if spec couldn't be loaded
-                    with st.container(border=True, height=700):
-                        for msg in messages:
-                            if msg.get("content") is not None:
-                                with st.chat_message(msg.get("role", "user")):
-                                    st.markdown(msg.get("content", ""))
-
-        # Restore original spec
-        st.session_state.spec = original_spec
-
-        st.markdown("---")
-
         # Complete ranking question (A > B > C style)
         ranking = st.multiselect(
             "Rank the assistants from MOST to LEAST preferred:",
