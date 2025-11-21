@@ -82,9 +82,13 @@ def parse_workout_plan(
                 new_list = []
                 for d in workout_plan[day][time_of_day]:
                     exercise_name = d.pop("exercise_name")
-                    exercise = exercise_db.get_exercise_by_variation(
-                        name=exercise_name, **d
-                    )
+                    try:
+                        exercise = exercise_db.get_exercise_by_variation(
+                            name=exercise_name, **d
+                        )
+                    except Exception as e:
+                        print(f"Error getting exercise: {e}")
+                        exercise = None
                     if exercise is None and raise_errors:
                         raise Exception(
                             f"Exercise not found in database: {exercise_name}. For this task, plans are only valid if all exercises are from the database."
