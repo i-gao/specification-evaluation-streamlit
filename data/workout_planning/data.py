@@ -463,6 +463,7 @@ class WorkoutPlanningDataset(SpecificationCollection):
                     "_y0_mapping",
                     "_extractor_lookup",
                     "initial_specification",
+                    "_render_evaluation_kwargs",
                 ],
                 validity_fn=validity_fn,
                 validity_kwargs={
@@ -643,6 +644,7 @@ def user_specification_callback(
     """
     # Get validity_kwargs from callback_kwargs
     validity_kwargs = callback_kwargs.get("_validity_kwargs", {})
+    render_evaluation_kwargs = callback_kwargs.get("_render_evaluation_kwargs", {})
     constraints = [
         Constraint.create_boolean_penalize_false_constraint(
             description="Workout plan must have at least one workout per week",
@@ -732,6 +734,7 @@ def user_specification_callback(
         "current_specification": new_specification,
         "_render_evaluation_kwargs": {
             "y0": y0,
+            **render_evaluation_kwargs,
         },
     }
 
