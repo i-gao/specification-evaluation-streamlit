@@ -85,7 +85,7 @@ Some of the client's details may be missing. For example, they may not have spec
 To maximize your score, you will have to try different workout plans and ask the client to evaluate them. The client's score will be between 0 and 100. If the workout plan is invalid, dangerous for the client to follow, or does not fit their schedule, then the score will be -infinity.
 """
 
-COMMONSENSE_INSTRUCTIONS = """A workout plan is a week-long calendar that specifies when to work out and a list of exercises for each workout. Workout plans must uses exercises from the provided database. Using other exercises is not allowed. Workout plans must use the exact variations in the database. You cannot substitute in other variations or equipment; everything must be used strictly from the database. There is no need to worry about progressions across weeks."""
+COMMONSENSE_INSTRUCTIONS = """A workout plan is a week-long calendar that specifies when to work out and a list of exercises for each workout. Workout plans must uses exercises from the provided database. Using other exercises is not allowed. Workout plans must use the exact variations in the database. You cannot substitute in other variations or equipment; everything must be used strictly from the database. There is no need to worry about progressions across weeks. The plan must stay the same for each week."""
 
 
 def render_fixed_task_explanation():
