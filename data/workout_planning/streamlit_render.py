@@ -336,8 +336,11 @@ def _generate_workout_name(exercises: List[Dict[str, Any]]) -> str:
         target_str = list(target_muscles)[0]
     else:
         # Sort for consistency and join with " & "
-        sorted_muscles = sorted([m.lower() for m in target_muscles if isinstance(m, str)])
-        target_str = " & ".join(sorted_muscles)
+        try:
+            sorted_muscles = sorted([m.lower() for m in target_muscles if isinstance(m, str)])
+            target_str = " & ".join(sorted_muscles)
+        except:
+            target_str = "total body"
 
     # Format classification
     if classifications:
