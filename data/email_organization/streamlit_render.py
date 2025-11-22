@@ -128,7 +128,10 @@ def render_email_policy_results(msg: str, emails_data: List[Dict], show_correct_
         return
 
     # Display organized emails grouped by folder
-    if organized:
+    if not organized:
+        return
+
+    with st.container(border=True, height=700):
         st.markdown("### 📁 Organized Emails")
 
         # Create tabs for each folder
