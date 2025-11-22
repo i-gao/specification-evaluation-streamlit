@@ -2,7 +2,7 @@ import json
 from collections import Counter
 from dataclasses import dataclass, field, asdict
 from functools import cached_property
-from typing import List, Optional, Literal, Union, Dict   
+from typing import List, Optional, Literal, Union, Dict
 import pandas as pd
 import sys
 import os
@@ -42,7 +42,7 @@ class ExerciseDB(Database):
         self, file_path: str = f"{DATASET_ROOT}/assets/exercises_with_variations.csv"
     ):
         df = pd.read_csv(file_path)
-        df['URL'] = df['URL'].fillna("").astype(str)
+        df["URL"] = df["URL"].fillna("").astype(str)
         df = df.fillna("")
 
         super().__init__(
@@ -96,6 +96,7 @@ class ExerciseDB(Database):
     def get_exercise_by_variation(
         self,
         name: str,
+        variation_name: Optional[str] = None,
         time_or_reps: Optional[Literal["time", "reps"]] = None,
         num_sets: Optional[Union[int, float]] = None,
         rest_time: Optional[Union[int, float]] = None,
@@ -106,6 +107,15 @@ class ExerciseDB(Database):
         Returns the exercise with the given name and variation details.
         Match as many of the details as given
         """
+        # first try to match by variation name, otherwise fallback on the other details
+        if variation_name is not None:
+            filtered = self.df[
+                (self.df["variation_name"] == str(variation_name))
+                & (self.df["exercise_name"] == str(name))
+            ]
+            if len(filtered) == 1:
+                return filtered.iloc[0].to_dict()
+
         conditions = []
         if time_or_reps is not None:
             if time_or_reps == "reps":

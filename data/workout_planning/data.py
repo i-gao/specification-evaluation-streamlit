@@ -50,6 +50,7 @@ PREDICTION_FMT_INSTRUCTIONS = (
                 "rest_time": Optional[int],
                 "time_per_set": Optional[int],
                 "num_reps_per_set": Optional[int],
+                "variation_name": Optional[str],
             },
             ...
         ]
@@ -67,6 +68,7 @@ PREDICTION_FMT_INSTRUCTIONS = (
     - `rest_time` is the rest time between sets of the exercise, copied exactly from the database.
     - `time_per_set` is the time per set of the exercise, copied exactly from the database.
     - `num_reps_per_set` is the number of reps per set of the exercise, copied exactly from the database.
+    - `variation_name` is the name of the variation, copied exactly from the database. If this doesn't match exactly, we will fall back on the other details to identify the variation.
 Only exercises and variations from the database can be used.
 """.strip()
 )
